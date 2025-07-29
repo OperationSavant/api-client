@@ -8,7 +8,7 @@ interface HeadersTabProps {
 
 const HeadersTab: React.FC<HeadersTabProps> = ({ headers, onHeadersChange }) => {
   return (
-    <div className="p-4">
+    <div className="flex-1 flex flex-col"> {/* Outermost div: fills TabsContent, no direct scrolling/padding */}
       <KeyValueInput label="Headers" value={headers} onChange={onHeadersChange} />
     </div>
   );

@@ -66,8 +66,8 @@
 }
 
 @layer base {
-	* {
-		@apply border-border;
+	div {
+		@apply !border-0 !outline-0;
 	}
 	body {
 		@apply bg-background text-foreground;

@@ -90,13 +90,13 @@ function App() {
 	}, []);
 
 	return (
-		<div className='m-5'>
-			<Card>
+		<div className='flex flex-col h-screen'>
+			<Card className='min-h-2/3 max-h-2/3 bg-red-800'>
 				<CardHeader>
 					<CardTitle>API Request</CardTitle>
 				</CardHeader>
-				<CardContent>
-					<div className='grid w-full items-center gap-4'>
+				<CardContent className='flex-1 flex flex-col overflow-hidden'>
+					<div className='flex-1 flex flex-col gap-4'>
 						<div className='flex space-x-2'>
 							<Select onValueChange={setMethod} defaultValue={method}>
 								<SelectTrigger className='w-[140px]'>
@@ -122,7 +122,7 @@ function App() {
 							<Button onClick={handleSendRequest}>Send</Button>
 						</div>
 
-						<Tabs defaultValue='params' className='w-full'>
+						<Tabs defaultValue='params' className='w-full flex-1 flex flex-col'>
 							<TabsList>
 								<TabsTrigger value='params'>Params</TabsTrigger>
 								<TabsTrigger value='headers'>Headers</TabsTrigger>
@@ -132,25 +132,25 @@ function App() {
 								<TabsTrigger value='tests'>Tests</TabsTrigger>
 								<TabsTrigger value='settings'>Settings</TabsTrigger>
 							</TabsList>
-							<TabsContent value='params'>
+							<TabsContent value='params' className='flex flex-col h-4/5 bg-amber-500'>
 								<ParamsTab params={params} onParamsChange={setParams} />
 							</TabsContent>
-							<TabsContent value='headers'>
+							<TabsContent value='headers' className='flex flex-col'>
 								<HeadersTab headers={headers} onHeadersChange={setHeaders} />
 							</TabsContent>
-							<TabsContent value='auth'>
+							<TabsContent value='auth' className='flex flex-col'>
 								<AuthTab />
 							</TabsContent>
-							<TabsContent value='body'>
+							<TabsContent value='body' className='flex flex-col'>
 								<BodyTab requestBody={requestBody} onRequestBodyChange={setRequestBody} />
 							</TabsContent>
-							<TabsContent value='pre-request'>
+							<TabsContent value='pre-request' className='flex flex-col'>
 								<PreRequestScriptTab />
 							</TabsContent>
-							<TabsContent value='tests'>
+							<TabsContent value='tests' className='flex flex-col'>
 								<TestsTab />
 							</TabsContent>
-							<TabsContent value='settings'>
+							<TabsContent value='settings' className='flex flex-col'>
 								<SettingsTab />
 							</TabsContent>
 						</Tabs>
@@ -158,13 +158,13 @@ function App() {
 				</CardContent>
 			</Card>
 
-			<Card className='mt-4'>
+			<Card className='mt-4 flex-[2] flex flex-col'>
 				<CardHeader>
 					<CardTitle>API Response</CardTitle>
 				</CardHeader>
-				<CardContent>
-					<pre className='whitespace-pre-wrap text-sm bg-background p-4 rounded-md'>
-						{loading ? 'Loading...' : (response || 'Send a request to see the response.')}
+				<CardContent className='flex-1 flex flex-col'>
+					<pre className='whitespace-pre-wrap text-sm bg-background p-4 rounded-md flex-1 overflow-auto'>
+						{loading ? 'Loading...' : response || 'Send a request to see the response.'}
 					</pre>
 				</CardContent>
 			</Card>
