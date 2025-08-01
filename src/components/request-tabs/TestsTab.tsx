@@ -396,3 +396,4 @@ const TestResults: React.FC<TestResultsProps> = ({ execution }) => {
 };
 
 export default TestsTab;
+

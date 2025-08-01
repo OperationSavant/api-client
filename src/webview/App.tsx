@@ -171,7 +171,10 @@ function App() {
 									<SelectItem value='GET'>GET</SelectItem>
 									<SelectItem value='POST'>POST</SelectItem>
 									<SelectItem value='PUT'>PUT</SelectItem>
+									<SelectItem value='PATCH'>PATCH</SelectItem>
 									<SelectItem value='DELETE'>DELETE</SelectItem>
+									<SelectItem value='HEAD'>HEAD</SelectItem>
+									<SelectItem value='OPTIONS'>OPTIONS</SelectItem>
 								</SelectContent>
 							</Select>
 							<Select onValueChange={setProtocol} defaultValue={protocol}>

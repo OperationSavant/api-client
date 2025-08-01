@@ -187,9 +187,7 @@ query GetUsers {
 							<div className='flex items-center gap-2'>
 								<div
 									className={`text-sm px-2 py-1 rounded ${
-										variablesValidation.valid
-											? 'text-foreground bg-muted border border-ring'
-											: 'text-destructive bg-muted border border-destructive'
+										variablesValidation.valid ? 'text-foreground bg-muted border border-ring' : 'text-destructive bg-muted border border-destructive'
 									}`}>
 									{variablesValidation.message}
 								</div>

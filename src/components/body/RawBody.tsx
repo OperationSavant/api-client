@@ -162,9 +162,7 @@ const RawBody: React.FC<RawBodyProps> = ({ rawConfig, onChange }) => {
 
 					<div
 						className={`text-sm px-2 py-1 rounded ${
-							validation.valid
-								? 'text-foreground bg-muted border border-ring'
-								: 'text-destructive bg-muted border border-destructive'
+							validation.valid ? 'text-foreground bg-muted border border-ring' : 'text-destructive bg-muted border border-destructive'
 						}`}>
 						{validation.message || 'Ready'}
 					</div>
