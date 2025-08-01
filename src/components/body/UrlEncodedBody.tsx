@@ -47,8 +47,9 @@ const UrlEncodedBody: React.FC<UrlEncodedBodyProps> = ({ urlEncoded, onChange })
 		textarea.style.width = '100%';
 		textarea.style.height = '200px';
 		textarea.style.zIndex = '1000';
-		textarea.style.background = 'white';
-		textarea.style.border = '1px solid #ccc';
+		textarea.style.background = 'var(--vscode-input-background)';
+		textarea.style.border = '1px solid var(--vscode-input-border)';
+		textarea.style.color = 'var(--vscode-input-foreground)';
 		textarea.style.padding = '10px';
 
 		document.body.appendChild(textarea);

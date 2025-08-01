@@ -347,11 +347,11 @@ const TestResults: React.FC<TestResultsProps> = ({ execution }) => {
 				{/* Summary */}
 				<div className='grid grid-cols-3 gap-4'>
 					<div className='text-center'>
-						<div className='text-2xl font-bold text-green-600'>{execution.passedTests}</div>
+						<div className='text-2xl font-bold text-foreground'>{execution.passedTests}</div>
 						<div className='text-sm text-muted-foreground'>Passed</div>
 					</div>
 					<div className='text-center'>
-						<div className='text-2xl font-bold text-red-600'>{execution.failedTests}</div>
+						<div className='text-2xl font-bold text-destructive'>{execution.failedTests}</div>
 						<div className='text-sm text-muted-foreground'>Failed</div>
 					</div>
 					<div className='text-center'>
@@ -377,7 +377,7 @@ const TestResults: React.FC<TestResultsProps> = ({ execution }) => {
 					<div className='space-y-2 max-h-60 overflow-y-auto'>
 						{execution.results.map(result => (
 							<div key={result.id} className='flex items-center gap-3 p-2 rounded-lg border'>
-								{result.passed ? <CheckCircle className='w-4 h-4 text-green-600' /> : <XCircle className='w-4 h-4 text-red-600' />}
+								{result.passed ? <CheckCircle className='w-4 h-4 text-foreground' /> : <XCircle className='w-4 h-4 text-destructive' />}
 								<div className='flex-1 min-w-0'>
 									<div className='text-sm font-medium truncate'>{result.message}</div>
 									{!result.passed && (

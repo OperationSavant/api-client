@@ -188,8 +188,8 @@ query GetUsers {
 								<div
 									className={`text-sm px-2 py-1 rounded ${
 										variablesValidation.valid
-											? 'text-green-700 bg-green-100 dark:text-green-300 dark:bg-green-900/30'
-											: 'text-red-700 bg-red-100 dark:text-red-300 dark:bg-red-900/30'
+											? 'text-foreground bg-muted border border-ring'
+											: 'text-destructive bg-muted border border-destructive'
 									}`}>
 									{variablesValidation.message}
 								</div>

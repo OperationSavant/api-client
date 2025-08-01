@@ -156,7 +156,7 @@ function App() {
 
 	return (
 		<div className='flex flex-col h-screen'>
-			<Card className='min-h-2/3 max-h-2/3 bg-red-800'>
+			<Card className='min-h-2/3 max-h-2/3'>
 				<CardHeader>
 					<CardTitle>API Request</CardTitle>
 				</CardHeader>
@@ -197,7 +197,7 @@ function App() {
 								<TabsTrigger value='tests'>Tests</TabsTrigger>
 								<TabsTrigger value='settings'>Settings</TabsTrigger>
 							</TabsList>
-							<TabsContent value='params' className='flex flex-col h-4/5 bg-amber-500'>
+							<TabsContent value='params' className='flex flex-col h-4/5'>
 								<ParamsTab params={params} onParamsChange={setParams} />
 							</TabsContent>
 							<TabsContent value='headers' className='flex flex-col'>

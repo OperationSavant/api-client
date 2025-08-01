@@ -149,7 +149,7 @@ const OAuth2AuthComponent: React.FC<OAuth2AuthProps> = ({ auth, onChange }) => {
 						{isGeneratingToken ? 'Generating Token...' : 'Get New Access Token'}
 					</Button>
 
-					{tokenError && <div className='text-sm text-red-500 mt-2'>{tokenError}</div>}
+					{tokenError && <div className='text-sm text-destructive mt-2'>{tokenError}</div>}
 				</div>
 			</div>
 		</div>
