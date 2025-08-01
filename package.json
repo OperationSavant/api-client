@@ -1,95 +1,96 @@
 {
-  "name": "vscode-api-client",
-  "displayName": "VS Code API Client",
-  "description": "A feature-rich API client for Visual Studio Code, similar to Postman.",
-  "version": "0.0.1",
-  "engines": {
-    "vscode": "^1.70.0"
-  },
-  "categories": [
-    "Other"
-  ],
-  "activationEvents": [
-    "onCommand:vscode-api-client.start"
-  ],
-  "main": "./dist/extension.js",
-  "contributes": {
-    "commands": [
-      {
-        "command": "vscode-api-client.start",
-        "title": "Start API Client"
-      }
-    ]
-  },
-  "scripts": {
-    "vscode:prepublish": "npm run package",
-    "compile": "cross-env NODE_ENV=production webpack",
-    "watch": "webpack --watch",
-    "package": "webpack --mode production --devtool hidden-source-map",
-    "compile-tests": "tsc -p . --outDir out",
-    "watch-tests": "tsc -p . -w --outDir out",
-    "pretest": "npm run compile-tests && npm run compile && npm run lint",
-    "lint": "eslint src --ext ts",
-    "test": "vscode-test",
-    "test:jest": "jest",
-    "test:jest:watch": "jest --watch",
-    "test:jest:coverage": "jest --coverage"
-  },
-  "devDependencies": {
-    "@testing-library/jest-dom": "^6.6.4",
-    "@testing-library/react": "^16.3.0",
-    "@testing-library/user-event": "^14.6.1",
-    "@types/glob": "^8.1.0",
-    "@types/jest": "^30.0.0",
-    "@types/mocha": "^10.0.6",
-    "@types/node": "20.x",
-    "@types/node-fetch": "^2.6.12",
-    "@types/vscode": "^1.70.0",
-    "@typescript-eslint/eslint-plugin": "^7.7.1",
-    "@typescript-eslint/parser": "^7.7.1",
-    "@vscode/test-cli": "^0.0.9",
-    "@vscode/test-electron": "^2.3.9",
-    "cross-env": "^10.0.0",
-    "eslint": "^8.57.0",
-    "glob": "^8.1.0",
-    "jest": "^30.0.5",
-    "jest-environment-jsdom": "^30.0.5",
-    "mocha": "^10.4.0",
-    "postcss-cli": "^11.0.1",
-    "text-encoding": "^0.7.0",
-    "ts-jest": "^29.4.0",
-    "ts-loader": "^9.5.1",
-    "typescript": "^5.4.5",
-    "webpack": "^5.91.0",
-    "webpack-cli": "^5.1.4"
-  },
-  "dependencies": {
-    "@radix-ui/react-checkbox": "^1.3.2",
-    "@radix-ui/react-label": "^2.1.7",
-    "@radix-ui/react-progress": "^1.1.7",
-    "@radix-ui/react-select": "^2.2.5",
-    "@radix-ui/react-separator": "^1.1.7",
-    "@radix-ui/react-slot": "^1.2.3",
-    "@radix-ui/react-tabs": "^1.1.12",
-    "@tailwindcss/postcss": "^4.1.11",
-    "@types/react": "^19.1.8",
-    "@types/react-dom": "^19.1.6",
-    "autoprefixer": "^10.4.21",
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
-    "css-loader": "^7.1.2",
-    "lucide-react": "^0.532.0",
-    "mini-css-extract-plugin": "^2.9.2",
-    "node-fetch": "^2.7.0",
-    "postcss": "^8.5.6",
-    "postcss-loader": "^8.1.1",
-    "process": "^0.11.10",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1",
-    "style-loader": "^4.0.0",
-    "tailwind-merge": "^3.3.1",
-    "tailwindcss": "^4.1.11",
-    "tailwindcss-animate": "^1.0.7",
-    "tw-animate-css": "^1.3.6"
-  }
+	"name": "vscode-api-client",
+	"displayName": "VS Code API Client",
+	"description": "A feature-rich API client for Visual Studio Code, similar to Postman.",
+	"version": "0.0.1",
+	"engines": {
+		"vscode": "^1.70.0"
+	},
+	"categories": [
+		"Other"
+	],
+	"activationEvents": [
+		"onCommand:vscode-api-client.start"
+	],
+	"main": "./dist/extension.js",
+	"contributes": {
+		"commands": [
+			{
+				"command": "vscode-api-client.start",
+				"title": "Start API Client"
+			}
+		]
+	},
+	"scripts": {
+		"vscode:prepublish": "npm run package",
+		"compile": "cross-env NODE_ENV=production webpack",
+		"watch": "webpack --watch",
+		"package": "webpack --mode production --devtool hidden-source-map",
+		"compile-tests": "tsc -p . --outDir out",
+		"watch-tests": "tsc -p . -w --outDir out",
+		"pretest": "npm run compile-tests && npm run compile && npm run lint",
+		"lint": "eslint src --ext ts",
+		"test": "vscode-test",
+		"test:jest": "jest",
+		"test:jest:watch": "jest --watch",
+		"test:jest:coverage": "jest --coverage"
+	},
+	"devDependencies": {
+		"@testing-library/jest-dom": "^6.6.4",
+		"@testing-library/react": "^16.3.0",
+		"@testing-library/user-event": "^14.6.1",
+		"@types/glob": "^8.1.0",
+		"@types/jest": "^30.0.0",
+		"@types/mocha": "^10.0.6",
+		"@types/node": "20.x",
+		"@types/node-fetch": "^2.6.12",
+		"@types/vscode": "^1.70.0",
+		"@typescript-eslint/eslint-plugin": "^7.7.1",
+		"@typescript-eslint/parser": "^7.7.1",
+		"@vscode/test-cli": "^0.0.9",
+		"@vscode/test-electron": "^2.3.9",
+		"cross-env": "^10.0.0",
+		"eslint": "^8.57.0",
+		"glob": "^8.1.0",
+		"jest": "^30.0.5",
+		"jest-environment-jsdom": "^30.0.5",
+		"mocha": "^10.4.0",
+		"postcss-cli": "^11.0.1",
+		"text-encoding": "^0.7.0",
+		"ts-jest": "^29.4.0",
+		"ts-loader": "^9.5.1",
+		"typescript": "^5.4.5",
+		"webpack": "^5.91.0",
+		"webpack-cli": "^5.1.4"
+	},
+	"dependencies": {
+		"@radix-ui/react-checkbox": "^1.3.2",
+		"@radix-ui/react-label": "^2.1.7",
+		"@radix-ui/react-progress": "^1.1.7",
+		"@radix-ui/react-select": "^2.2.5",
+		"@radix-ui/react-separator": "^1.1.7",
+		"@radix-ui/react-slot": "^1.2.3",
+		"@radix-ui/react-tabs": "^1.1.12",
+		"@tailwindcss/postcss": "^4.1.11",
+		"@types/react": "^19.1.8",
+		"@types/react-dom": "^19.1.6",
+		"autoprefixer": "^10.4.21",
+		"class-variance-authority": "^0.7.1",
+		"clsx": "^2.1.1",
+		"css-loader": "^7.1.2",
+		"lucide-react": "^0.532.0",
+		"mini-css-extract-plugin": "^2.9.2",
+		"node-fetch": "^2.7.0",
+		"postcss": "^8.5.6",
+		"postcss-loader": "^8.1.1",
+		"process": "^0.11.10",
+		"react": "^19.1.1",
+		"react-dom": "^19.1.1",
+		"style-loader": "^4.0.0",
+		"tailwind-merge": "^3.3.1",
+		"tailwindcss": "^4.1.11",
+		"tailwindcss-animate": "^1.0.7",
+		"tw-animate-css": "^1.3.6"
+	}
 }
+

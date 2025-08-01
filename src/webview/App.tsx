@@ -28,7 +28,7 @@ function App() {
 	const [auth, setAuth] = useState<AuthConfig>({ type: 'none' });
 	const [response, setResponse] = useState<string | null>(null);
 	const [loading, setLoading] = useState(false);
-	
+
 	// Testing state
 	const [testSuites, setTestSuites] = useState<TestSuite[]>([]);
 	const [testExecutions, setTestExecutions] = useState<TestExecution[]>([]);
@@ -40,7 +40,7 @@ function App() {
 	const handleContentTypeChange = (contentType: string) => {
 		setHeaders(prev => ({
 			...prev,
-			'Content-Type': contentType
+			'Content-Type': contentType,
 		}));
 	};
 
@@ -94,7 +94,7 @@ function App() {
 					} catch {
 						return undefined;
 					}
-				})()
+				})(),
 			};
 
 			const execution = await testExecutor.executeTestSuite(suite, mockResponseData);
@@ -110,18 +110,11 @@ function App() {
 		setLoading(true);
 		const vscode = vscodeApi.current;
 		let fullUrl = `${protocol}://${url}`;
-		
+
 		try {
 			// Apply authentication to headers and params
-			const { headers: authHeaders, params: authParams } = await applyAuthentication(
-				auth, 
-				method, 
-				fullUrl, 
-				headers, 
-				params, 
-				requestBody
-			);
-			
+			const { headers: authHeaders, params: authParams } = await applyAuthentication(auth, method, fullUrl, headers, params, requestBody);
+
 			console.log('Sending request to:', fullUrl, 'with method:', method, 'and body:', requestBody, 'headers:', authHeaders, 'params:', authParams);
 			vscode.postMessage({
 				command: 'sendRequest',
@@ -214,17 +207,13 @@ function App() {
 								<AuthTab auth={auth} onAuthChange={setAuth} />
 							</TabsContent>
 							<TabsContent value='body' className='flex flex-col'>
-								<BodyTab 
-									requestBody={requestBody} 
-									onRequestBodyChange={setRequestBody}
-									onContentTypeChange={handleContentTypeChange}
-								/>
+								<BodyTab requestBody={requestBody} onRequestBodyChange={setRequestBody} onContentTypeChange={handleContentTypeChange} />
 							</TabsContent>
 							<TabsContent value='pre-request' className='flex flex-col'>
 								<PreRequestScriptTab />
 							</TabsContent>
 							<TabsContent value='tests' className='flex flex-col'>
-								<TestsTab 
+								<TestsTab
 									testSuites={testSuites}
 									onTestSuitesChange={setTestSuites}
 									onRunTests={handleRunTests}
