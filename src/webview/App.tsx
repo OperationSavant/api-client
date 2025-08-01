@@ -29,6 +29,14 @@ function App() {
 
 	const vscodeApi = useRef<any>(null);
 
+	// Handle content type changes from body tab
+	const handleContentTypeChange = (contentType: string) => {
+		setHeaders(prev => ({
+			...prev,
+			'Content-Type': contentType
+		}));
+	};
+
 	const handleUrlBlur = () => {
 		let currentUrl = url;
 		let currentProtocol = protocol;
@@ -164,7 +172,11 @@ function App() {
 								<AuthTab auth={auth} onAuthChange={setAuth} />
 							</TabsContent>
 							<TabsContent value='body' className='flex flex-col'>
-								<BodyTab requestBody={requestBody} onRequestBodyChange={setRequestBody} />
+								<BodyTab 
+									requestBody={requestBody} 
+									onRequestBodyChange={setRequestBody}
+									onContentTypeChange={handleContentTypeChange}
+								/>
 							</TabsContent>
 							<TabsContent value='pre-request' className='flex flex-col'>
 								<PreRequestScriptTab />
