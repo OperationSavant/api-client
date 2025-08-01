@@ -4,13 +4,13 @@ describe('HTTP Methods Support', () => {
 	describe('Method Validation', () => {
 		it('should include all standard HTTP methods', () => {
 			const supportedMethods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'];
-			
+
 			// Verify all methods are strings
 			supportedMethods.forEach(method => {
 				expect(typeof method).toBe('string');
 				expect(method.length).toBeGreaterThan(0);
 			});
-			
+
 			// Verify we have all the essential methods
 			expect(supportedMethods).toContain('GET');
 			expect(supportedMethods).toContain('POST');
@@ -28,7 +28,7 @@ describe('HTTP Methods Support', () => {
 
 		it('should support case-sensitive method names', () => {
 			const supportedMethods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'];
-			
+
 			// All methods should be uppercase
 			supportedMethods.forEach(method => {
 				expect(method).toBe(method.toUpperCase());
@@ -40,7 +40,7 @@ describe('HTTP Methods Support', () => {
 		it('should identify safe methods', () => {
 			// Safe methods don't modify server state
 			const safeMethods = ['GET', 'HEAD', 'OPTIONS'];
-			
+
 			safeMethods.forEach(method => {
 				expect(['GET', 'HEAD', 'OPTIONS']).toContain(method);
 			});
@@ -49,13 +49,13 @@ describe('HTTP Methods Support', () => {
 		it('should identify idempotent methods', () => {
 			// Idempotent methods can be called multiple times with same effect
 			const idempotentMethods = ['GET', 'PUT', 'DELETE', 'HEAD', 'OPTIONS'];
-			
+
 			expect(idempotentMethods).toContain('GET');
 			expect(idempotentMethods).toContain('PUT');
 			expect(idempotentMethods).toContain('DELETE');
 			expect(idempotentMethods).toContain('HEAD');
 			expect(idempotentMethods).toContain('OPTIONS');
-			
+
 			// POST and PATCH are typically NOT idempotent
 			expect(idempotentMethods).not.toContain('POST');
 			expect(idempotentMethods).not.toContain('PATCH');
@@ -64,12 +64,12 @@ describe('HTTP Methods Support', () => {
 		it('should identify methods that typically support request bodies', () => {
 			const bodyMethods = ['POST', 'PUT', 'PATCH'];
 			const noBodyMethods = ['GET', 'HEAD', 'DELETE', 'OPTIONS'];
-			
+
 			// Methods that commonly have bodies
 			expect(bodyMethods).toContain('POST');
 			expect(bodyMethods).toContain('PUT');
 			expect(bodyMethods).toContain('PATCH');
-			
+
 			// Methods that typically don't have bodies
 			expect(noBodyMethods).toContain('GET');
 			expect(noBodyMethods).toContain('HEAD');
@@ -120,11 +120,11 @@ describe('HTTP Methods Support', () => {
 			// Our enhanced response includes more information
 			const expectedResponseFields = [
 				'status',
-				'statusText', 
+				'statusText',
 				'headers',
 				'method',
 				'url',
-				'body' // Optional - not present for HEAD requests
+				'body', // Optional - not present for HEAD requests
 			];
 
 			expectedResponseFields.forEach(field => {
@@ -136,13 +136,13 @@ describe('HTTP Methods Support', () => {
 			// HEAD responses should not have a body field
 			const headResponseFields = ['status', 'statusText', 'headers', 'method', 'url'];
 			const regularResponseFields = ['status', 'statusText', 'headers', 'method', 'url', 'body'];
-			
+
 			expect(headResponseFields.length).toBeLessThan(regularResponseFields.length);
 		});
 
 		it('should include status codes for all responses', () => {
 			const commonStatusCodes = [200, 201, 204, 400, 401, 403, 404, 500];
-			
+
 			commonStatusCodes.forEach(code => {
 				expect(typeof code).toBe('number');
 				expect(code).toBeGreaterThanOrEqual(100);
@@ -151,14 +151,8 @@ describe('HTTP Methods Support', () => {
 		});
 
 		it('should handle different content types', () => {
-			const contentTypes = [
-				'application/json',
-				'text/plain',
-				'text/html',
-				'application/xml',
-				'application/octet-stream'
-			];
-			
+			const contentTypes = ['application/json', 'text/plain', 'text/html', 'application/xml', 'application/octet-stream'];
+
 			contentTypes.forEach(type => {
 				expect(typeof type).toBe('string');
 				expect(type).toContain('/');
@@ -169,7 +163,7 @@ describe('HTTP Methods Support', () => {
 	describe('Error Handling', () => {
 		it('should handle network errors gracefully', () => {
 			const networkErrors = ['ECONNREFUSED', 'ETIMEDOUT', 'ENOTFOUND'];
-			
+
 			networkErrors.forEach(error => {
 				expect(typeof error).toBe('string');
 			});
@@ -177,7 +171,7 @@ describe('HTTP Methods Support', () => {
 
 		it('should handle HTTP error status codes', () => {
 			const errorCodes = [400, 401, 403, 404, 422, 500, 502, 503];
-			
+
 			errorCodes.forEach(code => {
 				expect(code).toBeGreaterThanOrEqual(400);
 			});
@@ -185,7 +179,7 @@ describe('HTTP Methods Support', () => {
 
 		it('should handle malformed JSON responses', () => {
 			const malformedJson = 'This is not valid JSON';
-			
+
 			expect(() => {
 				JSON.parse(malformedJson);
 			}).toThrow();
@@ -194,12 +188,8 @@ describe('HTTP Methods Support', () => {
 
 	describe('Security Considerations', () => {
 		it('should handle CORS properly', () => {
-			const corsHeaders = [
-				'Access-Control-Allow-Origin',
-				'Access-Control-Allow-Methods',
-				'Access-Control-Allow-Headers'
-			];
-			
+			const corsHeaders = ['Access-Control-Allow-Origin', 'Access-Control-Allow-Methods', 'Access-Control-Allow-Headers'];
+
 			corsHeaders.forEach(header => {
 				expect(typeof header).toBe('string');
 				expect(header).toContain('Access-Control');
@@ -208,7 +198,7 @@ describe('HTTP Methods Support', () => {
 
 		it('should support authentication headers', () => {
 			const authHeaders = ['Authorization', 'X-API-Key', 'Cookie'];
-			
+
 			authHeaders.forEach(header => {
 				expect(typeof header).toBe('string');
 			});
@@ -219,7 +209,7 @@ describe('HTTP Methods Support', () => {
 		it('should track response times', () => {
 			// Response time should be tracked for performance monitoring
 			const mockResponseTime = 150;
-			
+
 			expect(typeof mockResponseTime).toBe('number');
 			expect(mockResponseTime).toBeGreaterThan(0);
 		});
@@ -227,7 +217,7 @@ describe('HTTP Methods Support', () => {
 		it('should handle large responses', () => {
 			// Should be able to handle responses of various sizes
 			const responseSizes = [100, 1024, 1048576]; // 100B, 1KB, 1MB
-			
+
 			responseSizes.forEach(size => {
 				expect(size).toBeGreaterThan(0);
 			});
@@ -244,9 +234,9 @@ describe('HTTP Methods Support', () => {
 				{ method: 'PATCH', pattern: '/users/:id', purpose: 'Update user partially' },
 				{ method: 'DELETE', pattern: '/users/:id', purpose: 'Delete user' },
 				{ method: 'HEAD', pattern: '/users/:id', purpose: 'Check if user exists' },
-				{ method: 'OPTIONS', pattern: '/users', purpose: 'Get allowed methods' }
+				{ method: 'OPTIONS', pattern: '/users', purpose: 'Get allowed methods' },
 			];
-			
+
 			restfulPatterns.forEach(pattern => {
 				expect(typeof pattern.method).toBe('string');
 				expect(typeof pattern.pattern).toBe('string');
@@ -255,12 +245,8 @@ describe('HTTP Methods Support', () => {
 		});
 
 		it('should handle API versioning', () => {
-			const versioningStrategies = [
-				'/v1/users',
-				'/api/v2/users',
-				'Accept: application/vnd.api+json;version=1'
-			];
-			
+			const versioningStrategies = ['/v1/users', '/api/v2/users', 'Accept: application/vnd.api+json;version=1'];
+
 			versioningStrategies.forEach(strategy => {
 				expect(typeof strategy).toBe('string');
 			});

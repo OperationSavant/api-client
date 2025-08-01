@@ -36,11 +36,11 @@ export function activate(context: vscode.ExtensionContext) {
 								}
 
 								const response = await fetch(url, options);
-								
+
 								// Handle different response types based on method and content
 								let data: any;
 								const contentType = response.headers.get('content-type') || '';
-								
+
 								if (message.method.toUpperCase() === 'HEAD') {
 									// HEAD requests return no body, only headers
 									data = {
@@ -48,7 +48,7 @@ export function activate(context: vscode.ExtensionContext) {
 										statusText: response.statusText,
 										headers: Object.fromEntries(response.headers.entries()),
 										method: message.method,
-										url: response.url
+										url: response.url,
 									};
 								} else if (contentType.includes('application/json')) {
 									// JSON response
@@ -60,7 +60,7 @@ export function activate(context: vscode.ExtensionContext) {
 											headers: Object.fromEntries(response.headers.entries()),
 											body: jsonData,
 											method: message.method,
-											url: response.url
+											url: response.url,
 										};
 									} catch {
 										// If JSON parsing fails, treat as text
@@ -71,7 +71,7 @@ export function activate(context: vscode.ExtensionContext) {
 											headers: Object.fromEntries(response.headers.entries()),
 											body: textData,
 											method: message.method,
-											url: response.url
+											url: response.url,
 										};
 									}
 								} else {
@@ -83,10 +83,10 @@ export function activate(context: vscode.ExtensionContext) {
 										headers: Object.fromEntries(response.headers.entries()),
 										body: textData,
 										method: message.method,
-										url: response.url
+										url: response.url,
 									};
 								}
-								
+
 								panel.webview.postMessage({ command: 'apiResponse', data: data });
 							} catch (error: any) {
 								vscode.window.showErrorMessage(`API Request Failed: ${error.message}`);
@@ -136,3 +136,4 @@ function getNonce() {
 }
 
 export function deactivate() {}
+
