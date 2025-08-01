@@ -10,11 +10,13 @@ import HeadersTab from '@/components/request-tabs/HeadersTab';
 import BodyTab from '@/components/request-tabs/BodyTab';
 import AuthTab from '@/components/request-tabs/AuthTab';
 import PreRequestScriptTab from '@/components/request-tabs/PreRequestScriptTab';
-import TestsTab from '@/components/request-tabs/TestsTab';
+import TestTab from '@/components/request-tabs/TestTab';
 import SettingsTab from '@/components/request-tabs/SettingsTab';
 
 import { AuthConfig } from '@/types/auth';
+import { TestSuite, TestExecution } from '@/types/testing';
 import { applyAuthentication } from '@/utils/auth';
+import { testExecutor, createResponseTestData } from '@/utils/testExecutor';
 
 function App() {
 	const [protocol, setProtocol] = useState('https');
@@ -26,6 +28,11 @@ function App() {
 	const [auth, setAuth] = useState<AuthConfig>({ type: 'none' });
 	const [response, setResponse] = useState<string | null>(null);
 	const [loading, setLoading] = useState(false);
+	
+	// Testing state
+	const [testSuites, setTestSuites] = useState<TestSuite[]>([]);
+	const [testExecutions, setTestExecutions] = useState<TestExecution[]>([]);
+	const [isRunningTests, setIsRunningTests] = useState(false);
 
 	const vscodeApi = useRef<any>(null);
 
@@ -62,6 +69,41 @@ function App() {
 		}
 		setParams(currentParams);
 		setUrl(currentUrl);
+	};
+
+	// Handle test execution
+	const handleRunTests = async (suiteId: string) => {
+		const suite = testSuites.find(s => s.id === suiteId);
+		if (!suite || !response) return;
+
+		setIsRunningTests(true);
+		try {
+			// In a real app, we'd have the actual response data
+			// For now, we'll create mock response data
+			const mockResponseData = {
+				status: 200,
+				statusText: 'OK',
+				headers: headers,
+				body: response,
+				contentType: headers['Content-Type'] || 'application/json',
+				responseTime: 150,
+				size: response.length,
+				data: (() => {
+					try {
+						return JSON.parse(response);
+					} catch {
+						return undefined;
+					}
+				})()
+			};
+
+			const execution = await testExecutor.executeTestSuite(suite, mockResponseData);
+			setTestExecutions(prev => [execution, ...prev.slice(0, 9)]); // Keep last 10 executions
+		} catch (error) {
+			console.error('Test execution failed:', error);
+		} finally {
+			setIsRunningTests(false);
+		}
 	};
 
 	const handleSendRequest = async () => {
@@ -182,7 +224,13 @@ function App() {
 								<PreRequestScriptTab />
 							</TabsContent>
 							<TabsContent value='tests' className='flex flex-col'>
-								<TestsTab />
+								<TestTab 
+									testSuites={testSuites}
+									onTestSuitesChange={setTestSuites}
+									onRunTests={handleRunTests}
+									testExecutions={testExecutions}
+									isRunning={isRunningTests}
+								/>
 							</TabsContent>
 							<TabsContent value='settings' className='flex flex-col'>
 								<SettingsTab />
