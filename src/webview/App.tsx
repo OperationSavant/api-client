@@ -10,7 +10,7 @@ import HeadersTab from '@/components/request-tabs/HeadersTab';
 import BodyTab from '@/components/request-tabs/BodyTab';
 import AuthTab from '@/components/request-tabs/AuthTab';
 import PreRequestScriptTab from '@/components/request-tabs/PreRequestScriptTab';
-import TestTab from '@/components/request-tabs/TestTab';
+import TestsTab from '@/components/request-tabs/TestsTab';
 import SettingsTab from '@/components/request-tabs/SettingsTab';
 
 import { AuthConfig } from '@/types/auth';
@@ -224,7 +224,7 @@ function App() {
 								<PreRequestScriptTab />
 							</TabsContent>
 							<TabsContent value='tests' className='flex flex-col'>
-								<TestTab 
+								<TestsTab 
 									testSuites={testSuites}
 									onTestSuitesChange={setTestSuites}
 									onRunTests={handleRunTests}
