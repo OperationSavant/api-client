@@ -1,6 +1,11 @@
 // Test setup file
 import '@testing-library/jest-dom';
 
+// Mock TextEncoder/TextDecoder for Node environment
+const { TextEncoder, TextDecoder } = require('text-encoding');
+global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder;
+
 // Mock VS Code API
 (global as any).acquireVsCodeApi = jest.fn(() => ({
   postMessage: jest.fn(),
