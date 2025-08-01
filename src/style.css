@@ -79,3 +79,17 @@
 	}
 }
 
+/* Force stable scrollbar gutter to prevent layout shifts */
+@layer utilities {
+	.stable-scrollbar {
+		scrollbar-gutter: stable;
+		overflow-anchor: none;
+	}
+
+	/* Alternative approach for better cross-browser support */
+	.force-scrollbar-space {
+		scrollbar-gutter: stable both-edges;
+		overflow: overlay;
+	}
+}
+

@@ -8,7 +8,7 @@ interface ParamsTabProps {
 
 const ParamsTab: React.FC<ParamsTabProps> = ({ params, onParamsChange }) => {
 	return (
-		<div className='flex-1 flex flex-col overflow-y-auto'>
+		<div className='h-full'>
 			<KeyValueInput label='Parameters' value={params} onChange={onParamsChange} />
 		</div>
 	);

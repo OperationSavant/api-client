@@ -155,89 +155,91 @@ function App() {
 	}, []);
 
 	return (
-		<div className='flex flex-col h-screen'>
-			<Card className='min-h-2/3 max-h-2/3'>
-				<CardHeader>
+		<div className='flex flex-col h-screen p-4 gap-4' style={{ scrollbarGutter: 'stable' }}>
+			{/* Request Section - 60% of screen height */}
+			<Card className='h-[60vh] flex flex-col' style={{ scrollbarGutter: 'stable' }}>
+				<CardHeader className='flex-shrink-0'>
 					<CardTitle>API Request</CardTitle>
 				</CardHeader>
-				<CardContent className='flex-1 flex flex-col overflow-hidden'>
-					<div className='flex-1 flex flex-col gap-4'>
-						<div className='flex space-x-2'>
-							<Select onValueChange={setMethod} defaultValue={method}>
-								<SelectTrigger className='w-[140px]'>
-									<SelectValue placeholder='Method' />
-								</SelectTrigger>
-								<SelectContent className='w-[140px]'>
-									<SelectItem value='GET'>GET</SelectItem>
-									<SelectItem value='POST'>POST</SelectItem>
-									<SelectItem value='PUT'>PUT</SelectItem>
-									<SelectItem value='PATCH'>PATCH</SelectItem>
-									<SelectItem value='DELETE'>DELETE</SelectItem>
-									<SelectItem value='HEAD'>HEAD</SelectItem>
-									<SelectItem value='OPTIONS'>OPTIONS</SelectItem>
-								</SelectContent>
-							</Select>
-							<Select onValueChange={setProtocol} defaultValue={protocol}>
-								<SelectTrigger className='w-[120px]'>
-									<SelectValue placeholder='Protocol' />
-								</SelectTrigger>
-								<SelectContent className='w-[120px]'>
-									<SelectItem value='https'>https://</SelectItem>
-									<SelectItem value='http'>http://</SelectItem>
-								</SelectContent>
-							</Select>
-							<Input id='url' className='flex-1' placeholder='api.example.com/data' value={url} onChange={e => setUrl(e.target.value)} onBlur={handleUrlBlur} />
-							<Button onClick={handleSendRequest}>Send</Button>
-						</div>
-
-						<Tabs defaultValue='params' className='w-full flex-1 flex flex-col'>
-							<TabsList>
-								<TabsTrigger value='params'>Params</TabsTrigger>
-								<TabsTrigger value='headers'>Headers</TabsTrigger>
-								<TabsTrigger value='auth'>Authorization</TabsTrigger>
-								<TabsTrigger value='body'>Body</TabsTrigger>
-								<TabsTrigger value='pre-request'>Pre-request Script</TabsTrigger>
-								<TabsTrigger value='tests'>Tests</TabsTrigger>
-								<TabsTrigger value='settings'>Settings</TabsTrigger>
-							</TabsList>
-							<TabsContent value='params' className='flex flex-col h-4/5'>
-								<ParamsTab params={params} onParamsChange={setParams} />
-							</TabsContent>
-							<TabsContent value='headers' className='flex flex-col'>
-								<HeadersTab headers={headers} onHeadersChange={setHeaders} />
-							</TabsContent>
-							<TabsContent value='auth' className='flex flex-col'>
-								<AuthTab auth={auth} onAuthChange={setAuth} />
-							</TabsContent>
-							<TabsContent value='body' className='flex flex-col'>
-								<BodyTab requestBody={requestBody} onRequestBodyChange={setRequestBody} onContentTypeChange={handleContentTypeChange} />
-							</TabsContent>
-							<TabsContent value='pre-request' className='flex flex-col'>
-								<PreRequestScriptTab />
-							</TabsContent>
-							<TabsContent value='tests' className='flex flex-col'>
-								<TestsTab
-									testSuites={testSuites}
-									onTestSuitesChange={setTestSuites}
-									onRunTests={handleRunTests}
-									testExecutions={testExecutions}
-									isRunning={isRunningTests}
-								/>
-							</TabsContent>
-							<TabsContent value='settings' className='flex flex-col'>
-								<SettingsTab />
-							</TabsContent>
-						</Tabs>
+				<CardContent className='flex-1 flex flex-col min-h-0 gap-4' style={{ scrollbarGutter: 'stable' }}>
+					{/* HTTP Request Controls - Fixed height */}
+					<div className='flex space-x-2 flex-shrink-0'>
+						<Select onValueChange={setMethod} defaultValue={method}>
+							<SelectTrigger className='w-[140px]'>
+								<SelectValue placeholder='Method' />
+							</SelectTrigger>
+							<SelectContent className='w-[140px]'>
+								<SelectItem value='GET'>GET</SelectItem>
+								<SelectItem value='POST'>POST</SelectItem>
+								<SelectItem value='PUT'>PUT</SelectItem>
+								<SelectItem value='PATCH'>PATCH</SelectItem>
+								<SelectItem value='DELETE'>DELETE</SelectItem>
+								<SelectItem value='HEAD'>HEAD</SelectItem>
+								<SelectItem value='OPTIONS'>OPTIONS</SelectItem>
+							</SelectContent>
+						</Select>
+						<Select onValueChange={setProtocol} defaultValue={protocol}>
+							<SelectTrigger className='w-[120px]'>
+								<SelectValue placeholder='Protocol' />
+							</SelectTrigger>
+							<SelectContent className='w-[120px]'>
+								<SelectItem value='https'>https://</SelectItem>
+								<SelectItem value='http'>http://</SelectItem>
+							</SelectContent>
+						</Select>
+						<Input id='url' className='flex-1' placeholder='api.example.com/data' value={url} onChange={e => setUrl(e.target.value)} onBlur={handleUrlBlur} />
+						<Button onClick={handleSendRequest}>Send</Button>
 					</div>
+
+					{/* Tabs Section - Takes remaining space with scrollable content */}
+					<Tabs defaultValue='params' className='flex-1 flex flex-col min-h-0'>
+						<TabsList className='flex-shrink-0'>
+							<TabsTrigger value='params'>Params</TabsTrigger>
+							<TabsTrigger value='headers'>Headers</TabsTrigger>
+							<TabsTrigger value='auth'>Authorization</TabsTrigger>
+							<TabsTrigger value='body'>Body</TabsTrigger>
+							<TabsTrigger value='pre-request'>Pre-request Script</TabsTrigger>
+							<TabsTrigger value='tests'>Tests</TabsTrigger>
+							<TabsTrigger value='settings'>Settings</TabsTrigger>
+						</TabsList>
+						<TabsContent value='params' className='flex-1 min-h-0 overflow-y-auto p-4 stable-scrollbar'>
+							<ParamsTab params={params} onParamsChange={setParams} />
+						</TabsContent>
+						<TabsContent value='headers' className='flex-1 min-h-0 overflow-y-auto p-4 stable-scrollbar'>
+							<HeadersTab headers={headers} onHeadersChange={setHeaders} />
+						</TabsContent>
+						<TabsContent value='auth' className='flex-1 min-h-0 overflow-y-auto p-4 stable-scrollbar'>
+							<AuthTab auth={auth} onAuthChange={setAuth} />
+						</TabsContent>
+						<TabsContent value='body' className='flex-1 min-h-0 overflow-y-auto p-4 stable-scrollbar'>
+							<BodyTab requestBody={requestBody} onRequestBodyChange={setRequestBody} onContentTypeChange={handleContentTypeChange} />
+						</TabsContent>
+						<TabsContent value='pre-request' className='flex-1 min-h-0 overflow-y-auto p-4 stable-scrollbar'>
+							<PreRequestScriptTab />
+						</TabsContent>
+						<TabsContent value='tests' className='flex-1 min-h-0 overflow-y-auto p-4 stable-scrollbar'>
+							<TestsTab
+								testSuites={testSuites}
+								onTestSuitesChange={setTestSuites}
+								onRunTests={handleRunTests}
+								testExecutions={testExecutions}
+								isRunning={isRunningTests}
+							/>
+						</TabsContent>
+						<TabsContent value='settings' className='flex-1 min-h-0 overflow-y-auto p-4 stable-scrollbar'>
+							<SettingsTab />
+						</TabsContent>
+					</Tabs>
 				</CardContent>
 			</Card>
 
-			<Card className='mt-4 flex-[2] flex flex-col'>
-				<CardHeader>
+			{/* Response Section - 40% of screen height */}
+			<Card className='h-[40vh] flex flex-col' style={{ scrollbarGutter: 'stable' }}>
+				<CardHeader className='flex-shrink-0'>
 					<CardTitle>API Response</CardTitle>
 				</CardHeader>
-				<CardContent className='flex-1 flex flex-col'>
-					<pre className='whitespace-pre-wrap text-sm bg-background p-4 rounded-md flex-1 overflow-auto'>
+				<CardContent className='flex-1 min-h-0' style={{ scrollbarGutter: 'stable' }}>
+					<pre className='whitespace-pre-wrap text-sm bg-background p-4 rounded-md h-full overflow-auto stable-scrollbar'>
 						{loading ? 'Loading...' : response || 'Send a request to see the response.'}
 					</pre>
 				</CardContent>
