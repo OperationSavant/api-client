@@ -13,6 +13,9 @@ import PreRequestScriptTab from '@/components/request-tabs/PreRequestScriptTab';
 import TestsTab from '@/components/request-tabs/TestsTab';
 import SettingsTab from '@/components/request-tabs/SettingsTab';
 
+import { AuthConfig } from '@/types/auth';
+import { applyAuthentication } from '@/utils/auth';
+
 function App() {
 	const [protocol, setProtocol] = useState('https');
 	const [url, setUrl] = useState('');
@@ -20,6 +23,7 @@ function App() {
 	const [requestBody, setRequestBody] = useState('');
 	const [headers, setHeaders] = useState<Record<string, string>>({});
 	const [params, setParams] = useState<Record<string, string>>({});
+	const [auth, setAuth] = useState<AuthConfig>({ type: 'none' });
 	const [response, setResponse] = useState<string | null>(null);
 	const [loading, setLoading] = useState(false);
 
@@ -52,19 +56,37 @@ function App() {
 		setUrl(currentUrl);
 	};
 
-	const handleSendRequest = () => {
+	const handleSendRequest = async () => {
 		setLoading(true);
 		const vscode = vscodeApi.current;
 		let fullUrl = `${protocol}://${url}`;
-		console.log('Sending request to:', fullUrl, 'with method:', method, 'and body:', requestBody, 'headers:', headers, 'params:', params);
-		vscode.postMessage({
-			command: 'sendRequest',
-			url: fullUrl,
-			method: method,
-			body: requestBody,
-			headers: headers,
-			params: params,
-		});
+		
+		try {
+			// Apply authentication to headers and params
+			const { headers: authHeaders, params: authParams } = await applyAuthentication(
+				auth, 
+				method, 
+				fullUrl, 
+				headers, 
+				params, 
+				requestBody
+			);
+			
+			console.log('Sending request to:', fullUrl, 'with method:', method, 'and body:', requestBody, 'headers:', authHeaders, 'params:', authParams);
+			vscode.postMessage({
+				command: 'sendRequest',
+				url: fullUrl,
+				method: method,
+				body: requestBody,
+				headers: authHeaders,
+				params: authParams,
+			});
+		} catch (error) {
+			console.error('Authentication error:', error);
+			const errorMessage = error instanceof Error ? error.message : 'Unknown authentication error';
+			setResponse(`Authentication Error: ${errorMessage}`);
+			setLoading(false);
+		}
 	};
 
 	React.useEffect(() => {
@@ -139,7 +161,7 @@ function App() {
 								<HeadersTab headers={headers} onHeadersChange={setHeaders} />
 							</TabsContent>
 							<TabsContent value='auth' className='flex flex-col'>
-								<AuthTab />
+								<AuthTab auth={auth} onAuthChange={setAuth} />
 							</TabsContent>
 							<TabsContent value='body' className='flex flex-col'>
 								<BodyTab requestBody={requestBody} onRequestBodyChange={setRequestBody} />

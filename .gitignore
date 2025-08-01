@@ -48,4 +48,7 @@ coverage/
 *.sw?
 /dist
 /out
+
+# Development planning documents (not for git)
+IMPLEMENTATION_PLAN.md
 /build
