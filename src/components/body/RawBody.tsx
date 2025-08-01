@@ -99,7 +99,7 @@ const RawBody: React.FC<RawBodyProps> = ({ rawConfig, onChange }) => {
 				case 'json':
 					JSON.parse(rawConfig.content);
 					return { valid: true, message: 'Valid JSON' };
-				case 'xml':
+				case 'xml': {
 					// Basic XML validation (check for matching tags)
 					const xmlDoc = new DOMParser().parseFromString(rawConfig.content, 'text/xml');
 					const parseError = xmlDoc.getElementsByTagName('parsererror');
@@ -107,6 +107,7 @@ const RawBody: React.FC<RawBodyProps> = ({ rawConfig, onChange }) => {
 						return { valid: false, message: 'Invalid XML syntax' };
 					}
 					return { valid: true, message: 'Valid XML' };
+				}
 				default:
 					return { valid: true, message: 'Content ready' };
 			}

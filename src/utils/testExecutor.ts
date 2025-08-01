@@ -124,9 +124,10 @@ export class TestExecutor {
 			case 'json-value-type':
 				return this.extractJsonPath(responseData.data, assertion.field || '');
 
-			case 'json-array-length':
+			case 'json-array-length': {
 				const arrayValue = this.extractJsonPath(responseData.data, assertion.field || '');
 				return Array.isArray(arrayValue) ? arrayValue.length : 0;
+			}
 
 			case 'response-body-contains':
 			case 'response-body-matches':
@@ -202,13 +203,15 @@ export class TestExecutor {
 			case 'ends-with':
 				return String(actualValue).toLowerCase().endsWith(String(expectedValue).toLowerCase());
 
-			case 'exists':
+			case 'exists': {
 				const exists = actualValue !== undefined && actualValue !== null;
 				return expectedValue ? exists : !exists;
+			}
 
-			case 'not-exists':
+			case 'not-exists': {
 				const notExists = actualValue === undefined || actualValue === null;
 				return expectedValue ? notExists : !notExists;
+			}
 
 			case 'is-type':
 				return typeof actualValue === expectedValue;

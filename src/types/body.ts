@@ -66,7 +66,7 @@ export const generateRequestBody = (config: RequestBodyConfig): { body: string |
 		case 'none':
 			return { body: null };
 
-		case 'form-data':
+		case 'form-data': {
 			const formData = new FormData();
 			config.formData
 				.filter(field => field.enabled && field.key)
@@ -78,8 +78,9 @@ export const generateRequestBody = (config: RequestBodyConfig): { body: string |
 					}
 				});
 			return { body: formData }; // Don't set Content-Type, let browser set it with boundary
+		}
 
-		case 'x-www-form-urlencoded':
+		case 'x-www-form-urlencoded': {
 			const params = new URLSearchParams();
 			config.urlEncoded
 				.filter(field => field.enabled && field.key)
@@ -90,6 +91,7 @@ export const generateRequestBody = (config: RequestBodyConfig): { body: string |
 				body: params.toString(),
 				contentType: 'application/x-www-form-urlencoded',
 			};
+		}
 
 		case 'raw':
 			return {
@@ -97,7 +99,7 @@ export const generateRequestBody = (config: RequestBodyConfig): { body: string |
 				contentType: getContentTypeForLanguage(config.raw.language),
 			};
 
-		case 'binary':
+		case 'binary': {
 			if (config.binary.file) {
 				return {
 					body: config.binary.file,
@@ -105,8 +107,9 @@ export const generateRequestBody = (config: RequestBodyConfig): { body: string |
 				};
 			}
 			return { body: null };
+		}
 
-		case 'graphql':
+		case 'graphql': {
 			const graphqlBody = {
 				query: config.graphql.query,
 				variables: JSON.parse(config.graphql.variables || '{}'),
@@ -116,6 +119,7 @@ export const generateRequestBody = (config: RequestBodyConfig): { body: string |
 				body: JSON.stringify(graphqlBody, null, 2),
 				contentType: 'application/json',
 			};
+		}
 
 		default:
 			return { body: null };

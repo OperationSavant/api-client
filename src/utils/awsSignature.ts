@@ -43,7 +43,7 @@ export async function createAwsSignature(
 
 	// Create a date for headers and the credential string
 	const t = new Date();
-	const amzDate = t.toISOString().replace(/[:\-]|\.\d{3}/g, '');
+	const amzDate = t.toISOString().replace(/[-:.]/g, '').replace(/\d{3}Z$/, 'Z');
 	const dateStamp = amzDate.slice(0, 8); // Date without time, used in credential scope
 
 	// Step 1: Create canonical request

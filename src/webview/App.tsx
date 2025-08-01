@@ -47,7 +47,7 @@ function App() {
 	const handleUrlBlur = () => {
 		let currentUrl = url;
 		let currentProtocol = protocol;
-		let currentParams: Record<string, string> = {};
+		const currentParams: Record<string, string> = {};
 
 		// Extract protocol
 		const protocolMatch = currentUrl.match(/^(https?:\/\/)/);
@@ -109,7 +109,7 @@ function App() {
 	const handleSendRequest = async () => {
 		setLoading(true);
 		const vscode = vscodeApi.current;
-		let fullUrl = `${protocol}://${url}`;
+		const fullUrl = `${protocol}://${url}`;
 
 		try {
 			// Apply authentication to headers and params

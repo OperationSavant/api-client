@@ -36,7 +36,57 @@ export function activate(context: vscode.ExtensionContext) {
 								}
 
 								const response = await fetch(url, options);
-								const data = await response.json();
+								
+								// Handle different response types based on method and content
+								let data: any;
+								const contentType = response.headers.get('content-type') || '';
+								
+								if (message.method.toUpperCase() === 'HEAD') {
+									// HEAD requests return no body, only headers
+									data = {
+										status: response.status,
+										statusText: response.statusText,
+										headers: Object.fromEntries(response.headers.entries()),
+										method: message.method,
+										url: response.url
+									};
+								} else if (contentType.includes('application/json')) {
+									// JSON response
+									try {
+										const jsonData = await response.json();
+										data = {
+											status: response.status,
+											statusText: response.statusText,
+											headers: Object.fromEntries(response.headers.entries()),
+											body: jsonData,
+											method: message.method,
+											url: response.url
+										};
+									} catch {
+										// If JSON parsing fails, treat as text
+										const textData = await response.text();
+										data = {
+											status: response.status,
+											statusText: response.statusText,
+											headers: Object.fromEntries(response.headers.entries()),
+											body: textData,
+											method: message.method,
+											url: response.url
+										};
+									}
+								} else {
+									// Non-JSON response (text, HTML, etc.)
+									const textData = await response.text();
+									data = {
+										status: response.status,
+										statusText: response.statusText,
+										headers: Object.fromEntries(response.headers.entries()),
+										body: textData,
+										method: message.method,
+										url: response.url
+									};
+								}
+								
 								panel.webview.postMessage({ command: 'apiResponse', data: data });
 							} catch (error: any) {
 								vscode.window.showErrorMessage(`API Request Failed: ${error.message}`);
