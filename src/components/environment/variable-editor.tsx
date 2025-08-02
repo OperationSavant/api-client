@@ -8,19 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { 
-	Save, 
-	X, 
-	AlertCircle, 
-	Eye, 
-	EyeOff, 
-	Globe, 
-	Folder, 
-	FileText,
-	Key,
-	Type,
-	Hash
-} from 'lucide-react';
+import { Save, X, AlertCircle, Eye, EyeOff, Globe, Folder, FileText, Key, Type, Hash } from 'lucide-react';
 import { EnvironmentVariable, VariableScope, EnvironmentScope } from '@/types/environment';
 import { environmentService } from '@/services/environment-service';
 
@@ -35,35 +23,27 @@ interface VariableEditorProps {
 }
 
 const VARIABLE_SCOPES: { value: VariableScope; label: string; icon: React.ReactNode; description: string }[] = [
-	{ 
-		value: 'global', 
-		label: 'Global', 
-		icon: <Globe className="w-4 h-4" />,
-		description: 'Available across all collections and requests'
+	{
+		value: 'global',
+		label: 'Global',
+		icon: <Globe className='w-4 h-4' />,
+		description: 'Available across all collections and requests',
 	},
-	{ 
-		value: 'collection', 
-		label: 'Collection', 
-		icon: <Folder className="w-4 h-4" />,
-		description: 'Available within the selected collection only'
+	{
+		value: 'collection',
+		label: 'Collection',
+		icon: <Folder className='w-4 h-4' />,
+		description: 'Available within the selected collection only',
 	},
-	{ 
-		value: 'request', 
-		label: 'Request', 
-		icon: <FileText className="w-4 h-4" />,
-		description: 'Available for this specific request only'
+	{
+		value: 'request',
+		label: 'Request',
+		icon: <FileText className='w-4 h-4' />,
+		description: 'Available for this specific request only',
 	},
 ];
 
-export const VariableEditor: React.FC<VariableEditorProps> = ({
-	isOpen,
-	onClose,
-	variable,
-	defaultScope = 'global',
-	collectionId,
-	requestId,
-	onSave,
-}) => {
+export const VariableEditor: React.FC<VariableEditorProps> = ({ isOpen, onClose, variable, defaultScope = 'global', collectionId, requestId, onSave }) => {
 	const [formData, setFormData] = useState({
 		key: '',
 		value: '',
@@ -103,9 +83,7 @@ export const VariableEditor: React.FC<VariableEditorProps> = ({
 
 		// Find or create appropriate scope
 		if (variable) {
-			const existingScope = allScopes.find(s => 
-				s.variables.some(v => v.id === variable.id)
-			);
+			const existingScope = allScopes.find(s => s.variables.some(v => v.id === variable.id));
 			if (existingScope) {
 				setSelectedScopeId(existingScope.id);
 			}
@@ -120,18 +98,9 @@ export const VariableEditor: React.FC<VariableEditorProps> = ({
 
 			if (!targetScope) {
 				// Create new scope if it doesn't exist
-				const scopeName = formData.scope === 'global' 
-					? 'Global Variables' 
-					: formData.scope === 'collection' 
-						? `Collection Variables` 
-						: `Request Variables`;
-				
-				targetScope = environmentService.createScope(
-					scopeName,
-					formData.scope,
-					collectionId,
-					requestId
-				);
+				const scopeName = formData.scope === 'global' ? 'Global Variables' : formData.scope === 'collection' ? `Collection Variables` : `Request Variables`;
+
+				targetScope = environmentService.createScope(scopeName, formData.scope, collectionId, requestId);
 			}
 
 			setSelectedScopeId(targetScope.id);
@@ -164,9 +133,7 @@ export const VariableEditor: React.FC<VariableEditorProps> = ({
 		// Check for duplicate keys in the same scope
 		const targetScope = scopes.find(s => s.id === selectedScopeId);
 		if (targetScope) {
-			const duplicateVariable = targetScope.variables.find(v => 
-				v.key === formData.key && v.id !== variable?.id
-			);
+			const duplicateVariable = targetScope.variables.find(v => v.key === formData.key && v.id !== variable?.id);
 			if (duplicateVariable) {
 				newErrors.key = `Variable with key '${formData.key}' already exists in this scope`;
 			}
@@ -226,7 +193,7 @@ export const VariableEditor: React.FC<VariableEditorProps> = ({
 
 	const handleScopeChange = (newScope: VariableScope) => {
 		setFormData(prev => ({ ...prev, scope: newScope }));
-		
+
 		// Find or create appropriate scope
 		let targetScope = scopes.find(s => {
 			if (newScope === 'global') return s.type === 'global';
@@ -236,18 +203,9 @@ export const VariableEditor: React.FC<VariableEditorProps> = ({
 		});
 
 		if (!targetScope) {
-			const scopeName = newScope === 'global' 
-				? 'Global Variables' 
-				: newScope === 'collection' 
-					? `Collection Variables` 
-					: `Request Variables`;
-			
-			targetScope = environmentService.createScope(
-				scopeName,
-				newScope,
-				collectionId,
-				requestId
-			);
+			const scopeName = newScope === 'global' ? 'Global Variables' : newScope === 'collection' ? `Collection Variables` : `Request Variables`;
+
+			targetScope = environmentService.createScope(scopeName, newScope, collectionId, requestId);
 			setScopes(prev => [...prev, targetScope!]);
 		}
 
@@ -260,140 +218,125 @@ export const VariableEditor: React.FC<VariableEditorProps> = ({
 
 	return (
 		<Dialog open={isOpen} onOpenChange={onClose}>
-			<DialogContent className="sm:max-w-[600px]">
+			<DialogContent className='sm:max-w-[600px]'>
 				<DialogHeader>
-					<DialogTitle className="flex items-center gap-2">
-						<Key className="w-5 h-5" />
+					<DialogTitle className='flex items-center gap-2'>
+						<Key className='w-5 h-5' />
 						{variable ? 'Edit Variable' : 'Add Variable'}
 					</DialogTitle>
 				</DialogHeader>
 
-				<div className="space-y-6">
+				<div className='space-y-6'>
 					{errors.general && (
-						<Alert variant="destructive">
-							<AlertCircle className="h-4 w-4" />
+						<Alert variant='destructive'>
+							<AlertCircle className='h-4 w-4' />
 							<AlertDescription>{errors.general}</AlertDescription>
 						</Alert>
 					)}
 
 					{/* Variable Key */}
-					<div className="space-y-2">
-						<Label htmlFor="key">Variable Key *</Label>
+					<div className='space-y-2'>
+						<Label htmlFor='key'>Variable Key *</Label>
 						<Input
-							id="key"
-							placeholder="Enter variable key (e.g., API_URL)"
+							id='key'
+							placeholder='Enter variable key (e.g., API_URL)'
 							value={formData.key}
-							onChange={(e) => setFormData(prev => ({ ...prev, key: e.target.value }))}
+							onChange={e => setFormData(prev => ({ ...prev, key: e.target.value }))}
 							className={errors.key ? 'border-red-500' : ''}
 						/>
-						{errors.key && (
-							<p className="text-sm text-red-500">{errors.key}</p>
-						)}
-						<p className="text-xs text-muted-foreground">
-							Use in requests as: <code className="bg-muted px-1 py-0.5 rounded">{'{{' + formData.key + '}}'}</code>
+						{errors.key && <p className='text-sm text-red-500'>{errors.key}</p>}
+						<p className='text-xs text-muted-foreground'>
+							Use in requests as: <code className='bg-muted px-1 py-0.5 rounded'>{'{{' + formData.key + '}}'}</code>
 						</p>
 					</div>
 
 					{/* Variable Value */}
-					<div className="space-y-2">
-						<div className="flex items-center justify-between">
-							<Label htmlFor="value">Variable Value</Label>
+					<div className='space-y-2'>
+						<div className='flex items-center justify-between'>
+							<Label htmlFor='value'>Variable Value</Label>
 							{formData.type === 'secret' && (
-								<Button
-									type="button"
-									variant="ghost"
-									size="sm"
-									onClick={() => setShowValue(!showValue)}
-								>
-									{showValue ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+								<Button type='button' variant='ghost' size='sm' onClick={() => setShowValue(!showValue)}>
+									{showValue ? <EyeOff className='w-4 h-4' /> : <Eye className='w-4 h-4' />}
 									{showValue ? 'Hide' : 'Show'}
 								</Button>
 							)}
 						</div>
 						<Textarea
-							id="value"
-							placeholder="Enter variable value"
+							id='value'
+							placeholder='Enter variable value'
 							value={formData.value}
-							onChange={(e) => setFormData(prev => ({ ...prev, value: e.target.value }))}
+							onChange={e => setFormData(prev => ({ ...prev, value: e.target.value }))}
 							rows={3}
 						/>
 					</div>
 
 					{/* Variable Type */}
-					<div className="space-y-2">
+					<div className='space-y-2'>
 						<Label>Variable Type</Label>
-						<div className="flex gap-4">
-							<label className="flex items-center space-x-2 cursor-pointer">
+						<div className='flex gap-4'>
+							<label className='flex items-center space-x-2 cursor-pointer'>
 								<input
-									type="radio"
-									name="type"
-									value="text"
+									type='radio'
+									name='type'
+									value='text'
 									checked={formData.type === 'text'}
-									onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value as 'text' | 'secret' }))}
-									className="w-4 h-4"
+									onChange={e => setFormData(prev => ({ ...prev, type: e.target.value as 'text' | 'secret' }))}
+									className='w-4 h-4'
 								/>
-								<div className="flex items-center gap-2">
-									<Type className="w-4 h-4" />
+								<div className='flex items-center gap-2'>
+									<Type className='w-4 h-4' />
 									<span>Text</span>
-									<Badge variant="secondary">visible</Badge>
+									<Badge variant='secondary'>visible</Badge>
 								</div>
 							</label>
-							<label className="flex items-center space-x-2 cursor-pointer">
+							<label className='flex items-center space-x-2 cursor-pointer'>
 								<input
-									type="radio"
-									name="type"
-									value="secret"
+									type='radio'
+									name='type'
+									value='secret'
 									checked={formData.type === 'secret'}
-									onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value as 'text' | 'secret' }))}
-									className="w-4 h-4"
+									onChange={e => setFormData(prev => ({ ...prev, type: e.target.value as 'text' | 'secret' }))}
+									className='w-4 h-4'
 								/>
-								<div className="flex items-center gap-2">
-									<Hash className="w-4 h-4" />
+								<div className='flex items-center gap-2'>
+									<Hash className='w-4 h-4' />
 									<span>Secret</span>
-									<Badge variant="destructive">masked</Badge>
+									<Badge variant='destructive'>masked</Badge>
 								</div>
 							</label>
 						</div>
 					</div>
 
 					{/* Variable Scope */}
-					<div className="space-y-2">
+					<div className='space-y-2'>
 						<Label>Variable Scope</Label>
-						<div className="space-y-3">
-							{VARIABLE_SCOPES.map((scope) => {
-								const isDisabled = scope.value === 'collection' && !collectionId ||
-									scope.value === 'request' && !requestId;
+						<div className='space-y-3'>
+							{VARIABLE_SCOPES.map(scope => {
+								const isDisabled = (scope.value === 'collection' && !collectionId) || (scope.value === 'request' && !requestId);
 								return (
-									<label 
-										key={scope.value} 
+									<label
+										key={scope.value}
 										className={`flex items-start space-x-3 cursor-pointer p-3 border rounded-lg transition-colors ${
-											formData.scope === scope.value 
-												? 'border-primary bg-primary/5' 
-												: 'border-border hover:bg-accent/50'
-										} ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-									>
+											formData.scope === scope.value ? 'border-primary bg-primary/5' : 'border-border hover:bg-accent/50'
+										} ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}>
 										<input
-											type="radio"
-											name="scope"
+											type='radio'
+											name='scope'
 											value={scope.value}
 											checked={formData.scope === scope.value}
-											onChange={(e) => handleScopeChange(e.target.value as VariableScope)}
+											onChange={e => handleScopeChange(e.target.value as VariableScope)}
 											disabled={isDisabled}
-											className="w-4 h-4 mt-0.5"
+											className='w-4 h-4 mt-0.5'
 										/>
-										<div className="flex-1">
-											<div className="flex items-center gap-2 mb-1">
+										<div className='flex-1'>
+											<div className='flex items-center gap-2 mb-1'>
 												{scope.icon}
-												<span className="font-medium">{scope.label}</span>
+												<span className='font-medium'>{scope.label}</span>
 											</div>
-											<p className="text-sm text-muted-foreground">
-												{scope.description}
-											</p>
+											<p className='text-sm text-muted-foreground'>{scope.description}</p>
 											{isDisabled && (
-												<p className="text-xs text-red-500 mt-1">
-													{scope.value === 'collection' 
-														? 'No collection context available' 
-														: 'No request context available'}
+												<p className='text-xs text-red-500 mt-1'>
+													{scope.value === 'collection' ? 'No collection context available' : 'No request context available'}
 												</p>
 											)}
 										</div>
@@ -404,35 +347,31 @@ export const VariableEditor: React.FC<VariableEditorProps> = ({
 					</div>
 
 					{/* Description */}
-					<div className="space-y-2">
-						<Label htmlFor="description">Description (Optional)</Label>
+					<div className='space-y-2'>
+						<Label htmlFor='description'>Description (Optional)</Label>
 						<Textarea
-							id="description"
-							placeholder="Describe what this variable is used for..."
+							id='description'
+							placeholder='Describe what this variable is used for...'
 							value={formData.description}
-							onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+							onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))}
 							rows={2}
 						/>
 					</div>
 
 					{/* Enabled Toggle */}
-					<div className="flex items-center space-x-2">
-						<Switch
-							id="enabled"
-							checked={formData.enabled}
-							onCheckedChange={(checked) => setFormData(prev => ({ ...prev, enabled: checked }))}
-						/>
-						<Label htmlFor="enabled">Enable this variable</Label>
+					<div className='flex items-center space-x-2'>
+						<Switch id='enabled' checked={formData.enabled} onCheckedChange={checked => setFormData(prev => ({ ...prev, enabled: checked }))} />
+						<Label htmlFor='enabled'>Enable this variable</Label>
 					</div>
 				</div>
 
 				<DialogFooter>
-					<Button variant="outline" onClick={onClose} disabled={isLoading}>
-						<X className="w-4 h-4 mr-2" />
+					<Button variant='outline' onClick={onClose} disabled={isLoading}>
+						<X className='w-4 h-4 mr-2' />
 						Cancel
 					</Button>
 					<Button onClick={handleSave} disabled={isLoading}>
-						<Save className="w-4 h-4 mr-2" />
+						<Save className='w-4 h-4 mr-2' />
 						{isLoading ? 'Saving...' : variable ? 'Update Variable' : 'Create Variable'}
 					</Button>
 				</DialogFooter>

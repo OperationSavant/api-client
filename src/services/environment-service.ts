@@ -1,16 +1,16 @@
-import { 
-	EnvironmentVariable, 
-	EnvironmentScope, 
-	VariableScope, 
-	VariableFilter, 
-	VariableSort, 
-	VariableResolution, 
-	VariableUsage, 
+import {
+	EnvironmentVariable,
+	EnvironmentScope,
+	VariableScope,
+	VariableFilter,
+	VariableSort,
+	VariableResolution,
+	VariableUsage,
 	VariableValidation,
 	VariableExport,
 	VariableImport,
 	SystemVariable,
-	VariableConfiguration
+	VariableConfiguration,
 } from '@/types/environment';
 
 class EnvironmentService {
@@ -170,10 +170,8 @@ class EnvironmentService {
 			}
 			if (filter.searchTerm) {
 				const term = filter.searchTerm.toLowerCase();
-				allVariables = allVariables.filter(v => 
-					v.key.toLowerCase().includes(term) || 
-					v.value.toLowerCase().includes(term) ||
-					(v.description && v.description.toLowerCase().includes(term))
+				allVariables = allVariables.filter(
+					v => v.key.toLowerCase().includes(term) || v.value.toLowerCase().includes(term) || (v.description && v.description.toLowerCase().includes(term))
 				);
 			}
 			if (filter.collectionId) {
@@ -218,7 +216,7 @@ class EnvironmentService {
 		if (variableIndex === -1) return false;
 
 		const variable = scope.variables[variableIndex];
-		
+
 		// Validate updates
 		const updatedVariable = { ...variable, ...updates };
 		const validation = this.validateVariable(updatedVariable);
@@ -247,7 +245,7 @@ class EnvironmentService {
 
 		const initialLength = scope.variables.length;
 		scope.variables = scope.variables.filter(v => v.id !== variableId);
-		
+
 		if (scope.variables.length < initialLength) {
 			scope.updatedAt = new Date();
 			this.clearResolutionCache();
@@ -260,7 +258,7 @@ class EnvironmentService {
 	// Variable Resolution
 	resolveString(input: string, contextScope?: VariableScope, collectionId?: string, requestId?: string): VariableResolution {
 		const cacheKey = `${input}:${contextScope}:${collectionId}:${requestId}`;
-		
+
 		if (this.config.cacheResolution && this.resolutionCache.has(cacheKey)) {
 			return this.resolutionCache.get(cacheKey)!;
 		}
@@ -304,9 +302,9 @@ class EnvironmentService {
 	}
 
 	private resolveVariable(
-		key: string, 
-		contextScope?: VariableScope, 
-		collectionId?: string, 
+		key: string,
+		contextScope?: VariableScope,
+		collectionId?: string,
 		requestId?: string
 	): { value: string; scope: VariableScope } | null {
 		// Check system variables first
@@ -400,32 +398,28 @@ class EnvironmentService {
 
 	// Import/Export
 	exportVariables(export_config: VariableExport): string {
-		const variables = this.getVariables(
-			export_config.scope ? { scope: export_config.scope } : undefined
-		);
+		const variables = this.getVariables(export_config.scope ? { scope: export_config.scope } : undefined);
 
-		const exportData = variables.filter(v => 
-			export_config.includeSecrets || v.type !== 'secret'
-		);
+		const exportData = variables.filter(v => export_config.includeSecrets || v.type !== 'secret');
 
 		switch (export_config.format) {
 			case 'json':
-				return JSON.stringify({
-					variables: exportData,
-					exportedAt: export_config.timestamp,
-					version: '1.0',
-				}, null, 2);
+				return JSON.stringify(
+					{
+						variables: exportData,
+						exportedAt: export_config.timestamp,
+						version: '1.0',
+					},
+					null,
+					2
+				);
 
 			case 'env':
-				return exportData
-					.map(v => `${v.key}=${v.value}`)
-					.join('\n');
+				return exportData.map(v => `${v.key}=${v.value}`).join('\n');
 
 			case 'csv': {
 				const headers = 'Key,Value,Type,Scope,Description,Enabled';
-				const rows = exportData.map(v => 
-					`"${v.key}","${v.value}","${v.type}","${v.scope}","${v.description || ''}","${v.enabled}"`
-				);
+				const rows = exportData.map(v => `"${v.key}","${v.value}","${v.type}","${v.scope}","${v.description || ''}","${v.enabled}"`);
 				return [headers, ...rows].join('\n');
 			}
 

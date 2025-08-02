@@ -24,7 +24,7 @@ describe('EnvironmentService', () => {
 		localStorageMock.setItem.mockClear();
 		localStorageMock.removeItem.mockClear();
 		localStorageMock.clear.mockClear();
-		
+
 		// Reset the service state
 		environmentService.clearAll();
 	});
