@@ -362,13 +362,123 @@ describe('EnvironmentService', () => {
 			expect(result.variables).toHaveLength(1);
 		});
 
-		test('should get all system variables', () => {
+		test('should resolve date/time system variables', () => {
+			const isoResult = environmentService.resolveString('{{$isoTimestamp}}');
+			expect(isoResult.resolved).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
+
+			const dateResult = environmentService.resolveString('{{$dateToday}}');
+			expect(dateResult.resolved).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+
+			const timeResult = environmentService.resolveString('{{$timeNow}}');
+			expect(timeResult.resolved).toMatch(/^\d{2}:\d{2}:\d{2}$/);
+		});
+
+		test('should resolve random number system variables', () => {
+			const randomIntResult = environmentService.resolveString('{{$randomInt}}');
+			expect(randomIntResult.resolved).toMatch(/^\d+$/);
+			expect(parseInt(randomIntResult.resolved)).toBeLessThan(1000000);
+
+			const randomInt1Result = environmentService.resolveString('{{$randomInt1}}');
+			expect(randomInt1Result.resolved).toMatch(/^\d$/);
+			expect(parseInt(randomInt1Result.resolved)).toBeLessThan(10);
+
+			const randomFloatResult = environmentService.resolveString('{{$randomFloat}}');
+			expect(randomFloatResult.resolved).toMatch(/^\d+\.\d{2}$/);
+		});
+
+		test('should resolve random string system variables', () => {
+			const randomStringResult = environmentService.resolveString('{{$randomString}}');
+			expect(randomStringResult.resolved).toMatch(/^[a-z0-9]{13}$/);
+
+			const randomString5Result = environmentService.resolveString('{{$randomString5}}');
+			expect(randomString5Result.resolved).toMatch(/^[a-z0-9]{5}$/);
+
+			const randomString10Result = environmentService.resolveString('{{$randomString10}}');
+			expect(randomString10Result.resolved).toMatch(/^[a-z0-9]{10}$/);
+
+			const randomAlphaResult = environmentService.resolveString('{{$randomAlpha}}');
+			expect(randomAlphaResult.resolved).toMatch(/^[a-zA-Z]{10}$/);
+
+			const randomHexResult = environmentService.resolveString('{{$randomHex}}');
+			expect(randomHexResult.resolved).toMatch(/^[0-9a-f]{16}$/);
+		});
+
+		test('should resolve email generation system variables', () => {
+			const randomEmailResult = environmentService.resolveString('{{$randomEmail}}');
+			expect(randomEmailResult.resolved).toMatch(/^[a-z]+\d+@[a-z]+\.[a-z]+$/);
+
+			const firstNameResult = environmentService.resolveString('{{$randomFirstName}}');
+			expect(firstNameResult.resolved).toMatch(/^[A-Z][a-z]+$/);
+
+			const lastNameResult = environmentService.resolveString('{{$randomLastName}}');
+			expect(lastNameResult.resolved).toMatch(/^[A-Z][a-z]+$/);
+
+			const fullNameResult = environmentService.resolveString('{{$randomFullName}}');
+			expect(fullNameResult.resolved).toMatch(/^[A-Z][a-z]+ [A-Z][a-z]+$/);
+		});
+
+		test('should resolve GUID system variables', () => {
+			const guidResult = environmentService.resolveString('{{$guid}}');
+			expect(guidResult.resolved).toBe('mock-uuid-1234-5678-9012');
+
+			const uuidResult = environmentService.resolveString('{{$randomUUID}}');
+			expect(uuidResult.resolved).toBe('mock-uuid-1234-5678-9012');
+		});
+
+		test('should resolve system utility variables', () => {
+			const userAgentResult = environmentService.resolveString('{{$userAgent}}');
+			expect(userAgentResult.resolved).toBe('VS-Code-API-Client/1.0.0');
+
+			const booleanResult = environmentService.resolveString('{{$randomBoolean}}');
+			expect(['true', 'false']).toContain(booleanResult.resolved);
+
+			const ipResult = environmentService.resolveString('{{$randomIP}}');
+			expect(ipResult.resolved).toMatch(/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/);
+
+			const portResult = environmentService.resolveString('{{$randomPort}}');
+			expect(parseInt(portResult.resolved)).toBeGreaterThan(0);
+			expect(parseInt(portResult.resolved)).toBeLessThanOrEqual(65535);
+		});
+
+		test('should get all system variables with comprehensive count', () => {
 			const systemVars = environmentService.getSystemVariables();
 
-			expect(systemVars.length).toBeGreaterThan(0);
+			expect(systemVars.length).toBeGreaterThanOrEqual(25); // We added many new variables
 			expect(systemVars.every(v => v.readonly)).toBe(true);
-			expect(systemVars.some(v => v.key === '$timestamp')).toBe(true);
-			expect(systemVars.some(v => v.key === '$randomUUID')).toBe(true);
+			
+			// Check key categories are present
+			const categories = systemVars.map(v => v.category);
+			expect(categories).toContain('date');
+			expect(categories).toContain('random');
+			expect(categories).toContain('uuid');
+			expect(categories).toContain('system');
+
+			// Check specific variables exist
+			const keys = systemVars.map(v => v.key);
+			expect(keys).toContain('$timestamp');
+			expect(keys).toContain('$randomEmail');
+			expect(keys).toContain('$randomInt');
+			expect(keys).toContain('$randomString');
+			expect(keys).toContain('$dateToday');
+			expect(keys).toContain('$userAgent');
+		});
+
+		test('should categorize system variables correctly', () => {
+			const systemVars = environmentService.getSystemVariables();
+			
+			const dateVars = systemVars.filter(v => v.category === 'date');
+			expect(dateVars.length).toBeGreaterThan(0);
+			expect(dateVars.some(v => v.key === '$timestamp')).toBe(true);
+			expect(dateVars.some(v => v.key === '$dateToday')).toBe(true);
+
+			const randomVars = systemVars.filter(v => v.category === 'random');
+			expect(randomVars.length).toBeGreaterThan(10); // We have many random variables
+			
+			const uuidVars = systemVars.filter(v => v.category === 'uuid');
+			expect(uuidVars.length).toBeGreaterThanOrEqual(2); // $randomUUID and $guid
+
+			const systemCategoryVars = systemVars.filter(v => v.category === 'system');
+			expect(systemCategoryVars.length).toBeGreaterThan(0);
 		});
 	});
 

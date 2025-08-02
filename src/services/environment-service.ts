@@ -437,6 +437,7 @@ class EnvironmentService {
 	// System Variables
 	private initializeSystemVariables(): void {
 		const systemVars: SystemVariable[] = [
+			// Date/Time Variables
 			{
 				key: '$timestamp',
 				generator: () => Date.now().toString(),
@@ -452,12 +453,124 @@ class EnvironmentService {
 				readonly: true,
 			},
 			{
+				key: '$dateToday',
+				generator: () => new Date().toISOString().split('T')[0],
+				description: 'Current date in YYYY-MM-DD format',
+				category: 'date',
+				readonly: true,
+			},
+			{
+				key: '$timeNow',
+				generator: () => new Date().toTimeString().split(' ')[0],
+				description: 'Current time in HH:MM:SS format',
+				category: 'date',
+				readonly: true,
+			},
+			{
+				key: '$dateTime',
+				generator: () => new Date().toLocaleString(),
+				description: 'Current date and time in locale format',
+				category: 'date',
+				readonly: true,
+			},
+
+			// Random Number Variables
+			{
 				key: '$randomInt',
 				generator: () => Math.floor(Math.random() * 1000000).toString(),
 				description: 'Random integer between 0 and 999999',
 				category: 'random',
 				readonly: true,
 			},
+			{
+				key: '$randomInt1',
+				generator: () => Math.floor(Math.random() * 10).toString(),
+				description: 'Random single digit (0-9)',
+				category: 'random',
+				readonly: true,
+			},
+			{
+				key: '$randomInt2',
+				generator: () => Math.floor(Math.random() * 100).toString(),
+				description: 'Random two digit number (0-99)',
+				category: 'random',
+				readonly: true,
+			},
+			{
+				key: '$randomInt3',
+				generator: () => Math.floor(Math.random() * 1000).toString(),
+				description: 'Random three digit number (0-999)',
+				category: 'random',
+				readonly: true,
+			},
+			{
+				key: '$randomFloat',
+				generator: () => (Math.random() * 100).toFixed(2),
+				description: 'Random float number with 2 decimal places',
+				category: 'random',
+				readonly: true,
+			},
+
+			// Random String Variables
+			{
+				key: '$randomString',
+				generator: () => {
+					const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+					return Array.from({length: 13}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+				},
+				description: 'Random alphanumeric string (13 characters)',
+				category: 'random',
+				readonly: true,
+			},
+			{
+				key: '$randomString5',
+				generator: () => {
+					const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+					return Array.from({length: 5}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+				},
+				description: 'Random alphanumeric string (5 characters)',
+				category: 'random',
+				readonly: true,
+			},
+			{
+				key: '$randomString10',
+				generator: () => {
+					const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+					return Array.from({length: 10}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+				},
+				description: 'Random alphanumeric string (10 characters)',
+				category: 'random',
+				readonly: true,
+			},
+			{
+				key: '$randomString20',
+				generator: () => {
+					const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+					return Array.from({length: 20}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+				},
+				description: 'Random alphanumeric string (20 characters)',
+				category: 'random',
+				readonly: true,
+			},
+			{
+				key: '$randomAlpha',
+				generator: () => {
+					const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+					return Array.from({length: 10}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+				},
+				description: 'Random alphabetic string (10 characters)',
+				category: 'random',
+				readonly: true,
+			},
+			{
+				key: '$randomHex',
+				generator: () => Array.from({length: 16}, () => Math.floor(Math.random() * 16).toString(16)).join(''),
+				description: 'Random hexadecimal string (16 characters)',
+				category: 'random',
+				readonly: true,
+			},
+
+			// GUID/UUID Variables
 			{
 				key: '$randomUUID',
 				generator: () => crypto.randomUUID(),
@@ -466,9 +579,90 @@ class EnvironmentService {
 				readonly: true,
 			},
 			{
-				key: '$randomString',
-				generator: () => Math.random().toString(36).substring(2, 15),
-				description: 'Random alphanumeric string',
+				key: '$guid',
+				generator: () => crypto.randomUUID(),
+				description: 'Random GUID (alias for randomUUID)',
+				category: 'uuid',
+				readonly: true,
+			},
+
+			// Email Generation Variables
+			{
+				key: '$randomEmail',
+				generator: () => {
+					const names = ['john', 'jane', 'alex', 'sarah', 'mike', 'emma', 'david', 'lisa', 'chris', 'anna'];
+					const domains = ['example.com', 'test.com', 'demo.org', 'sample.net', 'mock.io'];
+					const name = names[Math.floor(Math.random() * names.length)];
+					const domain = domains[Math.floor(Math.random() * domains.length)];
+					const number = Math.floor(Math.random() * 1000);
+					return `${name}${number}@${domain}`;
+				},
+				description: 'Random email address',
+				category: 'random',
+				readonly: true,
+			},
+			{
+				key: '$randomFirstName',
+				generator: () => {
+					const names = ['John', 'Jane', 'Alex', 'Sarah', 'Mike', 'Emma', 'David', 'Lisa', 'Chris', 'Anna', 'Tom', 'Lucy', 'James', 'Maria', 'Robert'];
+					return names[Math.floor(Math.random() * names.length)];
+				},
+				description: 'Random first name',
+				category: 'random',
+				readonly: true,
+			},
+			{
+				key: '$randomLastName',
+				generator: () => {
+					const names = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez', 'Wilson', 'Anderson', 'Taylor', 'Thomas', 'Jackson'];
+					return names[Math.floor(Math.random() * names.length)];
+				},
+				description: 'Random last name',
+				category: 'random',
+				readonly: true,
+			},
+			{
+				key: '$randomFullName',
+				generator: () => {
+					const firstNames = ['John', 'Jane', 'Alex', 'Sarah', 'Mike', 'Emma', 'David', 'Lisa', 'Chris', 'Anna'];
+					const lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis'];
+					const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+					const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+					return `${firstName} ${lastName}`;
+				},
+				description: 'Random full name',
+				category: 'random',
+				readonly: true,
+			},
+
+			// System Variables
+			{
+				key: '$userAgent',
+				generator: () => 'VS-Code-API-Client/1.0.0',
+				description: 'Default user agent string',
+				category: 'system',
+				readonly: true,
+			},
+			{
+				key: '$randomBoolean',
+				generator: () => Math.random() < 0.5 ? 'true' : 'false',
+				description: 'Random boolean value',
+				category: 'random',
+				readonly: true,
+			},
+			{
+				key: '$randomIP',
+				generator: () => {
+					return Array.from({length: 4}, () => Math.floor(Math.random() * 256)).join('.');
+				},
+				description: 'Random IPv4 address',
+				category: 'random',
+				readonly: true,
+			},
+			{
+				key: '$randomPort',
+				generator: () => (Math.floor(Math.random() * 65535) + 1).toString(),
+				description: 'Random port number (1-65535)',
 				category: 'random',
 				readonly: true,
 			},

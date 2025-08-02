@@ -48,7 +48,7 @@ export class EnvironmentTreeProvider implements vscode.TreeDataProvider<Environm
 							command: 'apiClient.setActiveEnvironment',
 							title: 'Set Active Environment',
 							arguments: [scope.id],
-					  },
+					},
 			});
 		});
 	}
