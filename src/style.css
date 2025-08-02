@@ -86,10 +86,36 @@
 		overflow-anchor: none;
 	}
 
+	/* Force scrollbars to always be visible to prevent layout shifts */
+	.force-scrollbar-visible {
+		overflow-y: scroll !important;
+		scrollbar-width: thin;
+		scrollbar-color: var(--vscode-scrollbarSlider-background) transparent;
+	}
+
+	/* Custom scrollbar styling for WebKit browsers */
+	.force-scrollbar-visible::-webkit-scrollbar {
+		width: 12px;
+	}
+
+	.force-scrollbar-visible::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	.force-scrollbar-visible::-webkit-scrollbar-thumb {
+		background-color: var(--vscode-scrollbarSlider-background);
+		border-radius: 6px;
+		border: 2px solid transparent;
+		background-clip: content-box;
+	}
+
+	.force-scrollbar-visible::-webkit-scrollbar-thumb:hover {
+		background-color: var(--vscode-scrollbarSlider-hoverBackground);
+	}
+
 	/* Alternative approach for better cross-browser support */
 	.force-scrollbar-space {
 		scrollbar-gutter: stable both-edges;
 		overflow: overlay;
 	}
 }
-

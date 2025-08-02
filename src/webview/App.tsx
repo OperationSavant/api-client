@@ -155,13 +155,13 @@ function App() {
 	}, []);
 
 	return (
-		<div className='flex flex-col h-screen p-4 gap-4' style={{ scrollbarGutter: 'stable' }}>
+		<div className='flex flex-col h-screen p-4 gap-4'>
 			{/* Request Section - 60% of screen height */}
-			<Card className='h-[60vh] flex flex-col' style={{ scrollbarGutter: 'stable' }}>
+			<Card className='h-[60vh] flex flex-col'>
 				<CardHeader className='flex-shrink-0'>
 					<CardTitle>API Request</CardTitle>
 				</CardHeader>
-				<CardContent className='flex-1 flex flex-col min-h-0 gap-4' style={{ scrollbarGutter: 'stable' }}>
+				<CardContent className='flex-1 flex flex-col min-h-0 gap-4'>
 					{/* HTTP Request Controls - Fixed height */}
 					<div className='flex space-x-2 flex-shrink-0'>
 						<Select onValueChange={setMethod} defaultValue={method}>
@@ -202,22 +202,22 @@ function App() {
 							<TabsTrigger value='tests'>Tests</TabsTrigger>
 							<TabsTrigger value='settings'>Settings</TabsTrigger>
 						</TabsList>
-						<TabsContent value='params' className='flex-1 min-h-0 overflow-y-auto p-4 stable-scrollbar'>
+						<TabsContent value='params' className='flex-1 min-h-0 p-4 force-scrollbar-visible'>
 							<ParamsTab params={params} onParamsChange={setParams} />
 						</TabsContent>
-						<TabsContent value='headers' className='flex-1 min-h-0 overflow-y-auto p-4 stable-scrollbar'>
+						<TabsContent value='headers' className='flex-1 min-h-0 p-4 force-scrollbar-visible'>
 							<HeadersTab headers={headers} onHeadersChange={setHeaders} />
 						</TabsContent>
-						<TabsContent value='auth' className='flex-1 min-h-0 overflow-y-auto p-4 stable-scrollbar'>
+						<TabsContent value='auth' className='flex-1 min-h-0 p-4 force-scrollbar-visible'>
 							<AuthTab auth={auth} onAuthChange={setAuth} />
 						</TabsContent>
-						<TabsContent value='body' className='flex-1 min-h-0 overflow-y-auto p-4 stable-scrollbar'>
+						<TabsContent value='body' className='flex-1 min-h-0 p-4 force-scrollbar-visible'>
 							<BodyTab requestBody={requestBody} onRequestBodyChange={setRequestBody} onContentTypeChange={handleContentTypeChange} />
 						</TabsContent>
-						<TabsContent value='pre-request' className='flex-1 min-h-0 overflow-y-auto p-4 stable-scrollbar'>
+						<TabsContent value='pre-request' className='flex-1 min-h-0 p-4 force-scrollbar-visible'>
 							<PreRequestScriptTab />
 						</TabsContent>
-						<TabsContent value='tests' className='flex-1 min-h-0 overflow-y-auto p-4 stable-scrollbar'>
+						<TabsContent value='tests' className='flex-1 min-h-0 p-4 force-scrollbar-visible'>
 							<TestsTab
 								testSuites={testSuites}
 								onTestSuitesChange={setTestSuites}
@@ -226,7 +226,7 @@ function App() {
 								isRunning={isRunningTests}
 							/>
 						</TabsContent>
-						<TabsContent value='settings' className='flex-1 min-h-0 overflow-y-auto p-4 stable-scrollbar'>
+						<TabsContent value='settings' className='flex-1 min-h-0 p-4 force-scrollbar-visible'>
 							<SettingsTab />
 						</TabsContent>
 					</Tabs>
@@ -234,12 +234,12 @@ function App() {
 			</Card>
 
 			{/* Response Section - 40% of screen height */}
-			<Card className='h-[40vh] flex flex-col' style={{ scrollbarGutter: 'stable' }}>
+			<Card className='h-[40vh] flex flex-col'>
 				<CardHeader className='flex-shrink-0'>
 					<CardTitle>API Response</CardTitle>
 				</CardHeader>
-				<CardContent className='flex-1 min-h-0' style={{ scrollbarGutter: 'stable' }}>
-					<pre className='whitespace-pre-wrap text-sm bg-background p-4 rounded-md h-full overflow-auto stable-scrollbar'>
+				<CardContent className='flex-1 min-h-0'>
+					<pre className='whitespace-pre-wrap text-sm bg-background p-4 rounded-md h-full force-scrollbar-visible'>
 						{loading ? 'Loading...' : response || 'Send a request to see the response.'}
 					</pre>
 				</CardContent>
