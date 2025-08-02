@@ -10,16 +10,158 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:vscode-api-client.start"
+		"onView:apiClient.collections",
+		"onView:apiClient.history",
+		"onView:apiClient.environment"
 	],
 	"main": "./dist/extension.js",
 	"contributes": {
+		"viewsContainers": {
+			"activitybar": [
+				{
+					"id": "apiClient",
+					"title": "API Client",
+					"icon": "$(globe)"
+				}
+			]
+		},
+		"views": {
+			"apiClient": [
+				{
+					"id": "apiClient.collections",
+					"name": "Collections",
+					"when": "true"
+				},
+				{
+					"id": "apiClient.history",
+					"name": "History",
+					"when": "true"
+				},
+				{
+					"id": "apiClient.environment",
+					"name": "Environment Variables",
+					"when": "true"
+				}
+			]
+		},
 		"commands": [
 			{
-				"command": "vscode-api-client.start",
-				"title": "Start API Client"
+				"command": "apiClient.openRequest",
+				"title": "Open API Client",
+				"icon": "$(globe)"
+			},
+			{
+				"command": "apiClient.createCollection",
+				"title": "Create Collection",
+				"icon": "$(add)"
+			},
+			{
+				"command": "apiClient.deleteCollection",
+				"title": "Delete Collection",
+				"icon": "$(trash)"
+			},
+			{
+				"command": "apiClient.createRequest",
+				"title": "Create Request",
+				"icon": "$(add)"
+			},
+			{
+				"command": "apiClient.deleteRequest",
+				"title": "Delete Request",
+				"icon": "$(trash)"
+			},
+			{
+				"command": "apiClient.clearHistory",
+				"title": "Clear History",
+				"icon": "$(clear-all)"
+			},
+			{
+				"command": "apiClient.createEnvironment",
+				"title": "Create Environment",
+				"icon": "$(add)"
+			},
+			{
+				"command": "apiClient.deleteEnvironment",
+				"title": "Delete Environment",
+				"icon": "$(trash)"
+			},
+			{
+				"command": "apiClient.refreshCollections",
+				"title": "Refresh",
+				"icon": "$(refresh)"
+			},
+			{
+				"command": "apiClient.refreshHistory",
+				"title": "Refresh",
+				"icon": "$(refresh)"
+			},
+			{
+				"command": "apiClient.refreshEnvironment",
+				"title": "Refresh",
+				"icon": "$(refresh)"
 			}
-		]
+		],
+		"menus": {
+			"view/title": [
+				{
+					"command": "apiClient.openRequest",
+					"when": "view == apiClient.collections",
+					"group": "navigation"
+				},
+				{
+					"command": "apiClient.createCollection",
+					"when": "view == apiClient.collections",
+					"group": "navigation"
+				},
+				{
+					"command": "apiClient.refreshCollections",
+					"when": "view == apiClient.collections",
+					"group": "navigation"
+				},
+				{
+					"command": "apiClient.clearHistory",
+					"when": "view == apiClient.history",
+					"group": "navigation"
+				},
+				{
+					"command": "apiClient.refreshHistory",
+					"when": "view == apiClient.history",
+					"group": "navigation"
+				},
+				{
+					"command": "apiClient.createEnvironment",
+					"when": "view == apiClient.environment",
+					"group": "navigation"
+				},
+				{
+					"command": "apiClient.refreshEnvironment",
+					"when": "view == apiClient.environment",
+					"group": "navigation"
+				}
+			],
+			"view/item/context": [
+				{
+					"command": "apiClient.createRequest",
+					"when": "view == apiClient.collections && viewItem == collection",
+					"group": "inline"
+				},
+				{
+					"command": "apiClient.deleteCollection",
+					"when": "view == apiClient.collections && viewItem == collection",
+					"group": "inline"
+				},
+				{
+					"command": "apiClient.deleteRequest",
+					"when": "view == apiClient.collections && viewItem == request",
+					"group": "inline"
+				},
+				{
+					"command": "apiClient.deleteEnvironment",
+					"when": "view == apiClient.environment && viewItem == environment",
+					"group": "inline"
+				}
+			]
+		}
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run package",
