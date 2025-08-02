@@ -149,7 +149,7 @@ describe('cURL Integration', () => {
 		test('should generate simple GET request', () => {
 			const result = generateCurlCommand({
 				url: 'https://api.example.com/users',
-				method: 'GET'
+				method: 'GET',
 			});
 
 			expect(result).toBe('curl "https://api.example.com/users"');
@@ -161,8 +161,8 @@ describe('cURL Integration', () => {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
-					'Accept': 'application/json'
-				}
+					Accept: 'application/json',
+				},
 			});
 
 			expect(result).toContain('-X POST');
@@ -179,9 +179,9 @@ describe('cURL Integration', () => {
 					type: 'basic',
 					credentials: {
 						username: 'user',
-						password: 'pass'
-					}
-				}
+						password: 'pass',
+					},
+				},
 			});
 
 			expect(result).toContain('-u "user:pass"');
@@ -195,9 +195,9 @@ describe('cURL Integration', () => {
 					type: 'bearer',
 					credentials: {
 						token: 'token123',
-						prefix: 'Bearer'
-					}
-				}
+						prefix: 'Bearer',
+					},
+				},
 			});
 
 			expect(result).toContain('-H "Authorization: Bearer token123"');
@@ -211,9 +211,9 @@ describe('cURL Integration', () => {
 					type: 'api-key',
 					credentials: {
 						key: 'X-API-Key',
-						value: 'apikey123'
-					}
-				}
+						value: 'apikey123',
+					},
+				},
 			});
 
 			expect(result).toContain('-H "X-API-Key: apikey123"');
@@ -230,11 +230,11 @@ describe('cURL Integration', () => {
 					raw: {
 						content: '{"name": "John", "email": "john@example.com"}',
 						language: 'json',
-						autoFormat: true
+						autoFormat: true,
 					},
 					binary: {},
-					graphql: { query: '', variables: '' }
-				}
+					graphql: { query: '', variables: '' },
+				},
 			});
 
 			expect(result).toContain('-d "{\\"name\\": \\"John\\", \\"email\\": \\"john@example.com\\"}"');
@@ -250,12 +250,12 @@ describe('cURL Integration', () => {
 					urlEncoded: [
 						{ key: 'name', value: 'John', enabled: true },
 						{ key: 'email', value: 'john@example.com', enabled: true },
-						{ key: 'disabled', value: 'test', enabled: false }
+						{ key: 'disabled', value: 'test', enabled: false },
 					],
 					raw: { content: '', language: 'text', autoFormat: false },
 					binary: {},
-					graphql: { query: '', variables: '' }
-				}
+					graphql: { query: '', variables: '' },
+				},
 			});
 
 			expect(result).toContain('-d "name=John&email=john%40example.com"');
@@ -275,9 +275,9 @@ describe('cURL Integration', () => {
 					graphql: {
 						query: 'query GetUser($id: ID!) { user(id: $id) { name email } }',
 						variables: '{"id": "123"}',
-						operationName: 'GetUser'
-					}
-				}
+						operationName: 'GetUser',
+					},
+				},
 			});
 
 			expect(result).toContain('-d');
@@ -291,7 +291,7 @@ describe('cURL Integration', () => {
 				compressed: true,
 				followRedirects: true,
 				insecure: true,
-				includeHeaders: true
+				includeHeaders: true,
 			});
 
 			expect(result).toContain('--compressed');
@@ -303,7 +303,7 @@ describe('cURL Integration', () => {
 		test('should not include method for GET requests', () => {
 			const result = generateCurlCommand({
 				url: 'https://api.example.com/users',
-				method: 'GET'
+				method: 'GET',
 			});
 
 			expect(result).not.toContain('-X GET');

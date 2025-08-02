@@ -40,7 +40,7 @@ export function parseCurlCommand(curlCommand: string): CurlParseResult {
 		method: 'GET',
 		headers: {},
 		success: false,
-		errors: []
+		errors: [],
 	};
 
 	try {
@@ -64,7 +64,7 @@ export function parseCurlCommand(curlCommand: string): CurlParseResult {
 
 		// Parse using a simple argument parser
 		const args = parseArguments(cleaned);
-		
+
 		// Extract URL (usually the last argument or after specific flags)
 		const url = extractUrl(args);
 		if (!url) {
@@ -93,7 +93,6 @@ export function parseCurlCommand(curlCommand: string): CurlParseResult {
 
 		result.success = true;
 		return result;
-
 	} catch (error) {
 		result.errors.push(`Parse error: ${error instanceof Error ? error.message : 'Unknown error'}`);
 		return result;
@@ -232,7 +231,7 @@ function extractUrl(args: string[]): string | null {
 	// Look for URL patterns
 	for (let i = 0; i < args.length; i++) {
 		const arg = args[i];
-		
+
 		// Skip flags and their values
 		if (arg.startsWith('-')) {
 			// Skip the next argument if this flag takes a value
@@ -303,8 +302,8 @@ function extractAuth(args: string[], headers: Record<string, string>): CurlParse
 						type: 'basic',
 						credentials: {
 							username: userPass.substring(0, colonIndex),
-							password: userPass.substring(colonIndex + 1)
-						}
+							password: userPass.substring(colonIndex + 1),
+						},
 					};
 				}
 			}
@@ -312,9 +311,9 @@ function extractAuth(args: string[], headers: Record<string, string>): CurlParse
 	}
 
 	// Check for bearer token in Authorization header (case-insensitive)
-	const authHeader = headers['Authorization'] || headers['authorization'] || 
-		Object.entries(headers).find(([key]) => key.toLowerCase() === 'authorization')?.[1];
-	
+	const authHeader =
+		headers['Authorization'] || headers['authorization'] || Object.entries(headers).find(([key]) => key.toLowerCase() === 'authorization')?.[1];
+
 	if (authHeader) {
 		const bearerMatch = authHeader.match(/^(Bearer|bearer|Token|token)\s+(.+)$/);
 		if (bearerMatch) {
@@ -322,8 +321,8 @@ function extractAuth(args: string[], headers: Record<string, string>): CurlParse
 				type: 'bearer',
 				credentials: {
 					token: bearerMatch[2],
-					prefix: bearerMatch[1]
-				}
+					prefix: bearerMatch[1],
+				},
 			};
 		}
 	}
@@ -362,10 +361,10 @@ function extractBody(args: string[], headers: Record<string, string>): RequestBo
 			raw: {
 				content: bodyData,
 				language: 'json',
-				autoFormat: true
+				autoFormat: true,
 			},
 			binary: {},
-			graphql: { query: '', variables: '' }
+			graphql: { query: '', variables: '' },
 		};
 	}
 
@@ -376,7 +375,7 @@ function extractBody(args: string[], headers: Record<string, string>): RequestBo
 			urlEncoded: parseUrlEncodedData(bodyData),
 			raw: { content: '', language: 'text', autoFormat: false },
 			binary: {},
-			graphql: { query: '', variables: '' }
+			graphql: { query: '', variables: '' },
 		};
 	}
 
@@ -388,10 +387,10 @@ function extractBody(args: string[], headers: Record<string, string>): RequestBo
 			raw: {
 				content: bodyData,
 				language: 'xml',
-				autoFormat: true
+				autoFormat: true,
 			},
 			binary: {},
-			graphql: { query: '', variables: '' }
+			graphql: { query: '', variables: '' },
 		};
 	}
 
@@ -403,25 +402,25 @@ function extractBody(args: string[], headers: Record<string, string>): RequestBo
 		raw: {
 			content: bodyData,
 			language: 'text',
-			autoFormat: false
+			autoFormat: false,
 		},
 		binary: {},
-		graphql: { query: '', variables: '' }
+		graphql: { query: '', variables: '' },
 	};
 }
 
 /**
  * Parse URL-encoded data into key-value pairs
  */
-function parseUrlEncodedData(data: string): Array<{key: string, value: string, enabled: boolean}> {
-	const pairs: Array<{key: string, value: string, enabled: boolean}> = [];
-	
+function parseUrlEncodedData(data: string): Array<{ key: string; value: string; enabled: boolean }> {
+	const pairs: Array<{ key: string; value: string; enabled: boolean }> = [];
+
 	const params = new URLSearchParams(data);
 	for (const [key, value] of params.entries()) {
 		pairs.push({
 			key: decodeURIComponent(key),
 			value: decodeURIComponent(value),
-			enabled: true
+			enabled: true,
 		});
 	}
 
@@ -459,7 +458,7 @@ function generateBodyData(body: RequestBodyConfig): string | null {
 			const graphqlPayload = {
 				query: body.graphql.query,
 				variables: body.graphql.variables ? JSON.parse(body.graphql.variables) : {},
-				operationName: body.graphql.operationName
+				operationName: body.graphql.operationName,
 			};
 			return `"${JSON.stringify(graphqlPayload).replace(/"/g, '\\"')}"`;
 		}
@@ -478,9 +477,11 @@ function isValidUrl(string: string): boolean {
 		return url.protocol === 'http:' || url.protocol === 'https:';
 	} catch {
 		// Check for relative URLs or URLs without protocol
-		return /^(https?:\/\/)?[\w.-]+\.[\w.-]+(\/.*)?$/.test(string) ||
+		return (
+			/^(https?:\/\/)?[\w.-]+\.[\w.-]+(\/.*)?$/.test(string) ||
 			/^(https?:\/\/)?localhost(:\d+)?(\/.*)?$/.test(string) ||
-			/^(https?:\/\/)?(\d{1,3}\.){3}\d{1,3}(:\d+)?(\/.*)?$/.test(string);
+			/^(https?:\/\/)?(\d{1,3}\.){3}\d{1,3}(:\d+)?(\/.*)?$/.test(string)
+		);
 	}
 }
 
@@ -501,17 +502,17 @@ export function validateCurlCommand(curlCommand: string): { valid: boolean; erro
 	// Check for unmatched quotes
 	const singleQuotes = (curlCommand.match(/'/g) || []).length;
 	const doubleQuotes = (curlCommand.match(/"/g) || []).length;
-	
+
 	if (singleQuotes % 2 !== 0) {
 		errors.push('Unmatched single quotes in command');
 	}
-	
+
 	if (doubleQuotes % 2 !== 0) {
 		errors.push('Unmatched double quotes in command');
 	}
 
 	return {
 		valid: errors.length === 0,
-		errors
+		errors,
 	};
 }
