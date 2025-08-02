@@ -8,7 +8,7 @@ class HistoryService {
 		cleanupDays: 30,
 		enableStatistics: true,
 		saveRequestBody: true,
-		saveResponseData: false
+		saveResponseData: false,
 	};
 
 	constructor() {
@@ -21,7 +21,7 @@ class HistoryService {
 		const historyItem: RequestHistory = {
 			...request,
 			id: this.generateId(),
-			timestamp: new Date()
+			timestamp: new Date(),
 		};
 
 		this.history.unshift(historyItem); // Add to beginning for latest first
@@ -41,9 +41,7 @@ class HistoryService {
 		// Apply filters
 		if (filter) {
 			if (filter.method && filter.method.length > 0) {
-				filteredHistory = filteredHistory.filter(item => 
-					filter.method!.includes(item.method)
-				);
+				filteredHistory = filteredHistory.filter(item => filter.method!.includes(item.method));
 			}
 
 			if (filter.status && filter.status !== 'all') {
@@ -55,25 +53,21 @@ class HistoryService {
 			}
 
 			if (filter.dateRange) {
-				filteredHistory = filteredHistory.filter(item => 
-					item.timestamp >= filter.dateRange!.start && 
-					item.timestamp <= filter.dateRange!.end
-				);
+				filteredHistory = filteredHistory.filter(item => item.timestamp >= filter.dateRange!.start && item.timestamp <= filter.dateRange!.end);
 			}
 
 			if (filter.searchTerm) {
 				const searchLower = filter.searchTerm.toLowerCase();
-				filteredHistory = filteredHistory.filter(item => 
-					item.url.toLowerCase().includes(searchLower) ||
-					item.statusText?.toLowerCase().includes(searchLower) ||
-					item.error?.toLowerCase().includes(searchLower)
+				filteredHistory = filteredHistory.filter(
+					item =>
+						item.url.toLowerCase().includes(searchLower) ||
+						item.statusText?.toLowerCase().includes(searchLower) ||
+						item.error?.toLowerCase().includes(searchLower)
 				);
 			}
 
 			if (filter.collectionId) {
-				filteredHistory = filteredHistory.filter(item => 
-					item.collectionId === filter.collectionId
-				);
+				filteredHistory = filteredHistory.filter(item => item.collectionId === filter.collectionId);
 			}
 		}
 
@@ -164,15 +158,15 @@ class HistoryService {
 	// Export Operations
 	exportHistory(filter?: HistoryFilter, format: 'json' | 'csv' | 'har' = 'json'): HistoryExport {
 		const items = this.getHistory(filter);
-		
+
 		const exportData: HistoryExport = {
 			format,
 			items,
 			metadata: {
 				exportedAt: new Date(),
 				totalItems: items.length,
-				dateRange: filter?.dateRange
-			}
+				dateRange: filter?.dateRange,
+			},
 		};
 
 		return exportData;
@@ -184,13 +178,13 @@ class HistoryService {
 		switch (format) {
 			case 'json':
 				return JSON.stringify(exportData, null, 2);
-			
+
 			case 'csv':
 				return this.convertToCSV(exportData.items);
-			
+
 			case 'har':
 				return this.convertToHAR(exportData.items);
-			
+
 			default:
 				return JSON.stringify(exportData, null, 2);
 		}
@@ -208,16 +202,14 @@ class HistoryService {
 			methodDistribution: {},
 			statusDistribution: {},
 			mostUsedUrls: [],
-			recentActivity: []
+			recentActivity: [],
 		};
 
 		if (items.length === 0) return stats;
 
 		// Calculate average response time
-		const responseTimes = items
-			.filter(item => item.responseTime !== undefined)
-			.map(item => item.responseTime!);
-		
+		const responseTimes = items.filter(item => item.responseTime !== undefined).map(item => item.responseTime!);
+
 		if (responseTimes.length > 0) {
 			stats.averageResponseTime = responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length;
 		}
@@ -254,9 +246,7 @@ class HistoryService {
 		stats.recentActivity = last7Days.map(date => {
 			const dayStart = new Date(date + 'T00:00:00');
 			const dayEnd = new Date(date + 'T23:59:59');
-			const count = items.filter(item => 
-				item.timestamp >= dayStart && item.timestamp <= dayEnd
-			).length;
+			const count = items.filter(item => item.timestamp >= dayStart && item.timestamp <= dayEnd).length;
 			return { date, count };
 		});
 
@@ -306,12 +296,10 @@ class HistoryService {
 			item.responseTime?.toString() || '',
 			item.timestamp.toISOString(),
 			item.success.toString(),
-			item.error || ''
+			item.error || '',
 		]);
 
-		return [headers, ...rows]
-			.map(row => row.map(cell => `"${cell.replace(/"/g, '""')}"`).join(','))
-			.join('\n');
+		return [headers, ...rows].map(row => row.map(cell => `"${cell.replace(/"/g, '""')}"`).join(',')).join('\n');
 	}
 
 	private convertToHAR(items: RequestHistory[]): string {
@@ -321,7 +309,7 @@ class HistoryService {
 				version: '1.2',
 				creator: {
 					name: 'VS Code API Client',
-					version: '1.0.0'
+					version: '1.0.0',
 				},
 				entries: items.map(item => ({
 					startedDateTime: item.timestamp.toISOString(),
@@ -335,10 +323,12 @@ class HistoryService {
 						cookies: [],
 						headersSize: -1,
 						bodySize: item.requestSize || -1,
-						postData: item.body ? {
-							mimeType: 'application/json',
-							text: JSON.stringify(item.body)
-						} : undefined
+						postData: item.body
+							? {
+									mimeType: 'application/json',
+									text: JSON.stringify(item.body),
+							}
+							: undefined,
 					},
 					response: {
 						status: item.status || 0,
@@ -348,20 +338,20 @@ class HistoryService {
 						cookies: [],
 						content: {
 							size: item.responseSize || 0,
-							mimeType: 'application/json'
+							mimeType: 'application/json',
 						},
 						redirectURL: '',
 						headersSize: -1,
-						bodySize: item.responseSize || -1
+						bodySize: item.responseSize || -1,
 					},
 					cache: {},
 					timings: {
 						send: 0,
 						wait: item.responseTime || 0,
-						receive: 0
-					}
-				}))
-			}
+						receive: 0,
+					},
+				})),
+			},
 		};
 
 		return JSON.stringify(har, null, 2);
@@ -374,7 +364,7 @@ class HistoryService {
 				const parsed = JSON.parse(stored);
 				this.history = parsed.map((item: any) => ({
 					...item,
-					timestamp: new Date(item.timestamp)
+					timestamp: new Date(item.timestamp),
 				}));
 			}
 

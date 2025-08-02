@@ -17,7 +17,7 @@ describe('HistoryService', () => {
 				status: 200,
 				statusText: 'OK',
 				responseTime: 150,
-				success: true
+				success: true,
 			};
 
 			const historyItem = historyService.addToHistory(request);
@@ -35,12 +35,12 @@ describe('HistoryService', () => {
 			const request1 = {
 				url: 'https://api.example.com/users',
 				method: 'GET' as const,
-				success: true
+				success: true,
 			};
 			const request2 = {
 				url: 'https://api.example.com/posts',
 				method: 'POST' as const,
-				success: true
+				success: true,
 			};
 
 			historyService.addToHistory(request1);
@@ -56,7 +56,7 @@ describe('HistoryService', () => {
 			const request = {
 				url: 'https://api.example.com/users',
 				method: 'GET' as const,
-				success: true
+				success: true,
 			};
 
 			const added = historyService.addToHistory(request);
@@ -76,7 +76,7 @@ describe('HistoryService', () => {
 			const request = {
 				url: 'https://api.example.com/users',
 				method: 'GET' as const,
-				success: true
+				success: true,
 			};
 
 			const added = historyService.addToHistory(request);
@@ -96,12 +96,12 @@ describe('HistoryService', () => {
 			const request1 = {
 				url: 'https://api.example.com/users',
 				method: 'GET' as const,
-				success: true
+				success: true,
 			};
 			const request2 = {
 				url: 'https://api.example.com/posts',
 				method: 'POST' as const,
-				success: true
+				success: true,
 			};
 
 			const added1 = historyService.addToHistory(request1);
@@ -118,12 +118,12 @@ describe('HistoryService', () => {
 			historyService.addToHistory({
 				url: 'https://api.example.com/users',
 				method: 'GET' as const,
-				success: true
+				success: true,
 			});
 			historyService.addToHistory({
 				url: 'https://api.example.com/posts',
 				method: 'POST' as const,
-				success: true
+				success: true,
 			});
 
 			historyService.clearHistory();
@@ -140,26 +140,26 @@ describe('HistoryService', () => {
 				url: 'https://api.example.com/users',
 				method: 'GET',
 				status: 200,
-				success: true
+				success: true,
 			});
 			historyService.addToHistory({
 				url: 'https://api.example.com/posts',
 				method: 'POST',
 				status: 201,
-				success: true
+				success: true,
 			});
 			historyService.addToHistory({
 				url: 'https://api.example.com/error',
 				method: 'GET',
 				status: 500,
 				success: false,
-				error: 'Internal Server Error'
+				error: 'Internal Server Error',
 			});
 		});
 
 		test('should filter by method', () => {
 			const filter: HistoryFilter = {
-				method: ['GET']
+				method: ['GET'],
 			};
 
 			const history = historyService.getHistory(filter);
@@ -169,7 +169,7 @@ describe('HistoryService', () => {
 
 		test('should filter by success status', () => {
 			const filter: HistoryFilter = {
-				status: 'success'
+				status: 'success',
 			};
 
 			const history = historyService.getHistory(filter);
@@ -179,7 +179,7 @@ describe('HistoryService', () => {
 
 		test('should filter by error status', () => {
 			const filter: HistoryFilter = {
-				status: 'error'
+				status: 'error',
 			};
 
 			const history = historyService.getHistory(filter);
@@ -189,7 +189,7 @@ describe('HistoryService', () => {
 
 		test('should filter by search term', () => {
 			const filter: HistoryFilter = {
-				searchTerm: 'users'
+				searchTerm: 'users',
 			};
 
 			const history = historyService.getHistory(filter);
@@ -202,8 +202,8 @@ describe('HistoryService', () => {
 			const filter: HistoryFilter = {
 				dateRange: {
 					start: new Date(now.getTime() - 1000 * 60 * 60), // 1 hour ago
-					end: now
-				}
+					end: now,
+				},
 			};
 
 			const history = historyService.getHistory(filter);
@@ -213,22 +213,22 @@ describe('HistoryService', () => {
 		test('should sort by timestamp ascending', () => {
 			const sort: HistorySort = {
 				field: 'timestamp',
-				direction: 'asc'
+				direction: 'asc',
 			};
 
 			const history = historyService.getHistory(undefined, sort);
 			expect(history).toHaveLength(3);
-			
+
 			// Check if sorted chronologically (oldest first)
 			for (let i = 1; i < history.length; i++) {
-				expect(history[i-1].timestamp.getTime()).toBeLessThanOrEqual(history[i].timestamp.getTime());
+				expect(history[i - 1].timestamp.getTime()).toBeLessThanOrEqual(history[i].timestamp.getTime());
 			}
 		});
 
 		test('should sort by url descending', () => {
 			const sort: HistorySort = {
 				field: 'url',
-				direction: 'desc'
+				direction: 'desc',
 			};
 
 			const history = historyService.getHistory(undefined, sort);
@@ -236,17 +236,17 @@ describe('HistoryService', () => {
 
 			// Check if sorted alphabetically (Z-A)
 			for (let i = 1; i < history.length; i++) {
-				expect(history[i-1].url.toLowerCase() >= history[i].url.toLowerCase()).toBe(true);
+				expect(history[i - 1].url.toLowerCase() >= history[i].url.toLowerCase()).toBe(true);
 			}
 		});
 
 		test('should combine filter and sort', () => {
 			const filter: HistoryFilter = {
-				method: ['GET']
+				method: ['GET'],
 			};
 			const sort: HistorySort = {
 				field: 'url',
-				direction: 'asc'
+				direction: 'asc',
 			};
 
 			const history = historyService.getHistory(filter, sort);
@@ -261,7 +261,7 @@ describe('HistoryService', () => {
 			const request = {
 				url: 'https://api.example.com/users',
 				method: 'GET' as const,
-				success: true
+				success: true,
 			};
 
 			const added = historyService.addToHistory(request);
@@ -286,13 +286,13 @@ describe('HistoryService', () => {
 				url: 'https://api.example.com/users',
 				method: 'GET',
 				status: 200,
-				success: true
+				success: true,
 			});
 			historyService.addToHistory({
 				url: 'https://api.example.com/posts',
 				method: 'POST',
 				status: 201,
-				success: true
+				success: true,
 			});
 		});
 
@@ -307,7 +307,7 @@ describe('HistoryService', () => {
 
 		test('should export filtered history', () => {
 			const filter: HistoryFilter = {
-				method: ['GET']
+				method: ['GET'],
 			};
 
 			const exported = historyService.exportHistory(filter);
@@ -342,21 +342,21 @@ describe('HistoryService', () => {
 				method: 'GET',
 				status: 200,
 				responseTime: 100,
-				success: true
+				success: true,
 			});
 			historyService.addToHistory({
 				url: 'https://api.example.com/posts',
 				method: 'POST',
 				status: 201,
 				responseTime: 200,
-				success: true
+				success: true,
 			});
 			historyService.addToHistory({
 				url: 'https://api.example.com/error',
 				method: 'GET',
 				status: 500,
 				responseTime: 50,
-				success: false
+				success: false,
 			});
 		});
 
@@ -388,7 +388,7 @@ describe('HistoryService', () => {
 			historyService.addToHistory({
 				url: 'https://api.example.com/users',
 				method: 'GET',
-				success: true
+				success: true,
 			});
 
 			const stats = historyService.getStatistics();
@@ -407,7 +407,7 @@ describe('HistoryService', () => {
 
 		test('should calculate filtered statistics', () => {
 			const filter: HistoryFilter = {
-				status: 'success'
+				status: 'success',
 			};
 
 			const stats = historyService.getStatistics(filter);
@@ -433,7 +433,7 @@ describe('HistoryService', () => {
 		test('should update configuration', () => {
 			const newConfig = {
 				maxItems: 500,
-				autoCleanup: false
+				autoCleanup: false,
 			};
 
 			historyService.updateConfiguration(newConfig);
@@ -451,7 +451,7 @@ describe('HistoryService', () => {
 			const request = {
 				url: 'https://api.example.com/users',
 				method: 'GET' as const,
-				success: true
+				success: true,
 			};
 
 			historyService.addToHistory(request);
@@ -476,7 +476,7 @@ describe('HistoryService', () => {
 				historyService.addToHistory({
 					url: 'https://api.example.com/users',
 					method: 'GET',
-					success: true
+					success: true,
 				});
 			}).not.toThrow();
 
@@ -494,17 +494,17 @@ describe('HistoryService', () => {
 			historyService.addToHistory({
 				url: 'https://api.example.com/1',
 				method: 'GET',
-				success: true
+				success: true,
 			});
 			historyService.addToHistory({
 				url: 'https://api.example.com/2',
 				method: 'GET',
-				success: true
+				success: true,
 			});
 			historyService.addToHistory({
 				url: 'https://api.example.com/3',
 				method: 'GET',
-				success: true
+				success: true,
 			});
 
 			const history = historyService.getHistory();
