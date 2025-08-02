@@ -49,6 +49,9 @@ coverage/
 /dist
 /out
 
+# Workflow file
+WORKFLOW.md
+
 # Development planning documents (not for git)
 IMPLEMENTATION_PLAN.md
 IMPLEMENTATION_PLAN_PATTERN.md

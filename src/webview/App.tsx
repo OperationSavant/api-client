@@ -12,8 +12,10 @@ import BodyTab from '@/components/request-tabs/BodyTab';
 import PreRequestScriptTab from '@/components/request-tabs/PreRequestScriptTab';
 import TestsTab from '@/components/request-tabs/TestsTab';
 import SettingsTab from '@/components/request-tabs/SettingsTab';
+import { CurlImportExport } from '@/components/curl-import-export';
 import { TestSuite, TestExecution } from '@/types/testing';
 import { AuthConfig } from '@/types/auth';
+import { RequestConfig } from '@/types/request';
 
 declare const acquireVsCodeApi: () => any;
 
@@ -31,6 +33,57 @@ function App() {
 	const [testSuites, setTestSuites] = useState<TestSuite[]>([]);
 	const [testExecutions, setTestExecutions] = useState<TestExecution[]>([]);
 	const [isRunningTests, setIsRunningTests] = useState(false);
+
+	// Create current request configuration for cURL export
+	const currentRequest: RequestConfig = {
+		url: `${protocol}://${url}`,
+		method: method as any,
+		headers,
+		auth,
+		body: {
+			type: 'raw',
+			formData: [],
+			urlEncoded: [],
+			raw: {
+				content: requestBody,
+				language: 'json',
+				autoFormat: true,
+			},
+			binary: {},
+			graphql: {
+				query: '',
+				variables: '',
+			},
+		},
+	};
+
+	const handleCurlImport = (request: RequestConfig) => {
+		// Extract URL parts
+		if (request.url) {
+			const urlObj = new URL(request.url);
+			setProtocol(urlObj.protocol.replace(':', ''));
+			setUrl(urlObj.host + urlObj.pathname + urlObj.search);
+		}
+
+		// Set method
+		setMethod(request.method);
+
+		// Set headers
+		setHeaders(request.headers);
+
+		// Set authentication
+		setAuth(request.auth);
+
+		// Set body content
+		if (request.body.raw?.content) {
+			setRequestBody(request.body.raw.content);
+		}
+	};
+
+	const handleCurlCopy = (curlCommand: string) => {
+		// Show success message or handle copy completion
+		console.log('cURL command copied to clipboard');
+	};
 
 	const handleUrlBlur = () => {
 		if (url && !url.startsWith('http')) {
@@ -174,6 +227,7 @@ function App() {
 							<TabsTrigger value='headers'>Headers</TabsTrigger>
 							<TabsTrigger value='auth'>Authorization</TabsTrigger>
 							<TabsTrigger value='body'>Body</TabsTrigger>
+							<TabsTrigger value='curl'>cURL</TabsTrigger>
 							<TabsTrigger value='pre-request'>Pre-request Script</TabsTrigger>
 							<TabsTrigger value='tests'>Tests</TabsTrigger>
 							<TabsTrigger value='settings'>Settings</TabsTrigger>
@@ -189,6 +243,9 @@ function App() {
 						</TabsContent>
 						<TabsContent value='body' className='flex-1 min-h-0 p-4 force-scrollbar-visible'>
 							<BodyTab requestBody={requestBody} onRequestBodyChange={setRequestBody} onContentTypeChange={handleContentTypeChange} />
+						</TabsContent>
+						<TabsContent value='curl' className='flex-1 min-h-0 p-4 force-scrollbar-visible'>
+							<CurlImportExport onImportRequest={handleCurlImport} currentRequest={currentRequest} onCopy={handleCurlCopy} />
 						</TabsContent>
 						<TabsContent value='pre-request' className='flex-1 min-h-0 p-4 force-scrollbar-visible'>
 							<PreRequestScriptTab />
