@@ -9,7 +9,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Badge } from '@/components/ui/badge';
 import { Plus, MoreHorizontal, Edit, Trash2, FolderOpen, FileText, Calendar, Save, X } from 'lucide-react';
 import { Collection, CollectionMetadata } from '@/types/collection';
-import { collectionService } from '@/services/collection-service';
+import { collectionService } from '@/services/collectionService';
 
 interface CollectionManagerProps {
 	onCollectionSelect?: (collection: Collection) => void;

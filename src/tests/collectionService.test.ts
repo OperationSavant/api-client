@@ -1,4 +1,4 @@
-import { collectionService } from '@/services/collection-service';
+import { collectionService } from '@/services/collectionService';
 import { Collection, CollectionFolder, CollectionRequest } from '@/types/collection';
 
 describe('CollectionService', () => {

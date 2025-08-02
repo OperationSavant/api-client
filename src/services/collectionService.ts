@@ -270,8 +270,13 @@ export class CollectionService {
 		const folder = this.findFolder(collection, folderId);
 		if (!folder) return false;
 
-		// Prevent moving folder into itself or its descendants
-		if (targetParentId && this.isFolderDescendant(collection, targetParentId, folderId)) {
+		// Prevent moving folder into itself
+		if (targetParentId === folderId) {
+			return false;
+		}
+
+		// Prevent moving folder into its descendants
+		if (targetParentId && this.isFolderDescendant(collection, folderId, targetParentId)) {
 			return false;
 		}
 
