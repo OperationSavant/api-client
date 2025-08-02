@@ -3,7 +3,9 @@ import { EnvironmentVariable, EnvironmentScope } from '../types/environment';
 import { environmentService } from '../services/environment-service';
 
 export class EnvironmentTreeProvider implements vscode.TreeDataProvider<EnvironmentTreeItem> {
-	private _onDidChangeTreeData: vscode.EventEmitter<EnvironmentTreeItem | undefined | null | void> = new vscode.EventEmitter<EnvironmentTreeItem | undefined | null | void>();
+	private _onDidChangeTreeData: vscode.EventEmitter<EnvironmentTreeItem | undefined | null | void> = new vscode.EventEmitter<
+		EnvironmentTreeItem | undefined | null | void
+	>();
 	readonly onDidChangeTreeData: vscode.Event<EnvironmentTreeItem | undefined | null | void> = this._onDidChangeTreeData.event;
 
 	constructor() {}
@@ -30,47 +32,39 @@ export class EnvironmentTreeProvider implements vscode.TreeDataProvider<Environm
 	private getEnvironmentScopes(): EnvironmentTreeItem[] {
 		const scopes = environmentService.getScopes(); // Get all scopes
 		const activeScope = environmentService.getActiveScope();
-		
+
 		return scopes.map((scope: EnvironmentScope) => {
 			const isActive = scope.id === activeScope?.id;
 			const label = isActive ? `${scope.name} (active)` : scope.name;
-			
-			return new EnvironmentTreeItem(
-				label,
-				vscode.TreeItemCollapsibleState.Collapsed,
-				{
-					contextValue: 'environment',
-					scope: scope,
-					iconPath: new vscode.ThemeIcon(isActive ? 'check' : 'circle-outline'),
-					tooltip: `${scope.type} scope: ${scope.name}`,
-					command: isActive ? undefined : {
-						command: 'apiClient.setActiveEnvironment',
-						title: 'Set Active Environment',
-						arguments: [scope.id]
-					}
-				}
-			);
+
+			return new EnvironmentTreeItem(label, vscode.TreeItemCollapsibleState.Collapsed, {
+				contextValue: 'environment',
+				scope: scope,
+				iconPath: new vscode.ThemeIcon(isActive ? 'check' : 'circle-outline'),
+				tooltip: `${scope.type} scope: ${scope.name}`,
+				command: isActive
+					? undefined
+					: {
+							command: 'apiClient.setActiveEnvironment',
+							title: 'Set Active Environment',
+							arguments: [scope.id],
+					  },
+			});
 		});
 	}
 
 	private getVariablesInScope(scope: EnvironmentScope): EnvironmentTreeItem[] {
 		return scope.variables.map(variable => {
-			const valuePreview = variable.value.length > 30 
-				? `${variable.value.substring(0, 30)}...`
-				: variable.value;
+			const valuePreview = variable.value.length > 30 ? `${variable.value.substring(0, 30)}...` : variable.value;
 			const label = `${variable.key} = ${valuePreview}`;
-			
-			return new EnvironmentTreeItem(
-				label,
-				vscode.TreeItemCollapsibleState.None,
-				{
-					contextValue: 'variable',
-					variable: variable,
-					scope: scope,
-					iconPath: new vscode.ThemeIcon(variable.type === 'secret' ? 'lock' : 'symbol-variable'),
-					tooltip: `${variable.key}: ${variable.value}${variable.description ? '\n' + variable.description : ''}`
-				}
-			);
+
+			return new EnvironmentTreeItem(label, vscode.TreeItemCollapsibleState.None, {
+				contextValue: 'variable',
+				variable: variable,
+				scope: scope,
+				iconPath: new vscode.ThemeIcon(variable.type === 'secret' ? 'lock' : 'symbol-variable'),
+				tooltip: `${variable.key}: ${variable.value}${variable.description ? '\n' + variable.description : ''}`,
+			});
 		});
 	}
 }

@@ -16,17 +16,17 @@ export function activate(context: vscode.ExtensionContext) {
 	// Register tree views
 	vscode.window.createTreeView('apiClient.collections', {
 		treeDataProvider: collectionsProvider,
-		showCollapseAll: true
+		showCollapseAll: true,
 	});
 
 	vscode.window.createTreeView('apiClient.history', {
 		treeDataProvider: historyProvider,
-		showCollapseAll: true
+		showCollapseAll: true,
 	});
 
 	vscode.window.createTreeView('apiClient.environment', {
 		treeDataProvider: environmentProvider,
-		showCollapseAll: true
+		showCollapseAll: true,
 	});
 
 	// Register commands
@@ -40,25 +40,21 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand('apiClient.createCollection', async () => {
 			const name = await vscode.window.showInputBox({
 				prompt: 'Enter collection name',
-				placeHolder: 'My Collection'
+				placeHolder: 'My Collection',
 			});
 			if (name) {
 				const description = await vscode.window.showInputBox({
 					prompt: 'Enter collection description (optional)',
-					placeHolder: 'Description'
+					placeHolder: 'Description',
 				});
 				collectionService.createCollection(name, description || undefined);
 				collectionsProvider.refresh();
 			}
 		}),
 
-		vscode.commands.registerCommand('apiClient.deleteCollection', async (item) => {
+		vscode.commands.registerCommand('apiClient.deleteCollection', async item => {
 			if (item && item.collection) {
-				const confirmation = await vscode.window.showWarningMessage(
-					`Delete collection "${item.collection.name}"?`,
-					{ modal: true },
-					'Delete'
-				);
+				const confirmation = await vscode.window.showWarningMessage(`Delete collection "${item.collection.name}"?`, { modal: true }, 'Delete');
 				if (confirmation === 'Delete') {
 					collectionService.deleteCollection(item.collection.id);
 					collectionsProvider.refresh();
@@ -66,11 +62,11 @@ export function activate(context: vscode.ExtensionContext) {
 			}
 		}),
 
-		vscode.commands.registerCommand('apiClient.createRequest', async (item) => {
+		vscode.commands.registerCommand('apiClient.createRequest', async item => {
 			if (item && item.collection) {
 				const name = await vscode.window.showInputBox({
 					prompt: 'Enter request name',
-					placeHolder: 'My Request'
+					placeHolder: 'My Request',
 				});
 				if (name) {
 					const request = {
@@ -81,9 +77,9 @@ export function activate(context: vscode.ExtensionContext) {
 						params: {},
 						body: {
 							type: 'none' as const,
-							data: ''
+							data: '',
 						},
-						auth: undefined
+						auth: undefined,
 					};
 					collectionService.createRequest(item.collection.id, request);
 					collectionsProvider.refresh();
@@ -91,13 +87,9 @@ export function activate(context: vscode.ExtensionContext) {
 			}
 		}),
 
-		vscode.commands.registerCommand('apiClient.deleteRequest', async (item) => {
+		vscode.commands.registerCommand('apiClient.deleteRequest', async item => {
 			if (item && item.request && item.collection) {
-				const confirmation = await vscode.window.showWarningMessage(
-					`Delete request "${item.request.name}"?`,
-					{ modal: true },
-					'Delete'
-				);
+				const confirmation = await vscode.window.showWarningMessage(`Delete request "${item.request.name}"?`, { modal: true }, 'Delete');
 				if (confirmation === 'Delete') {
 					collectionService.deleteRequest(item.collection.id, item.request.id);
 					collectionsProvider.refresh();
@@ -111,11 +103,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 		// History commands
 		vscode.commands.registerCommand('apiClient.clearHistory', async () => {
-			const confirmation = await vscode.window.showWarningMessage(
-				'Clear all request history?',
-				{ modal: true },
-				'Clear'
-			);
+			const confirmation = await vscode.window.showWarningMessage('Clear all request history?', { modal: true }, 'Clear');
 			if (confirmation === 'Clear') {
 				historyService.clearHistory();
 				historyProvider.refresh();
@@ -130,13 +118,10 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand('apiClient.createEnvironment', async () => {
 			const name = await vscode.window.showInputBox({
 				prompt: 'Enter environment name',
-				placeHolder: 'Development'
+				placeHolder: 'Development',
 			});
 			if (name) {
-				const scopeType = await vscode.window.showQuickPick(
-					['global', 'collection', 'request'],
-					{ placeHolder: 'Select scope type' }
-				);
+				const scopeType = await vscode.window.showQuickPick(['global', 'collection', 'request'], { placeHolder: 'Select scope type' });
 				if (scopeType) {
 					environmentService.createScope(name, scopeType as any);
 					environmentProvider.refresh();
@@ -144,13 +129,9 @@ export function activate(context: vscode.ExtensionContext) {
 			}
 		}),
 
-		vscode.commands.registerCommand('apiClient.deleteEnvironment', async (item) => {
+		vscode.commands.registerCommand('apiClient.deleteEnvironment', async item => {
 			if (item && item.scope) {
-				const confirmation = await vscode.window.showWarningMessage(
-					`Delete environment "${item.scope.name}"?`,
-					{ modal: true },
-					'Delete'
-				);
+				const confirmation = await vscode.window.showWarningMessage(`Delete environment "${item.scope.name}"?`, { modal: true }, 'Delete');
 				if (confirmation === 'Delete') {
 					environmentService.deleteScope(item.scope.id);
 					environmentProvider.refresh();
@@ -179,9 +160,9 @@ export function activate(context: vscode.ExtensionContext) {
 			const requestData = args[0];
 			// Send request data to webview after it loads
 			setTimeout(() => {
-				panel.webview.postMessage({ 
-					command: 'loadRequest', 
-					data: requestData 
+				panel.webview.postMessage({
+					command: 'loadRequest',
+					data: requestData,
 				});
 			}, 1000);
 		}
@@ -228,7 +209,7 @@ export function activate(context: vscode.ExtensionContext) {
 								headers: message.headers,
 								body: message.body,
 								success: response.ok,
-								error: response.ok ? undefined : `HTTP ${response.status} ${response.statusText}`
+								error: response.ok ? undefined : `HTTP ${response.status} ${response.statusText}`,
 							};
 							historyService.addToHistory(historyItem);
 							historyProvider.refresh();
@@ -245,7 +226,7 @@ export function activate(context: vscode.ExtensionContext) {
 									headers: Object.fromEntries(response.headers.entries()),
 									method: message.method,
 									url: response.url,
-									responseTime
+									responseTime,
 								};
 							} else if (contentType.includes('application/json')) {
 								// JSON response
@@ -258,7 +239,7 @@ export function activate(context: vscode.ExtensionContext) {
 										body: jsonData,
 										method: message.method,
 										url: response.url,
-										responseTime
+										responseTime,
 									};
 								} catch {
 									// If JSON parsing fails, treat as text
@@ -270,7 +251,7 @@ export function activate(context: vscode.ExtensionContext) {
 										body: textData,
 										method: message.method,
 										url: response.url,
-										responseTime
+										responseTime,
 									};
 								}
 							} else {
@@ -283,7 +264,7 @@ export function activate(context: vscode.ExtensionContext) {
 									body: textData,
 									method: message.method,
 									url: response.url,
-									responseTime
+									responseTime,
 								};
 							}
 
@@ -298,7 +279,7 @@ export function activate(context: vscode.ExtensionContext) {
 								headers: message.headers,
 								body: message.body,
 								success: false,
-								error: error.message
+								error: error.message,
 							};
 							historyService.addToHistory(historyItem);
 							historyProvider.refresh();

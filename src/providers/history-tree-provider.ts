@@ -3,7 +3,9 @@ import { RequestHistory } from '../types/history';
 import { historyService } from '../services/history-service';
 
 export class HistoryTreeProvider implements vscode.TreeDataProvider<HistoryTreeItem> {
-	private _onDidChangeTreeData: vscode.EventEmitter<HistoryTreeItem | undefined | null | void> = new vscode.EventEmitter<HistoryTreeItem | undefined | null | void>();
+	private _onDidChangeTreeData: vscode.EventEmitter<HistoryTreeItem | undefined | null | void> = new vscode.EventEmitter<
+		HistoryTreeItem | undefined | null | void
+	>();
 	readonly onDidChangeTreeData: vscode.Event<HistoryTreeItem | undefined | null | void> = this._onDidChangeTreeData.event;
 
 	constructor() {}
@@ -27,39 +29,35 @@ export class HistoryTreeProvider implements vscode.TreeDataProvider<HistoryTreeI
 	private getHistoryItems(): HistoryTreeItem[] {
 		const history = historyService.getHistory(); // Get all history items
 		const recentHistory = history.slice(0, 50); // Limit to recent 50 items
-		
+
 		return recentHistory.map(item => {
 			const date = new Date(item.timestamp).toLocaleString();
 			const statusBadge = item.status ? `[${item.status}]` : '';
 			const label = `${item.method} ${item.url} ${statusBadge}`;
-			
-			return new HistoryTreeItem(
-				label,
-				vscode.TreeItemCollapsibleState.None,
-				{
-					contextValue: 'historyItem',
-					historyItem: item,
-					iconPath: this.getMethodIcon(item.method),
-					tooltip: `${item.method} ${item.url}\n${date}`,
-					command: {
-						command: 'apiClient.openRequest',
-						title: 'Open Request',
-						arguments: [item]
-					}
-				}
-			);
+
+			return new HistoryTreeItem(label, vscode.TreeItemCollapsibleState.None, {
+				contextValue: 'historyItem',
+				historyItem: item,
+				iconPath: this.getMethodIcon(item.method),
+				tooltip: `${item.method} ${item.url}\n${date}`,
+				command: {
+					command: 'apiClient.openRequest',
+					title: 'Open Request',
+					arguments: [item],
+				},
+			});
 		});
 	}
 
 	private getMethodIcon(method: string): vscode.ThemeIcon {
 		const iconMap: { [key: string]: string } = {
-			'GET': 'arrow-down',
-			'POST': 'add',
-			'PUT': 'edit',
-			'DELETE': 'trash',
-			'PATCH': 'diff',
-			'HEAD': 'eye',
-			'OPTIONS': 'settings'
+			GET: 'arrow-down',
+			POST: 'add',
+			PUT: 'edit',
+			DELETE: 'trash',
+			PATCH: 'diff',
+			HEAD: 'eye',
+			OPTIONS: 'settings',
 		};
 		return new vscode.ThemeIcon(iconMap[method] || 'file');
 	}

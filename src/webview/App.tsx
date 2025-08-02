@@ -48,7 +48,7 @@ function App() {
 	const handleContentTypeChange = (contentType: string) => {
 		setHeaders(prev => ({
 			...prev,
-			'Content-Type': contentType
+			'Content-Type': contentType,
 		}));
 	};
 
@@ -73,8 +73,8 @@ function App() {
 						passed: Math.random() > 0.2,
 						actualValue: 'Mock actual value',
 						expectedValue: assertion.expectedValue,
-						message: `Test assertion for ${assertion.description || assertion.type}`
-					}))
+						message: `Test assertion for ${assertion.description || assertion.type}`,
+					})),
 				};
 				execution.failedTests = execution.totalTests - execution.passedTests;
 				setTestExecutions(prev => [...prev, execution]);
