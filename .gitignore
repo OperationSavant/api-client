@@ -51,4 +51,4 @@ coverage/
 
 # Development planning documents (not for git)
 IMPLEMENTATION_PLAN.md
-/build
+IMPLEMENTATION_PLAN_PATTERN.md
