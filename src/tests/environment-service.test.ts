@@ -445,7 +445,7 @@ describe('EnvironmentService', () => {
 
 			expect(systemVars.length).toBeGreaterThanOrEqual(25); // We added many new variables
 			expect(systemVars.every(v => v.readonly)).toBe(true);
-			
+
 			// Check key categories are present
 			const categories = systemVars.map(v => v.category);
 			expect(categories).toContain('date');
@@ -465,7 +465,7 @@ describe('EnvironmentService', () => {
 
 		test('should categorize system variables correctly', () => {
 			const systemVars = environmentService.getSystemVariables();
-			
+
 			const dateVars = systemVars.filter(v => v.category === 'date');
 			expect(dateVars.length).toBeGreaterThan(0);
 			expect(dateVars.some(v => v.key === '$timestamp')).toBe(true);
@@ -473,7 +473,7 @@ describe('EnvironmentService', () => {
 
 			const randomVars = systemVars.filter(v => v.category === 'random');
 			expect(randomVars.length).toBeGreaterThan(10); // We have many random variables
-			
+
 			const uuidVars = systemVars.filter(v => v.category === 'uuid');
 			expect(uuidVars.length).toBeGreaterThanOrEqual(2); // $randomUUID and $guid
 

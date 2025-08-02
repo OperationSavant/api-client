@@ -516,7 +516,7 @@ class EnvironmentService {
 				key: '$randomString',
 				generator: () => {
 					const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-					return Array.from({length: 13}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+					return Array.from({ length: 13 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
 				},
 				description: 'Random alphanumeric string (13 characters)',
 				category: 'random',
@@ -526,7 +526,7 @@ class EnvironmentService {
 				key: '$randomString5',
 				generator: () => {
 					const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-					return Array.from({length: 5}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+					return Array.from({ length: 5 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
 				},
 				description: 'Random alphanumeric string (5 characters)',
 				category: 'random',
@@ -536,7 +536,7 @@ class EnvironmentService {
 				key: '$randomString10',
 				generator: () => {
 					const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-					return Array.from({length: 10}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+					return Array.from({ length: 10 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
 				},
 				description: 'Random alphanumeric string (10 characters)',
 				category: 'random',
@@ -546,7 +546,7 @@ class EnvironmentService {
 				key: '$randomString20',
 				generator: () => {
 					const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-					return Array.from({length: 20}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+					return Array.from({ length: 20 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
 				},
 				description: 'Random alphanumeric string (20 characters)',
 				category: 'random',
@@ -556,7 +556,7 @@ class EnvironmentService {
 				key: '$randomAlpha',
 				generator: () => {
 					const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-					return Array.from({length: 10}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+					return Array.from({ length: 10 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
 				},
 				description: 'Random alphabetic string (10 characters)',
 				category: 'random',
@@ -564,7 +564,7 @@ class EnvironmentService {
 			},
 			{
 				key: '$randomHex',
-				generator: () => Array.from({length: 16}, () => Math.floor(Math.random() * 16).toString(16)).join(''),
+				generator: () => Array.from({ length: 16 }, () => Math.floor(Math.random() * 16).toString(16)).join(''),
 				description: 'Random hexadecimal string (16 characters)',
 				category: 'random',
 				readonly: true,
@@ -614,7 +614,23 @@ class EnvironmentService {
 			{
 				key: '$randomLastName',
 				generator: () => {
-					const names = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez', 'Wilson', 'Anderson', 'Taylor', 'Thomas', 'Jackson'];
+					const names = [
+						'Smith',
+						'Johnson',
+						'Williams',
+						'Brown',
+						'Jones',
+						'Garcia',
+						'Miller',
+						'Davis',
+						'Rodriguez',
+						'Martinez',
+						'Wilson',
+						'Anderson',
+						'Taylor',
+						'Thomas',
+						'Jackson',
+					];
 					return names[Math.floor(Math.random() * names.length)];
 				},
 				description: 'Random last name',
@@ -645,7 +661,7 @@ class EnvironmentService {
 			},
 			{
 				key: '$randomBoolean',
-				generator: () => Math.random() < 0.5 ? 'true' : 'false',
+				generator: () => (Math.random() < 0.5 ? 'true' : 'false'),
 				description: 'Random boolean value',
 				category: 'random',
 				readonly: true,
@@ -653,7 +669,7 @@ class EnvironmentService {
 			{
 				key: '$randomIP',
 				generator: () => {
-					return Array.from({length: 4}, () => Math.floor(Math.random() * 256)).join('.');
+					return Array.from({ length: 4 }, () => Math.floor(Math.random() * 256)).join('.');
 				},
 				description: 'Random IPv4 address',
 				category: 'random',
