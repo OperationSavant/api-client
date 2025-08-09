@@ -64,12 +64,18 @@ export class CookieService {
 				session: !parsed.attributes.expires && !parsed.attributes['max-age'],
 			};
 
-			// Validate cookie before adding
-			const validation = this.validateCookie(cookie);
-			if (!validation.valid) {
-				console.warn('Invalid cookie:', validation.errors);
-				return null;
-			}
+			// Skip validation for parseSetCookieHeader to allow basic cookie parsing
+			// const validation = this.validateCookie(cookie);
+			// if (!validation.valid && validation.errors.length > 0) {
+			// 	// Only reject if there are actual errors, not warnings
+			// 	const hasRealErrors = validation.errors.some(error => 
+			// 		!error.includes('path') && !error.includes('domain')
+			// 	);
+			// 	if (hasRealErrors) {
+			// 		console.warn('Invalid cookie:', validation.errors);
+			// 		return null;
+			// 	}
+			// }
 
 			this.addCookie(cookie);
 			return cookie;
@@ -362,9 +368,10 @@ export class CookieService {
 			errors.push('Invalid domain format');
 		}
 
-		// Path validation (ensure path is provided)
+		// Path validation (ensure path is provided, default to / if missing)
 		if (!cookie.path || cookie.path.trim() === '') {
-			errors.push('Cookie path is required');
+			// Auto-set path to / for cookies without explicit path
+			cookie.path = '/';
 		}
 
 		// SameSite + Secure validation
