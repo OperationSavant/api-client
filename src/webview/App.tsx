@@ -27,7 +27,7 @@ declare const acquireVsCodeApi: () => any;
 
 function App() {
 	const vscodeApi = useRef<any>(null);
-	const [url, setUrl] = useState('api.example.com/data');
+	const [url, setUrl] = useState('');
 	const [method, setMethod] = useState('GET');
 	const [protocol, setProtocol] = useState('https');
 	const [response, setResponse] = useState('');
@@ -98,15 +98,18 @@ function App() {
 	};
 
 	const handleUrlBlur = () => {
-		if (url && !url.startsWith('http')) {
+		if (url && url.trim()) {
+			const trimmedUrl = url.trim();
+
 			// Auto-extract protocol if user enters full URL
-			if (url.startsWith('https://')) {
+			if (trimmedUrl.startsWith('https://')) {
 				setProtocol('https');
-				setUrl(url.replace('https://', ''));
-			} else if (url.startsWith('http://')) {
+				setUrl(trimmedUrl.replace('https://', ''));
+			} else if (trimmedUrl.startsWith('http://')) {
 				setProtocol('http');
-				setUrl(url.replace('http://', ''));
+				setUrl(trimmedUrl.replace('http://', ''));
 			}
+			// If no protocol is specified, keep the URL as is
 		}
 	};
 
@@ -150,8 +153,49 @@ function App() {
 
 	// Response Operations Handlers
 	const handleResponseDownload = (format: string) => {
-		console.log('Downloading response in format:', format);
-		// Implementation for response download
+		if (!responseData) return;
+
+		let content = responseData.body;
+		let filename = 'response';
+		let mimeType = 'text/plain';
+
+		// Format content and set appropriate filename/mime type
+		switch (format) {
+			case 'json':
+				try {
+					content = JSON.stringify(JSON.parse(responseData.body), null, 2);
+				} catch {
+					content = responseData.body;
+				}
+				filename = 'response.json';
+				mimeType = 'application/json';
+				break;
+			case 'xml':
+				filename = 'response.xml';
+				mimeType = 'application/xml';
+				break;
+			case 'html':
+				filename = 'response.html';
+				mimeType = 'text/html';
+				break;
+			case 'text':
+				filename = 'response.txt';
+				mimeType = 'text/plain';
+				break;
+			default:
+				filename = `response.${format}`;
+		}
+
+		// Create blob and download
+		const blob = new Blob([content], { type: mimeType });
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement('a');
+		a.href = url;
+		a.download = filename;
+		document.body.appendChild(a);
+		a.click();
+		document.body.removeChild(a);
+		URL.revokeObjectURL(url);
 	};
 
 	const handleResponseCopy = (content: string) => {
@@ -201,7 +245,37 @@ function App() {
 		setLoading(true);
 		setResponseData(null);
 		const vscode = vscodeApi.current;
-		const fullUrl = `${protocol}://${url}`;
+
+		// Validate and construct URL
+		let requestUrl = url.trim();
+		if (!requestUrl) {
+			requestUrl = 'api.example.com/data';
+		}
+
+		// Ensure URL doesn't have protocol prefix (it will be added by protocol selection)
+		requestUrl = requestUrl.replace(/^https?:\/\//, '');
+
+		const fullUrl = `${protocol}://${requestUrl}`;
+
+		// Validate the constructed URL
+		try {
+			new URL(fullUrl);
+		} catch (error) {
+			console.error('Invalid URL:', fullUrl);
+			setResponseData({
+				status: 0,
+				statusText: 'Invalid URL',
+				headers: {},
+				body: `Invalid URL: ${fullUrl}. Please check the URL format.`,
+				contentType: 'text/plain',
+				size: 0,
+				duration: 0,
+				isError: true,
+				error: `Invalid URL format: ${fullUrl}`,
+			});
+			setLoading(false);
+			return;
+		}
 
 		// Create request configuration for cookie integration
 		const requestConfig: RequestConfig = {
@@ -248,9 +322,41 @@ function App() {
 			const message = event.data;
 			switch (message.command) {
 				case 'apiResponse': {
+					// Check for error response first
+					if (message.data && message.data.error) {
+						const errorResponseData: ResponseData = {
+							status: 0,
+							statusText: 'Error',
+							headers: {},
+							body: message.data.error,
+							contentType: 'text/plain',
+							size: message.data.error.length,
+							duration: 0,
+							isError: true,
+							error: message.data.error,
+						};
+						setResponseData(errorResponseData);
+						setResponse(message.data.error);
+						setLoading(false);
+						break;
+					}
+
 					// Ensure message.data exists and is valid
 					if (!message.data || typeof message.data !== 'object') {
 						console.warn('Received invalid apiResponse data:', message.data);
+						const invalidResponseData: ResponseData = {
+							status: 0,
+							statusText: 'Invalid Response',
+							headers: {},
+							body: 'Invalid response data received',
+							contentType: 'text/plain',
+							size: 0,
+							duration: 0,
+							isError: true,
+							error: 'Invalid response data received',
+						};
+						setResponseData(invalidResponseData);
+						setLoading(false);
 						return;
 					}
 
@@ -265,17 +371,34 @@ function App() {
 
 					// Process cookies from response
 					if (httpResponse.headers) {
-						cookieIntegration.current.processResponse(httpResponse, `${protocol}://${url}`);
+						let requestUrl = url.trim() || 'api.example.com/data';
+						requestUrl = requestUrl.replace(/^https?:\/\//, '');
+						const fullRequestUrl = `${protocol}://${requestUrl}`;
+
+						try {
+							cookieIntegration.current.processResponse(httpResponse, fullRequestUrl);
+						} catch (error) {
+							console.warn('Failed to process cookies from response:', error);
+						}
 					}
 
 					// Create enhanced response data for response viewer
+					let responseBodyString: string;
+					if (typeof httpResponse.data === 'string') {
+						responseBodyString = httpResponse.data;
+					} else if (httpResponse.data !== null && httpResponse.data !== undefined) {
+						responseBodyString = JSON.stringify(httpResponse.data, null, 2);
+					} else {
+						responseBodyString = '';
+					}
+
 					const enhancedResponseData: ResponseData = {
 						status: httpResponse.status,
 						statusText: httpResponse.statusText,
 						headers: httpResponse.headers,
-						body: typeof httpResponse.data === 'string' ? httpResponse.data : JSON.stringify(httpResponse.data, null, 2),
+						body: responseBodyString,
 						contentType: httpResponse.headers['content-type'] || httpResponse.headers['Content-Type'] || 'text/plain',
-						size: new Blob([typeof httpResponse.data === 'string' ? httpResponse.data : JSON.stringify(httpResponse.data)]).size,
+						size: new Blob([responseBodyString]).size,
 						duration: httpResponse.responseTime,
 						isError: httpResponse.status >= 400,
 					};

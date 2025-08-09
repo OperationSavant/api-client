@@ -118,4 +118,85 @@
 		scrollbar-gutter: stable both-edges;
 		overflow: overlay;
 	}
+
+	/* Response viewer specific scrolling */
+	.response-scroll-container {
+		overflow: auto !important;
+		scrollbar-width: thin;
+		scrollbar-color: var(--vscode-scrollbarSlider-background) var(--vscode-scrollbar-shadow);
+		-webkit-overflow-scrolling: touch;
+	}
+
+	.response-scroll-container::-webkit-scrollbar {
+		width: 8px;
+		height: 8px;
+	}
+
+	.response-scroll-container::-webkit-scrollbar-track {
+		background: var(--vscode-scrollbar-shadow);
+		border-radius: 4px;
+	}
+
+	.response-scroll-container::-webkit-scrollbar-thumb {
+		background-color: var(--vscode-scrollbarSlider-background);
+		border-radius: 4px;
+		border: 1px solid var(--vscode-scrollbar-shadow);
+	}
+
+	.response-scroll-container::-webkit-scrollbar-thumb:hover {
+		background-color: var(--vscode-scrollbarSlider-hoverBackground);
+	}
+
+	.response-scroll-container::-webkit-scrollbar-corner {
+		background: var(--vscode-scrollbar-shadow);
+	}
+
+	/* Text highlighting improvements */
+	.response-text {
+		color: var(--vscode-editor-foreground);
+		background: var(--vscode-editor-background);
+		font-family: var(--vscode-editor-font-family), 'Courier New', monospace;
+		font-size: var(--vscode-editor-font-size, 12px);
+		line-height: 1.6;
+		tab-size: 2;
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+	}
+
+	.response-formatted {
+		color: var(--vscode-editor-foreground);
+		background: var(--vscode-textCodeBlock-background);
+	}
+
+	.response-raw {
+		color: var(--vscode-editor-foreground);
+		background: var(--vscode-editor-background);
+	}
+
+	/* JSON syntax highlighting for formatted view */
+	.response-formatted .json-key {
+		color: var(--vscode-symbolIcon-keywordForeground, #569cd6);
+		font-weight: normal;
+	}
+
+	.response-formatted .json-string {
+		color: var(--vscode-symbolIcon-stringForeground, #ce9178);
+	}
+
+	.response-formatted .json-number {
+		color: var(--vscode-symbolIcon-numberForeground, #b5cea8);
+	}
+
+	.response-formatted .json-boolean {
+		color: var(--vscode-symbolIcon-booleanForeground, #569cd6);
+	}
+
+	.response-formatted .json-null {
+		color: var(--vscode-symbolIcon-nullForeground, #569cd6);
+	}
+
+	.response-formatted .json-punctuation {
+		color: var(--vscode-editor-foreground);
+	}
 }
+

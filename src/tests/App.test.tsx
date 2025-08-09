@@ -207,11 +207,12 @@ describe('App Component', () => {
 		expect(sendButton).toBeTruthy();
 	});
 
-	test('renders URL input with default value', () => {
+	test('renders URL input with placeholder', () => {
 		render(<App />);
 		const urlInput = screen.getByTestId('url-input');
 		expect(urlInput).toBeTruthy();
-		expect((urlInput as HTMLInputElement).value).toBe('api.example.com/data');
+		expect((urlInput as HTMLInputElement).value).toBe('');
+		expect((urlInput as HTMLInputElement).placeholder).toBe('api.example.com/data');
 	});
 
 	test('renders method selector', () => {
@@ -325,9 +326,9 @@ describe('App State Management', () => {
 	test('initializes with correct default state', () => {
 		render(<App />);
 
-		// Verify default URL
+		// Verify default URL is empty with placeholder
 		const urlInput = screen.getByTestId('url-input');
-		expect((urlInput as HTMLInputElement).value).toBe('api.example.com/data');
+		expect((urlInput as HTMLInputElement).value).toBe('');
 
 		// Verify default response state
 		expect(screen.getByText('Send a request to see the response.')).toBeTruthy();

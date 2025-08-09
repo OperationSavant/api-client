@@ -4,6 +4,7 @@
 
 const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 
 /**@type {import('webpack').Configuration}*/
 const config = {
@@ -98,6 +99,10 @@ const webviewConfig = {
 		}),
 		new MiniCssExtractPlugin({
 			filename: 'webview.css',
+		}),
+		new MonacoWebpackPlugin({
+			languages: ['json', 'xml', 'html', 'javascript', 'css', 'typescript'],
+			features: ['bracketMatching', 'clipboard', 'find', 'folding', 'format', 'wordHighlighter'],
 		}),
 	],
 };

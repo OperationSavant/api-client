@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Button } from '../ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Badge } from '../ui/badge';
 import { Separator } from '../ui/separator';
 import { Switch } from '../ui/switch';
 import { Label } from '../ui/label';
 import { Download, ExpandIcon, ShrinkIcon, Copy } from 'lucide-react';
+import { MonacoEditor } from '../editor/monaco-editor';
 
 export interface ResponseData {
 	status: number;
@@ -28,46 +28,10 @@ export interface ResponseViewerProps {
 	className?: string;
 }
 
-interface ResponseFormat {
-	name: string;
-	value: string;
-	language: string;
-}
-
-const RESPONSE_FORMATS: ResponseFormat[] = [
-	{ name: 'JSON', value: 'json', language: 'json' },
-	{ name: 'XML', value: 'xml', language: 'xml' },
-	{ name: 'HTML', value: 'html', language: 'html' },
-	{ name: 'Text', value: 'text', language: 'plaintext' },
-	{ name: 'JavaScript', value: 'javascript', language: 'javascript' },
-	{ name: 'CSS', value: 'css', language: 'css' },
-];
-
 export const ResponseViewer: React.FC<ResponseViewerProps> = ({ response, isLoading, onDownload, onCopy, className = '' }) => {
-	const [selectedFormat, setSelectedFormat] = useState('json');
 	const [viewMode, setViewMode] = useState<'raw' | 'formatted'>('formatted');
 	const [wordWrap, setWordWrap] = useState(false);
 	const [isFullscreen, setIsFullscreen] = useState(false);
-
-	// Auto-detect content type from response
-	useEffect(() => {
-		if (response?.contentType) {
-			const contentType = response.contentType.toLowerCase();
-			if (contentType.includes('json')) {
-				setSelectedFormat('json');
-			} else if (contentType.includes('xml')) {
-				setSelectedFormat('xml');
-			} else if (contentType.includes('html')) {
-				setSelectedFormat('html');
-			} else if (contentType.includes('javascript')) {
-				setSelectedFormat('javascript');
-			} else if (contentType.includes('css')) {
-				setSelectedFormat('css');
-			} else {
-				setSelectedFormat('text');
-			}
-		}
-	}, [response?.contentType]);
 
 	const formatBytes = (bytes: number): string => {
 		if (bytes === 0) return '0 Bytes';
@@ -92,7 +56,21 @@ export const ResponseViewer: React.FC<ResponseViewerProps> = ({ response, isLoad
 
 	const handleDownload = () => {
 		if (onDownload && response) {
-			onDownload(selectedFormat);
+			// Auto-detect format from content type
+			const contentType = response.contentType || '';
+			let format = 'text';
+			if (contentType.includes('json')) {
+				format = 'json';
+			} else if (contentType.includes('xml')) {
+				format = 'xml';
+			} else if (contentType.includes('html')) {
+				format = 'html';
+			} else if (contentType.includes('css')) {
+				format = 'css';
+			} else if (contentType.includes('javascript')) {
+				format = 'javascript';
+			}
+			onDownload(format);
 		}
 	};
 
@@ -130,19 +108,6 @@ export const ResponseViewer: React.FC<ResponseViewerProps> = ({ response, isLoad
 	const renderResponseControls = () => {
 		return (
 			<div className='flex items-center gap-4 p-3 border-b'>
-				<Select value={selectedFormat} onValueChange={setSelectedFormat}>
-					<SelectTrigger className='w-32'>
-						<SelectValue />
-					</SelectTrigger>
-					<SelectContent>
-						{RESPONSE_FORMATS.map(format => (
-							<SelectItem key={format.value} value={format.value}>
-								{format.name}
-							</SelectItem>
-						))}
-					</SelectContent>
-				</Select>
-
 				<div className='flex items-center gap-2'>
 					<Switch id='word-wrap' checked={wordWrap} onCheckedChange={setWordWrap} />
 					<Label htmlFor='word-wrap' className='text-sm'>
@@ -209,19 +174,81 @@ export const ResponseViewer: React.FC<ResponseViewerProps> = ({ response, isLoad
 		);
 	};
 
-	const renderResponseBody = () => {
+	const renderResponseBody = (mode: 'raw' | 'formatted') => {
 		if (!response?.body) return null;
 
-		// This will be enhanced with Monaco Editor integration
+		let content = response.body;
+		let language = 'plaintext';
+
+		// Detect language from content type
+		const contentType = response.contentType || '';
+		if (contentType.includes('json')) {
+			language = 'json';
+		} else if (contentType.includes('xml')) {
+			language = 'xml';
+		} else if (contentType.includes('html')) {
+			language = 'html';
+		} else if (contentType.includes('css')) {
+			language = 'css';
+		} else if (contentType.includes('javascript')) {
+			language = 'javascript';
+		}
+
+		// RAW MODE: Show exactly what server sent
+		if (mode === 'raw') {
+			content = response.body; // NO FORMATTING - exact server response
+		} else {
+			// FORMATTED MODE: Pretty-print the content
+			try {
+				if (language === 'json') {
+					const parsed = JSON.parse(response.body);
+					content = JSON.stringify(parsed, null, 2); // Pretty format JSON
+				} else if (language === 'xml') {
+					// Basic XML formatting - add newlines and indentation
+					content = response.body
+						.replace(/></g, '>\n<')
+						.replace(/^\s*\n/gm, '')
+						.split('\n')
+						.map((line, index) => {
+							const depth = Math.max(0, (line.match(/</g) || []).length - (line.match(/\//g) || []).length);
+							return '  '.repeat(Math.max(0, depth - 1)) + line.trim();
+						})
+						.join('\n');
+				} else if (language === 'html') {
+					// Basic HTML formatting - add newlines and indentation
+					content = response.body
+						.replace(/></g, '>\n<')
+						.replace(/^\s*\n/gm, '')
+						.split('\n')
+						.map((line, index) => {
+							const depth = Math.max(0, (line.match(/</g) || []).length - (line.match(/\//g) || []).length);
+							return '  '.repeat(Math.max(0, depth - 1)) + line.trim();
+						})
+						.join('\n');
+				} else if (language === 'css') {
+					// Basic CSS formatting
+					content = response.body
+						.replace(/;/g, ';\n')
+						.replace(/{/g, ' {\n  ')
+						.replace(/}/g, '\n}')
+						.replace(/,/g, ',\n')
+						.split('\n')
+						.map(line => line.trim())
+						.filter(line => line.length > 0)
+						.join('\n');
+				} else {
+					// For other content types, just use raw content
+					content = response.body;
+				}
+			} catch (error) {
+				// If parsing/formatting fails, use raw content
+				content = response.body;
+			}
+		}
+
 		return (
-			<div className='relative h-full'>
-				<pre
-					className={`
-            text-sm p-4 h-full overflow-auto font-mono
-            ${wordWrap ? 'whitespace-pre-wrap' : 'whitespace-pre'}
-          `}>
-					{response.body}
-				</pre>
+			<div className='relative h-full overflow-hidden border border-border rounded-md'>
+				<MonacoEditor value={content} language={language} formatOnMount={false} wordWrap={wordWrap} height='100%' copyButtonVisible={false} />
 			</div>
 		);
 	};
@@ -232,20 +259,22 @@ export const ResponseViewer: React.FC<ResponseViewerProps> = ({ response, isLoad
 		if (response.isError) return renderErrorState();
 
 		return (
-			<Tabs value={viewMode} onValueChange={value => setViewMode(value as 'raw' | 'formatted')}>
-				<TabsList className='grid w-full grid-cols-2'>
-					<TabsTrigger value='formatted'>Formatted</TabsTrigger>
-					<TabsTrigger value='raw'>Raw</TabsTrigger>
-				</TabsList>
+			<div className='h-full flex flex-col'>
+				<Tabs value={viewMode} onValueChange={value => setViewMode(value as 'raw' | 'formatted')} className='h-full flex flex-col'>
+					<TabsList className='grid w-full grid-cols-2 flex-shrink-0'>
+						<TabsTrigger value='formatted'>Formatted</TabsTrigger>
+						<TabsTrigger value='raw'>Raw</TabsTrigger>
+					</TabsList>
 
-				<TabsContent value='formatted' className='h-full mt-0'>
-					<div className='h-full border rounded-md'>{renderResponseBody()}</div>
-				</TabsContent>
+					<TabsContent value='formatted' className='flex-1 mt-2 overflow-hidden'>
+						<div className='h-full overflow-hidden'>{renderResponseBody('formatted')}</div>
+					</TabsContent>
 
-				<TabsContent value='raw' className='h-full mt-0'>
-					<div className='h-full border rounded-md'>{renderResponseBody()}</div>
-				</TabsContent>
-			</Tabs>
+					<TabsContent value='raw' className='flex-1 mt-2 overflow-hidden'>
+						<div className='h-full overflow-hidden'>{renderResponseBody('raw')}</div>
+					</TabsContent>
+				</Tabs>
+			</div>
 		);
 	};
 
