@@ -268,7 +268,7 @@ function App() {
 						cookieIntegration.current.processResponse(httpResponse, `${protocol}://${url}`);
 					}
 
-					// Create enhanced response data for Phase 6 components
+					// Create enhanced response data for response viewer
 					const enhancedResponseData: ResponseData = {
 						status: httpResponse.status,
 						statusText: httpResponse.statusText,

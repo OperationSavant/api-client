@@ -1,11 +1,11 @@
 /**
- * Test Suite for Phase 6.1: Enhanced Response Display
+ * Enhanced Response Display Test Suite
  * Tests response viewer, syntax highlighting, tree view, and HTML preview components
  */
 
 import { syntaxHighlightingService } from '../services/syntax-highlighting-service';
 
-describe('Phase 6.1: Enhanced Response Display', () => {
+describe('Enhanced Response Display', () => {
 	describe('SyntaxHighlightingService', () => {
 		test('should detect JSON content type correctly', () => {
 			const service = syntaxHighlightingService;

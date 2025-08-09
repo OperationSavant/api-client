@@ -1,6 +1,6 @@
 /**
  * Response Operations Test Suite
- * Tests for Phase 6.2: Response Operations functionality
+ * Tests for response operations functionality including download, copy, and formatting
  */
 
 /// <reference types="jest" />
