@@ -68,7 +68,7 @@ export class CookieService {
 			// const validation = this.validateCookie(cookie);
 			// if (!validation.valid && validation.errors.length > 0) {
 			// 	// Only reject if there are actual errors, not warnings
-			// 	const hasRealErrors = validation.errors.some(error => 
+			// 	const hasRealErrors = validation.errors.some(error =>
 			// 		!error.includes('path') && !error.includes('domain')
 			// 	);
 			// 	if (hasRealErrors) {

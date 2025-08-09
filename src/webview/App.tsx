@@ -17,6 +17,12 @@ import { TestSuite, TestExecution } from '@/types/testing';
 import { AuthConfig } from '@/types/auth';
 import { RequestConfig } from '@/types/request';
 
+import { ResponseViewer, ResponseData } from '@/components/response/response-viewer';
+import { CookieManager } from '@/components/cookie/cookie-manager';
+import { CookieIntegration } from '@/services/cookie-integration';
+import { cookieService } from '@/services/cookie-service';
+import { Cookie, CookieImportExport } from '@/types/cookie';
+
 declare const acquireVsCodeApi: () => any;
 
 function App() {
@@ -33,6 +39,12 @@ function App() {
 	const [testSuites, setTestSuites] = useState<TestSuite[]>([]);
 	const [testExecutions, setTestExecutions] = useState<TestExecution[]>([]);
 	const [isRunningTests, setIsRunningTests] = useState(false);
+
+	// Advanced Response Processing State
+	const [responseData, setResponseData] = useState<ResponseData | null>(null);
+	const [showCookieManager, setShowCookieManager] = useState(false);
+	const [cookies, setCookies] = useState<Cookie[]>([]);
+	const cookieIntegration = useRef(new CookieIntegration(cookieService));
 
 	// Create current request configuration for cURL export
 	const currentRequest: RequestConfig = {
@@ -136,17 +148,93 @@ function App() {
 		}, 1000);
 	};
 
+	// Response Operations Handlers
+	const handleResponseDownload = (format: string) => {
+		console.log('Downloading response in format:', format);
+		// Implementation for response download
+	};
+
+	const handleResponseCopy = (content: string) => {
+		navigator.clipboard.writeText(content);
+		console.log('Response copied to clipboard');
+	};
+
+	// Cookie Management Handlers
+	const handleAddCookie = (cookie: Omit<Cookie, 'created' | 'lastAccessed'>) => {
+		cookieService.addCookie({
+			...cookie,
+			created: new Date(),
+			lastAccessed: new Date(),
+		} as Cookie);
+	};
+
+	const handleUpdateCookie = (id: string, updates: Partial<Cookie>) => {
+		// Implementation for updating cookie
+		console.log('Updating cookie:', id, updates);
+	};
+
+	const handleDeleteCookie = (id: string) => {
+		// Implementation for deleting cookie
+		console.log('Deleting cookie:', id);
+	};
+
+	const handleDeleteAllCookies = () => {
+		cookieService.clearAll();
+	};
+
+	const handleImportCookies = (cookies: Cookie[]) => {
+		cookies.forEach(cookie => cookieService.addCookie(cookie));
+	};
+
+	const handleExportCookies = (exportConfig: CookieImportExport) => {
+		const exported = cookieService.exportCookies(exportConfig.format);
+		console.log('Exported cookies:', exported);
+	};
+
+	// Load cookies on component mount
+	useEffect(() => {
+		const loadedCookies = cookieService.getAllCookies();
+		setCookies(loadedCookies);
+	}, []);
+
 	const handleSendRequest = async () => {
 		setLoading(true);
+		setResponseData(null);
 		const vscode = vscodeApi.current;
 		const fullUrl = `${protocol}://${url}`;
+
+		// Create request configuration for cookie integration
+		const requestConfig: RequestConfig = {
+			url: fullUrl,
+			method: method as any,
+			headers,
+			auth,
+			body: {
+				type: 'raw',
+				formData: [],
+				urlEncoded: [],
+				raw: {
+					content: requestBody,
+					language: 'json',
+					autoFormat: true,
+				},
+				binary: {},
+				graphql: {
+					query: '',
+					variables: '',
+				},
+			},
+		};
+
+		// Process request through cookie integration (adds cookies)
+		const processedRequest = cookieIntegration.current.processRequest(requestConfig);
 
 		vscode.postMessage({
 			command: 'sendRequest',
 			url: fullUrl,
 			method: method,
 			body: requestBody,
-			headers: headers,
+			headers: processedRequest.headers, // Use processed headers with cookies
 			params: params,
 		});
 	};
@@ -159,13 +247,52 @@ function App() {
 		const handleMessage = (event: MessageEvent) => {
 			const message = event.data;
 			switch (message.command) {
-				case 'apiResponse':
+				case 'apiResponse': {
+					// Ensure message.data exists and is valid
+					if (!message.data || typeof message.data !== 'object') {
+						console.warn('Received invalid apiResponse data:', message.data);
+						return;
+					}
+
+					// Process response through cookie integration (extracts and stores cookies)
+					const httpResponse = {
+						status: message.data.status || 0,
+						statusText: message.data.statusText || '',
+						headers: message.data.headers || {},
+						data: message.data.body,
+						responseTime: message.data.responseTime || 0,
+					};
+
+					// Process cookies from response
+					if (httpResponse.headers) {
+						cookieIntegration.current.processResponse(httpResponse, `${protocol}://${url}`);
+					}
+
+					// Create enhanced response data for Phase 6 components
+					const enhancedResponseData: ResponseData = {
+						status: httpResponse.status,
+						statusText: httpResponse.statusText,
+						headers: httpResponse.headers,
+						body: typeof httpResponse.data === 'string' ? httpResponse.data : JSON.stringify(httpResponse.data, null, 2),
+						contentType: httpResponse.headers['content-type'] || httpResponse.headers['Content-Type'] || 'text/plain',
+						size: new Blob([typeof httpResponse.data === 'string' ? httpResponse.data : JSON.stringify(httpResponse.data)]).size,
+						duration: httpResponse.responseTime,
+						isError: httpResponse.status >= 400,
+					};
+
+					setResponseData(enhancedResponseData);
 					setResponse(JSON.stringify(message.data, null, 2));
 					setLoading(false);
 					break;
+				}
 				case 'loadRequest': {
 					// Load request data from tree view selection
 					const requestData = message.data;
+					if (!requestData || typeof requestData !== 'object') {
+						console.warn('Received invalid loadRequest data:', requestData);
+						return;
+					}
+
 					if (requestData.method) setMethod(requestData.method);
 					if (requestData.url) setUrl(requestData.url);
 					if (requestData.headers) setHeaders(requestData.headers);
@@ -227,6 +354,7 @@ function App() {
 							<TabsTrigger value='headers'>Headers</TabsTrigger>
 							<TabsTrigger value='auth'>Authorization</TabsTrigger>
 							<TabsTrigger value='body'>Body</TabsTrigger>
+							<TabsTrigger value='cookies'>Cookies</TabsTrigger>
 							<TabsTrigger value='curl'>cURL</TabsTrigger>
 							<TabsTrigger value='pre-request'>Pre-request Script</TabsTrigger>
 							<TabsTrigger value='tests'>Tests</TabsTrigger>
@@ -243,6 +371,17 @@ function App() {
 						</TabsContent>
 						<TabsContent value='body' className='flex-1 min-h-0 p-4 force-scrollbar-visible'>
 							<BodyTab requestBody={requestBody} onRequestBodyChange={setRequestBody} onContentTypeChange={handleContentTypeChange} />
+						</TabsContent>
+						<TabsContent value='cookies' className='flex-1 min-h-0 p-4 force-scrollbar-visible'>
+							<CookieManager
+								cookies={cookies}
+								onAddCookie={handleAddCookie}
+								onUpdateCookie={handleUpdateCookie}
+								onDeleteCookie={handleDeleteCookie}
+								onDeleteAll={handleDeleteAllCookies}
+								onImport={handleImportCookies}
+								onExport={handleExportCookies}
+							/>
 						</TabsContent>
 						<TabsContent value='curl' className='flex-1 min-h-0 p-4 force-scrollbar-visible'>
 							<CurlImportExport onImportRequest={handleCurlImport} currentRequest={currentRequest} onCopy={handleCurlCopy} />
@@ -272,9 +411,14 @@ function App() {
 					<CardTitle>API Response</CardTitle>
 				</CardHeader>
 				<CardContent className='flex-1 min-h-0'>
-					<pre className='whitespace-pre-wrap text-sm bg-background p-4 rounded-md h-full force-scrollbar-visible'>
-						{loading ? 'Loading...' : response || 'Send a request to see the response.'}
-					</pre>
+					{/* Enhanced Response Display */}
+					{responseData ? (
+						<ResponseViewer response={responseData} isLoading={loading} onDownload={handleResponseDownload} onCopy={handleResponseCopy} className='h-full' />
+					) : (
+						<div className='flex items-center justify-center h-full'>
+							<p className='text-sm text-muted-foreground'>{loading ? 'Loading...' : 'Send a request to see the response.'}</p>
+						</div>
+					)}
 				</CardContent>
 			</Card>
 		</div>
