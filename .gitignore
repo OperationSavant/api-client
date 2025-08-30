@@ -13,7 +13,9 @@ yarn-error.log*
 pnpm-debug.log*
 
 # VS Code settings
-.vscode/
+.vscode/*
+.github
+
 
 # Environment files
 .env
