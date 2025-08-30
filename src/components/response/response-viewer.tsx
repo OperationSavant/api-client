@@ -116,15 +116,15 @@ export const ResponseViewer: React.FC<ResponseViewerProps> = ({ response, isLoad
 				</div>
 
 				<div className='flex items-center gap-2 ml-auto'>
-					<Button variant='outline' size='sm' onClick={handleCopy} disabled={!response?.body}>
+					<Button variant='outline' size='sm' onClick={handleCopy} disabled={!response?.body} data-testid='copy-button'>
 						<Copy className='w-4 h-4 mr-2' />
 						Copy
 					</Button>
-					<Button variant='outline' size='sm' onClick={handleDownload} disabled={!response?.body}>
+					<Button variant='outline' size='sm' onClick={handleDownload} disabled={!response?.body} data-testid='download-button'>
 						<Download className='w-4 h-4 mr-2' />
 						Download
 					</Button>
-					<Button variant='outline' size='sm' onClick={() => setIsFullscreen(!isFullscreen)}>
+					<Button variant='outline' size='sm' onClick={() => setIsFullscreen(!isFullscreen)} data-testid='fullscreen-button'>
 						{isFullscreen ? <ShrinkIcon className='w-4 h-4' /> : <ExpandIcon className='w-4 h-4' />}
 					</Button>
 				</div>
@@ -136,7 +136,7 @@ export const ResponseViewer: React.FC<ResponseViewerProps> = ({ response, isLoad
 		return (
 			<div className='flex items-center justify-center h-64'>
 				<div className='flex flex-col items-center gap-4'>
-					<div className='animate-spin rounded-full h-8 w-8 border-b-2 border-primary'></div>
+					<div className='animate-spin rounded-full h-8 w-8 border-b-2 border-primary' role='status' aria-label='Loading'></div>
 					<p className='text-sm text-muted-foreground'>Loading response...</p>
 				</div>
 			</div>
@@ -279,7 +279,7 @@ export const ResponseViewer: React.FC<ResponseViewerProps> = ({ response, isLoad
 	};
 
 	return (
-		<div className={`flex flex-col h-full ${className} ${isFullscreen ? 'fixed inset-0 z-50 bg-background' : ''}`}>
+		<div className={`flex flex-col h-full ${className} ${isFullscreen ? 'fixed inset-0 z-50 bg-background' : ''}`} data-testid='response-viewer-container'>
 			{/* Response Metrics */}
 			{response && !isLoading && renderResponseMetrics()}
 

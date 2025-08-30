@@ -175,10 +175,16 @@ export const MonacoEditor: React.FC<MonacoEditorProps> = ({
 	}, [theme]);
 
 	return (
-		<div className={`monaco-editor-container ${className}`} style={{ position: 'relative', height }}>
+		<div
+			className={`monaco-editor-container ${className}`}
+			style={{ position: 'relative', height }}
+			data-testid='monaco-editor-container'
+			role='textbox'
+			aria-label={`Monaco code editor for ${language} content`}>
 			{copyButtonVisible && (
 				<button
 					onClick={handleCopy}
+					tabIndex={0}
 					className='absolute top-2 right-2 z-10 px-3 py-1 bg-background border border-border rounded text-xs hover:bg-accent transition-colors'
 					style={{ zIndex: 1000 }}>
 					{copyText}
