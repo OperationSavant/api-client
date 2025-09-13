@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
+import { ImperativePanelGroupHandle } from 'react-resizable-panels';
 
 import ParamsTab from '@/components/request-tabs/ParamsTab';
 import HeadersTab from '@/components/request-tabs/HeadersTab';
@@ -18,7 +18,7 @@ import { TestSuite, TestExecution } from '@/types/testing';
 import { AuthConfig } from '@/types/auth';
 import { RequestConfig } from '@/types/request';
 
-import { ResponseViewer, ResponseData } from '@/components/response/response-viewer';
+import { ResponseViewer, ResponseData, PanelState } from '@/components/response/response-viewer';
 import { CookieManager } from '@/components/cookie/cookie-manager';
 import { CookieIntegration } from '@/services/cookie-integration';
 import { cookieService } from '@/services/cookie-service';
@@ -46,6 +46,29 @@ function App() {
 	const [showCookieManager, setShowCookieManager] = useState(false);
 	const [cookies, setCookies] = useState<Cookie[]>([]);
 	const cookieIntegration = useRef(new CookieIntegration(cookieService));
+
+	const panelGroupRef = useRef<ImperativePanelGroupHandle>(null);
+	const [responsePanelState, setResponsePanelState] = useState<PanelState>('default');
+
+	const handleToggleResponsePanel = () => {
+		const panelGroup = panelGroupRef.current;
+		if (!panelGroup) return;
+
+		switch (responsePanelState) {
+			case 'default':
+				panelGroup.setLayout([10, 90]); // Request panel minSize is 10
+				setResponsePanelState('maximized');
+				break;
+			case 'maximized':
+				panelGroup.setLayout([95, 5]); // Response panel minSize is 5
+				setResponsePanelState('minimized');
+				break;
+			case 'minimized':
+				panelGroup.setLayout([60, 40]); // Default size
+				setResponsePanelState('default');
+				break;
+		}
+	};
 
 	// Create current request configuration for cURL export
 	const currentRequest: RequestConfig = {
@@ -436,7 +459,7 @@ function App() {
 
 	return (
 		<div className='flex flex-col h-screen bg-background text-foreground'>
-			<ResizablePanelGroup direction='vertical'>
+			<ResizablePanelGroup direction='vertical' ref={panelGroupRef}>
 				<ResizablePanel defaultSize={60} minSize={10}>
 					<div className='flex flex-col h-full p-4 gap-4'>
 						{/* Request Section */}
@@ -529,7 +552,15 @@ function App() {
 					<div className='h-full w-full'>
 						{/* Response Section */}
 						{responseData ? (
-							<ResponseViewer response={responseData} isLoading={loading} onDownload={handleResponseDownload} onCopy={handleResponseCopy} className='h-full' />
+							<ResponseViewer
+								response={responseData}
+								isLoading={loading}
+								onDownload={handleResponseDownload}
+								onCopy={handleResponseCopy}
+								className='h-full'
+								panelState={responsePanelState}
+								onTogglePanelSize={handleToggleResponsePanel}
+							/>
 						) : (
 							<div className='flex items-center justify-center h-full'>
 								<p className='text-sm text-muted-foreground'>{loading ? 'Loading...' : 'Send a request to see the response.'}</p>

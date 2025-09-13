@@ -5,7 +5,7 @@ import { Badge } from '../ui/badge';
 import { Separator } from '../ui/separator';
 import { Switch } from '../ui/switch';
 import { Label } from '../ui/label';
-import { Download, ExpandIcon, ShrinkIcon, Copy } from 'lucide-react';
+import { Download, ExpandIcon, ShrinkIcon, Copy, Maximize2, Minimize2, ChevronsUpDown } from 'lucide-react';
 import { MonacoEditor } from '../editor/monaco-editor';
 
 export interface ResponseData {
@@ -20,15 +20,27 @@ export interface ResponseData {
 	error?: string;
 }
 
+export type PanelState = 'default' | 'maximized' | 'minimized';
+
 export interface ResponseViewerProps {
 	response: ResponseData | null;
 	isLoading: boolean;
 	onDownload?: (format: string) => void;
 	onCopy?: (content: string) => void;
 	className?: string;
+	panelState?: PanelState;
+	onTogglePanelSize?: () => void;
 }
 
-export const ResponseViewer: React.FC<ResponseViewerProps> = ({ response, isLoading, onDownload, onCopy, className = '' }) => {
+export const ResponseViewer: React.FC<ResponseViewerProps> = ({
+	response,
+	isLoading,
+	onDownload,
+	onCopy,
+	className = '',
+	panelState = 'default',
+	onTogglePanelSize,
+}) => {
 	const [viewMode, setViewMode] = useState<'raw' | 'formatted'>('formatted');
 	const [wordWrap, setWordWrap] = useState(false);
 	const [isFullscreen, setIsFullscreen] = useState(false);
@@ -82,6 +94,7 @@ export const ResponseViewer: React.FC<ResponseViewerProps> = ({ response, isLoad
 
 	const renderResponseMetrics = () => {
 		if (!response) return null;
+		const PanelIcon = panelState === 'default' ? Maximize2 : panelState === 'maximized' ? Minimize2 : ChevronsUpDown;
 
 		return (
 			<div className='flex items-center gap-4 p-3 bg-muted/50 rounded-md'>
@@ -101,6 +114,12 @@ export const ResponseViewer: React.FC<ResponseViewerProps> = ({ response, isLoad
 					<Label className='text-sm font-medium'>Size:</Label>
 					<span className='text-sm text-muted-foreground'>{formatBytes(response.size)}</span>
 				</div>
+				<div className='flex-grow' />
+				{onTogglePanelSize && (
+					<Button variant='ghost' size='icon' onClick={onTogglePanelSize}>
+						<PanelIcon className='w-4 h-4' />
+					</Button>
+				)}
 			</div>
 		);
 	};
