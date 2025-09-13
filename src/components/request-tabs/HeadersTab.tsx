@@ -9,9 +9,10 @@ interface HeadersTabProps {
 const HeadersTab: React.FC<HeadersTabProps> = ({ headers, onHeadersChange }) => {
 	return (
 		<div className='h-full'>
-			<KeyValueInput label='Headers' value={headers} onChange={onHeadersChange} />
+			<KeyValueInput value={headers} onChange={onHeadersChange} />
 		</div>
 	);
 };
 
 export default HeadersTab;
+

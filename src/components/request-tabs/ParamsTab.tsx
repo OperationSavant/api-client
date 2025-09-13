@@ -9,7 +9,7 @@ interface ParamsTabProps {
 const ParamsTab: React.FC<ParamsTabProps> = ({ params, onParamsChange }) => {
 	return (
 		<div className='h-full'>
-			<KeyValueInput label='Parameters' value={params} onChange={onParamsChange} />
+			<KeyValueInput value={params} onChange={onParamsChange} />
 		</div>
 	);
 };

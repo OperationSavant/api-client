@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 
 import ParamsTab from '@/components/request-tabs/ParamsTab';
 import HeadersTab from '@/components/request-tabs/HeadersTab';
@@ -434,118 +435,112 @@ function App() {
 	}, []);
 
 	return (
-		<div className='flex flex-col h-screen p-4 gap-4'>
-			{/* Request Section - 60% of screen height */}
-			<Card className='h-[60vh] flex flex-col'>
-				<CardHeader className='flex-shrink-0'>
-					<CardTitle>API Request</CardTitle>
-				</CardHeader>
-				<CardContent className='flex-1 flex flex-col min-h-0 gap-4'>
-					{/* HTTP Request Controls - Fixed height */}
-					<div className='flex space-x-2 flex-shrink-0'>
-						<Select onValueChange={setMethod} defaultValue={method}>
-							<SelectTrigger className='w-[140px]'>
-								<SelectValue placeholder='Method' />
-							</SelectTrigger>
-							<SelectContent className='w-[140px]'>
-								<SelectItem value='GET'>GET</SelectItem>
-								<SelectItem value='POST'>POST</SelectItem>
-								<SelectItem value='PUT'>PUT</SelectItem>
-								<SelectItem value='PATCH'>PATCH</SelectItem>
-								<SelectItem value='DELETE'>DELETE</SelectItem>
-								<SelectItem value='HEAD'>HEAD</SelectItem>
-								<SelectItem value='OPTIONS'>OPTIONS</SelectItem>
-							</SelectContent>
-						</Select>
-						<Select onValueChange={setProtocol} defaultValue={protocol}>
-							<SelectTrigger className='w-[120px]'>
-								<SelectValue placeholder='Protocol' />
-							</SelectTrigger>
-							<SelectContent className='w-[120px]'>
-								<SelectItem value='https'>https://</SelectItem>
-								<SelectItem value='http'>http://</SelectItem>
-							</SelectContent>
-						</Select>
-						<Input id='url' className='flex-1' placeholder='api.example.com/data' value={url} onChange={e => setUrl(e.target.value)} onBlur={handleUrlBlur} />
-						<Button onClick={handleSendRequest}>Send</Button>
-					</div>
-
-					{/* Tabs Section - Takes remaining space with scrollable content */}
-					<Tabs defaultValue='params' className='flex-1 flex flex-col min-h-0'>
-						<TabsList className='flex-shrink-0'>
-							<TabsTrigger value='params'>Params</TabsTrigger>
-							<TabsTrigger value='headers'>Headers</TabsTrigger>
-							<TabsTrigger value='auth'>Authorization</TabsTrigger>
-							<TabsTrigger value='body'>Body</TabsTrigger>
-							<TabsTrigger value='cookies'>Cookies</TabsTrigger>
-							<TabsTrigger value='curl'>cURL</TabsTrigger>
-							<TabsTrigger value='pre-request'>Pre-request Script</TabsTrigger>
-							<TabsTrigger value='tests'>Tests</TabsTrigger>
-							<TabsTrigger value='settings'>Settings</TabsTrigger>
-						</TabsList>
-						<TabsContent value='params' className='flex-1 min-h-0 p-4 force-scrollbar-visible'>
-							<ParamsTab params={params} onParamsChange={setParams} />
-						</TabsContent>
-						<TabsContent value='headers' className='flex-1 min-h-0 p-4 force-scrollbar-visible'>
-							<HeadersTab headers={headers} onHeadersChange={setHeaders} />
-						</TabsContent>
-						<TabsContent value='auth' className='flex-1 min-h-0 p-4 force-scrollbar-visible'>
-							<AuthTab auth={auth} onAuthChange={setAuth} />
-						</TabsContent>
-						<TabsContent value='body' className='flex-1 min-h-0 p-4 force-scrollbar-visible'>
-							<BodyTab requestBody={requestBody} onRequestBodyChange={setRequestBody} onContentTypeChange={handleContentTypeChange} />
-						</TabsContent>
-						<TabsContent value='cookies' className='flex-1 min-h-0 p-4 force-scrollbar-visible'>
-							<CookieManager
-								cookies={cookies}
-								onAddCookie={handleAddCookie}
-								onUpdateCookie={handleUpdateCookie}
-								onDeleteCookie={handleDeleteCookie}
-								onDeleteAll={handleDeleteAllCookies}
-								onImport={handleImportCookies}
-								onExport={handleExportCookies}
-							/>
-						</TabsContent>
-						<TabsContent value='curl' className='flex-1 min-h-0 p-4 force-scrollbar-visible'>
-							<CurlImportExport onImportRequest={handleCurlImport} currentRequest={currentRequest} onCopy={handleCurlCopy} />
-						</TabsContent>
-						<TabsContent value='pre-request' className='flex-1 min-h-0 p-4 force-scrollbar-visible'>
-							<PreRequestScriptTab />
-						</TabsContent>
-						<TabsContent value='tests' className='flex-1 min-h-0 p-4 force-scrollbar-visible'>
-							<TestsTab
-								testSuites={testSuites}
-								onTestSuitesChange={setTestSuites}
-								onRunTests={handleRunTests}
-								testExecutions={testExecutions}
-								isRunning={isRunningTests}
-							/>
-						</TabsContent>
-						<TabsContent value='settings' className='flex-1 min-h-0 p-4 force-scrollbar-visible'>
-							<SettingsTab />
-						</TabsContent>
-					</Tabs>
-				</CardContent>
-			</Card>
-
-			{/* Response Section - 40% of screen height */}
-			<Card className='h-[40vh] flex flex-col'>
-				<CardHeader className='flex-shrink-0'>
-					<CardTitle>API Response</CardTitle>
-				</CardHeader>
-				<CardContent className='flex-1 min-h-0'>
-					{/* Enhanced Response Display */}
-					{responseData ? (
-						<ResponseViewer response={responseData} isLoading={loading} onDownload={handleResponseDownload} onCopy={handleResponseCopy} className='h-full' />
-					) : (
-						<div className='flex items-center justify-center h-full'>
-							<p className='text-sm text-muted-foreground'>{loading ? 'Loading...' : 'Send a request to see the response.'}</p>
+		<div className='flex flex-col h-screen bg-background text-foreground'>
+			<ResizablePanelGroup direction='vertical'>
+				<ResizablePanel defaultSize={60} minSize={10}>
+					<div className='flex flex-col h-full p-4 gap-4'>
+						{/* Request Section */}
+						<div className='flex space-x-2 flex-shrink-0'>
+							<Select onValueChange={setMethod} defaultValue={method}>
+								<SelectTrigger className='w-[140px]'>
+									<SelectValue placeholder='Method' />
+								</SelectTrigger>
+								<SelectContent className='w-[140px]'>
+									<SelectItem value='GET'>GET</SelectItem>
+									<SelectItem value='POST'>POST</SelectItem>
+									<SelectItem value='PUT'>PUT</SelectItem>
+									<SelectItem value='PATCH'>PATCH</SelectItem>
+									<SelectItem value='DELETE'>DELETE</SelectItem>
+									<SelectItem value='HEAD'>HEAD</SelectItem>
+									<SelectItem value='OPTIONS'>OPTIONS</SelectItem>
+								</SelectContent>
+							</Select>
+							<Select onValueChange={setProtocol} defaultValue={protocol}>
+								<SelectTrigger className='w-[120px]'>
+									<SelectValue placeholder='Protocol' />
+								</SelectTrigger>
+								<SelectContent className='w-[120px]'>
+									<SelectItem value='https'>https://</SelectItem>
+									<SelectItem value='http'>http://</SelectItem>
+								</SelectContent>
+							</Select>
+							<Input id='url' className='flex-1' placeholder='api.example.com/data' value={url} onChange={e => setUrl(e.target.value)} onBlur={handleUrlBlur} />
+							<Button onClick={handleSendRequest}>Send</Button>
 						</div>
-					)}
-				</CardContent>
-			</Card>
+
+						<Tabs defaultValue='params' className='flex-1 flex flex-col min-h-0'>
+							<TabsList className='flex-shrink-0'>
+								<TabsTrigger value='params'>Params</TabsTrigger>
+								<TabsTrigger value='headers'>Headers</TabsTrigger>
+								<TabsTrigger value='auth'>Authorization</TabsTrigger>
+								<TabsTrigger value='body'>Body</TabsTrigger>
+								<TabsTrigger value='cookies'>Cookies</TabsTrigger>
+								<TabsTrigger value='curl'>cURL</TabsTrigger>
+								<TabsTrigger value='pre-request'>Pre-request Script</TabsTrigger>
+								<TabsTrigger value='tests'>Tests</TabsTrigger>
+								<TabsTrigger value='settings'>Settings</TabsTrigger>
+							</TabsList>
+							<TabsContent value='params' className='flex-1 min-h-0 overflow-y-auto'>
+								<ParamsTab params={params} onParamsChange={setParams} />
+							</TabsContent>
+							<TabsContent value='headers' className='flex-1 min-h-0 overflow-y-auto'>
+								<HeadersTab headers={headers} onHeadersChange={setHeaders} />
+							</TabsContent>
+							<TabsContent value='auth' className='flex-1 min-h-0 overflow-y-auto'>
+								<AuthTab auth={auth} onAuthChange={setAuth} />
+							</TabsContent>
+							<TabsContent value='body' className='flex-1 min-h-0 overflow-y-auto'>
+								<BodyTab requestBody={requestBody} onRequestBodyChange={setRequestBody} onContentTypeChange={handleContentTypeChange} />
+							</TabsContent>
+							<TabsContent value='cookies' className='flex-1 min-h-0 overflow-y-auto'>
+								<CookieManager
+									cookies={cookies}
+									onAddCookie={handleAddCookie}
+									onUpdateCookie={handleUpdateCookie}
+									onDeleteCookie={handleDeleteCookie}
+									onDeleteAll={handleDeleteAllCookies}
+									onImport={handleImportCookies}
+									onExport={handleExportCookies}
+								/>
+							</TabsContent>
+							<TabsContent value='curl' className='flex-1 min-h-0 overflow-y-auto'>
+								<CurlImportExport onImportRequest={handleCurlImport} currentRequest={currentRequest} onCopy={handleCurlCopy} />
+							</TabsContent>
+							<TabsContent value='pre-request' className='flex-1 min-h-0 overflow-y-auto'>
+								<PreRequestScriptTab />
+							</TabsContent>
+							<TabsContent value='tests' className='flex-1 min-h-0 overflow-y-auto'>
+								<TestsTab
+									testSuites={testSuites}
+									onTestSuitesChange={setTestSuites}
+									onRunTests={handleRunTests}
+									testExecutions={testExecutions}
+									isRunning={isRunningTests}
+								/>
+							</TabsContent>
+							<TabsContent value='settings' className='flex-1 min-h-0 overflow-y-auto'>
+								<SettingsTab />
+							</TabsContent>
+						</Tabs>
+					</div>
+				</ResizablePanel>
+				<ResizableHandle withHandle />
+				<ResizablePanel defaultSize={40} minSize={5}>
+					<div className='h-full w-full'>
+						{/* Response Section */}
+						{responseData ? (
+							<ResponseViewer response={responseData} isLoading={loading} onDownload={handleResponseDownload} onCopy={handleResponseCopy} className='h-full' />
+						) : (
+							<div className='flex items-center justify-center h-full'>
+								<p className='text-sm text-muted-foreground'>{loading ? 'Loading...' : 'Send a request to see the response.'}</p>
+							</div>
+						)}
+					</div>
+				</ResizablePanel>
+			</ResizablePanelGroup>
 		</div>
 	);
 }
 
 export default App;
+
