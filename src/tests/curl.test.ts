@@ -1,4 +1,4 @@
-import { parseCurlCommand, generateCurlCommand, validateCurlCommand } from '@/utils/curl';
+import { parseCurlCommand, generateCurlCommand, validateCurlCommand } from '@/lib/curl';
 
 describe('cURL Integration', () => {
 	describe('parseCurlCommand', () => {
@@ -248,9 +248,9 @@ describe('cURL Integration', () => {
 					type: 'x-www-form-urlencoded',
 					formData: [],
 					urlEncoded: [
-						{ key: 'name', value: 'John', enabled: true },
-						{ key: 'email', value: 'john@example.com', enabled: true },
-						{ key: 'disabled', value: 'test', enabled: false },
+						{ key: 'name', value: 'John', checked: true },
+						{ key: 'email', value: 'john@example.com', checked: true },
+						{ key: 'disabled', value: 'test', checked: false },
 					],
 					raw: { content: '', language: 'text', autoFormat: false },
 					binary: {},

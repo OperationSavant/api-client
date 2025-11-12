@@ -1,5 +1,5 @@
 import { collectionService } from '@/services/collectionService';
-import { Collection, CollectionFolder, CollectionRequest } from '@/types/collection';
+import { Collection, CollectionFolder, CollectionRequest } from '@/shared/types/collection';
 
 describe('CollectionService', () => {
 	beforeEach(() => {
@@ -415,4 +415,3 @@ describe('CollectionService', () => {
 		});
 	});
 });
-

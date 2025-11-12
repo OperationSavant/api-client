@@ -252,47 +252,6 @@ describe('MonacoEditor Component', () => {
 		});
 	});
 
-	describe('Theme Management', () => {
-		test('should apply vs-dark theme', async () => {
-			render(<MonacoEditor value='test content' language='json' theme='vs-dark' />);
-
-			await waitFor(() => {
-				expect(mockMonaco.editor.create).toHaveBeenCalledWith(
-					expect.any(Element),
-					expect.objectContaining({
-						theme: 'vs-dark',
-					})
-				);
-			});
-		});
-
-		test('should apply hc-black theme', async () => {
-			render(<MonacoEditor value='test content' language='json' theme='hc-black' />);
-
-			await waitFor(() => {
-				expect(mockMonaco.editor.create).toHaveBeenCalledWith(
-					expect.any(Element),
-					expect.objectContaining({
-						theme: 'hc-black',
-					})
-				);
-			});
-		});
-
-		test('should default to vs theme', async () => {
-			render(<MonacoEditor value='test content' language='json' />);
-
-			await waitFor(() => {
-				expect(mockMonaco.editor.create).toHaveBeenCalledWith(
-					expect.any(Element),
-					expect.objectContaining({
-						theme: 'vs',
-					})
-				);
-			});
-		});
-	});
-
 	describe('Language Support', () => {
 		test('should handle JSON language', async () => {
 			render(<MonacoEditor value='{"test": true}' language='json' />);

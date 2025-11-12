@@ -1,4 +1,4 @@
-import { validateAuth } from '../utils/auth';
+import { validateAuth } from '../lib/auth';
 import { AuthConfig } from '../types/auth';
 
 describe('Authentication Validation', () => {

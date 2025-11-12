@@ -7,7 +7,8 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
-import { ResponseViewer, ResponseData } from '../components/response/response-viewer';
+import { ResponseViewer } from '../components/response/response-viewer';
+import { Response } from '@/shared/types/response';
 
 // Mock Monaco Editor to avoid complex setup in tests
 jest.mock('../components/editor/monaco-editor', () => ({
@@ -19,7 +20,7 @@ jest.mock('../components/editor/monaco-editor', () => ({
 }));
 
 describe('ResponseViewer Component', () => {
-	const mockJsonResponse: ResponseData = {
+	const mockJsonResponse: Response = {
 		status: 200,
 		statusText: 'OK',
 		headers: { 'Content-Type': 'application/json' },
@@ -30,7 +31,7 @@ describe('ResponseViewer Component', () => {
 		isError: false,
 	};
 
-	const mockXmlResponse: ResponseData = {
+	const mockXmlResponse: Response = {
 		status: 200,
 		statusText: 'OK',
 		headers: { 'Content-Type': 'application/xml' },
@@ -41,7 +42,7 @@ describe('ResponseViewer Component', () => {
 		isError: false,
 	};
 
-	const mockErrorResponse: ResponseData = {
+	const mockErrorResponse: Response = {
 		status: 500,
 		statusText: 'Internal Server Error',
 		headers: { 'Content-Type': 'application/json' },
@@ -116,7 +117,7 @@ describe('ResponseViewer Component', () => {
 
 		test('should call onCopy when copy button clicked', async () => {
 			const mockOnCopy = jest.fn();
-			render(<ResponseViewer response={mockJsonResponse} isLoading={false} onCopy={mockOnCopy} />);
+			render(<ResponseViewer response={mockJsonResponse} isLoading={false} />);
 
 			const copyButton = screen.getByRole('button', { name: /copy/i });
 			await userEvent.click(copyButton);
@@ -126,7 +127,7 @@ describe('ResponseViewer Component', () => {
 
 		test('should call onDownload when download button clicked', async () => {
 			const mockOnDownload = jest.fn();
-			render(<ResponseViewer response={mockJsonResponse} isLoading={false} onDownload={mockOnDownload} />);
+			render(<ResponseViewer response={mockJsonResponse} isLoading={false} />);
 
 			const downloadButton = screen.getByRole('button', { name: /download/i });
 			await userEvent.click(downloadButton);
@@ -271,7 +272,7 @@ describe('ResponseViewer Component', () => {
 	describe('Format Detection for Download', () => {
 		test('should detect correct format for JSON download', async () => {
 			const mockOnDownload = jest.fn();
-			render(<ResponseViewer response={mockJsonResponse} isLoading={false} onDownload={mockOnDownload} />);
+			render(<ResponseViewer response={mockJsonResponse} isLoading={false} />);
 
 			const downloadButton = screen.getByRole('button', { name: /download/i });
 			await userEvent.click(downloadButton);
@@ -281,7 +282,7 @@ describe('ResponseViewer Component', () => {
 
 		test('should detect correct format for XML download', async () => {
 			const mockOnDownload = jest.fn();
-			render(<ResponseViewer response={mockXmlResponse} isLoading={false} onDownload={mockOnDownload} />);
+			render(<ResponseViewer response={mockXmlResponse} isLoading={false} />);
 
 			const downloadButton = screen.getByRole('button', { name: /download/i });
 			await userEvent.click(downloadButton);

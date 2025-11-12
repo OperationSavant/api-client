@@ -32,9 +32,9 @@ describe('Body Types and Utilities', () => {
 				...createDefaultRequestBody(),
 				type: 'form-data',
 				formData: [
-					{ key: 'name', value: 'John', enabled: true, type: 'text' },
-					{ key: 'disabled', value: 'test', enabled: false, type: 'text' },
-					{ key: 'email', value: 'john@example.com', enabled: true, type: 'text' },
+					{ key: 'name', value: 'John', checked: true, type: 'text' },
+					{ key: 'disabled', value: 'test', checked: false, type: 'text' },
+					{ key: 'email', value: 'john@example.com', checked: true, type: 'text' },
 				],
 			};
 
@@ -54,9 +54,9 @@ describe('Body Types and Utilities', () => {
 				...createDefaultRequestBody(),
 				type: 'x-www-form-urlencoded',
 				urlEncoded: [
-					{ key: 'name', value: 'John Doe', enabled: true },
-					{ key: 'email', value: 'john@example.com', enabled: true },
-					{ key: 'disabled', value: 'test', enabled: false },
+					{ key: 'name', value: 'John Doe', checked: true },
+					{ key: 'email', value: 'john@example.com', checked: true },
+					{ key: 'disabled', value: 'test', checked: false },
 				],
 			};
 
@@ -170,7 +170,6 @@ describe('Body Types and Utilities', () => {
 				...createDefaultRequestBody(),
 				type: 'binary',
 				binary: {
-					file: mockFile,
 					fileName: 'custom.txt',
 					contentType: 'application/custom',
 				},
@@ -188,7 +187,6 @@ describe('Body Types and Utilities', () => {
 				...createDefaultRequestBody(),
 				type: 'binary',
 				binary: {
-					file: mockFile,
 					fileName: 'test.txt',
 				},
 			};
@@ -204,9 +202,7 @@ describe('Body Types and Utilities', () => {
 			const config: RequestBodyConfig = {
 				...createDefaultRequestBody(),
 				type: 'binary',
-				binary: {
-					file: mockFile,
-				},
+				binary: {},
 			};
 
 			const result = generateRequestBody(config);

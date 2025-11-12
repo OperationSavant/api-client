@@ -1,0 +1,5 @@
+# Exclude the dist folder and all its contents
+dist/
+
+# Exclude the build folder
+build/

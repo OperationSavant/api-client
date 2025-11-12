@@ -50,6 +50,7 @@ coverage/
 *.sw?
 /dist
 /out
+/Dummy
 
 # Workflow file
 WORKFLOW.md

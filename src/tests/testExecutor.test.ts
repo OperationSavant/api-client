@@ -1,4 +1,4 @@
-import { TestExecutor, createResponseTestData } from '../utils/testExecutor';
+import { TestExecutor, createResponseTestData } from '../lib/testExecutor';
 import { TestSuite, TestAssertion, ResponseTestData, createDefaultTestSuite, createDefaultTestAssertion } from '../types/testing';
 
 // Mock Response for testing environments

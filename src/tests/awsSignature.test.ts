@@ -1,4 +1,4 @@
-import { hmacSha256, sha256, getSignatureKey, createAwsSignature } from '../utils/awsSignature';
+import { hmacSha256, sha256, getSignatureKey, createAwsSignature } from '../lib/awsSignature';
 
 // Mock Web Crypto API
 const mockCrypto = {
@@ -90,7 +90,7 @@ describe('AWS Signature Utils', () => {
 			const region = 'us-east-1';
 			const service = 's3';
 
-			const result = await createAwsSignature(method, url, headers, body, accessKey, secretKey, sessionToken, region, service);
+			const result = await createAwsSignature(method, url, headers, accessKey, secretKey, sessionToken, region, service);
 
 			expect(result).toHaveProperty('Authorization');
 			expect(result).toHaveProperty('X-Amz-Date');
@@ -112,7 +112,7 @@ describe('AWS Signature Utils', () => {
 			const region = 'us-east-1';
 			const service = 's3';
 
-			const result = await createAwsSignature(method, url, headers, body, accessKey, secretKey, sessionToken, region, service);
+			const result = await createAwsSignature(method, url, headers, accessKey, secretKey, sessionToken, region, service);
 
 			expect(result).toHaveProperty('X-Amz-Security-Token');
 			expect(result['X-Amz-Security-Token']).toBe('session-token-123');
@@ -132,7 +132,7 @@ describe('AWS Signature Utils', () => {
 			const region = 'us-east-1';
 			const service = 'dynamodb';
 
-			const result = await createAwsSignature(method, url, headers, body, accessKey, secretKey, sessionToken, region, service);
+			const result = await createAwsSignature(method, url, headers, accessKey, secretKey, sessionToken, region, service);
 
 			expect(result).toHaveProperty('Authorization');
 			expect(result['Authorization']).toMatch(/^AWS4-HMAC-SHA256 Credential=.*\/dynamodb\/aws4_request/);
@@ -142,14 +142,14 @@ describe('AWS Signature Utils', () => {
 			const method = 'GET';
 			const url = 'https://s3.amazonaws.com/bucket/key?response-content-type=text%2Fplain';
 			const headers = { host: 's3.amazonaws.com' };
-			const body = '';
+			const body = undefined;
 			const accessKey = 'AKIAIOSFODNN7EXAMPLE';
 			const secretKey = 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY';
 			const sessionToken = '';
 			const region = 'us-east-1';
 			const service = 's3';
 
-			const result = await createAwsSignature(method, url, headers, body, accessKey, secretKey, sessionToken, region, service);
+			const result = await createAwsSignature(method, url, headers, accessKey, secretKey, sessionToken, region, service, body);
 
 			expect(result).toHaveProperty('Authorization');
 			expect(result['Authorization']).toMatch(/^AWS4-HMAC-SHA256/);

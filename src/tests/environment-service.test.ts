@@ -1,5 +1,5 @@
 import { environmentService } from '@/services/environment-service';
-import { EnvironmentVariable, VariableScope } from '@/types/environment';
+import { EnvironmentVariable, VariableScope } from '@/shared/types/environment';
 
 // Mock localStorage
 const localStorageMock = {

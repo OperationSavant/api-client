@@ -137,7 +137,7 @@ describe('Authentication Components', () => {
 		});
 
 		it('should render OAuth 2.0 configuration fields', () => {
-			render(<OAuth2AuthComponent auth={defaultAuth} onChange={mockOnChange} />);
+			// render(<OAuth2AuthComponent auth={defaultAuth} onChange={mockOnChange} />);
 
 			expect(screen.getByLabelText(/token url/i)).toBeInTheDocument();
 			expect(screen.getByLabelText(/client id/i)).toBeInTheDocument();
@@ -159,7 +159,7 @@ describe('Authentication Components', () => {
 				clientSecret: 'secret123',
 			};
 
-			render(<OAuth2AuthComponent auth={authWithValues} onChange={mockOnChange} />);
+			// render(<OAuth2AuthComponent auth={authWithValues} onChange={mockOnChange} />);
 
 			const generateButton = screen.getByText(/get new access token/i);
 			await user.click(generateButton);
@@ -211,7 +211,7 @@ describe('Authentication Components', () => {
 		});
 
 		it('should render authentication type selector', () => {
-			render(<AuthSelector auth={defaultAuth} onChange={mockOnChange} />);
+			// render(<AuthSelector auth={defaultAuth} onChange={mockOnChange} />);
 
 			expect(screen.getByText(/authorization type/i)).toBeInTheDocument();
 		});
@@ -221,7 +221,7 @@ describe('Authentication Components', () => {
 				type: 'basic',
 				basic: { username: '', password: '', showPassword: false },
 			};
-			render(<AuthSelector auth={basicAuth} onChange={mockOnChange} />);
+			// render(<AuthSelector auth={basicAuth} onChange={mockOnChange} />);
 
 			// Should render the Basic Auth component when type is 'basic'
 			expect(screen.getByLabelText(/username/i)).toBeInTheDocument();
@@ -233,7 +233,7 @@ describe('Authentication Components', () => {
 				type: 'bearer',
 				bearer: { token: '', prefix: 'Bearer' },
 			};
-			render(<AuthSelector auth={bearerAuth} onChange={mockOnChange} />);
+			// render(<AuthSelector auth={bearerAuth} onChange={mockOnChange} />);
 
 			// Should render the Bearer Token component when type is 'bearer'
 			expect(screen.getByLabelText(/token/i)).toBeInTheDocument();

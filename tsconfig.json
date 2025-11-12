@@ -1,29 +1,21 @@
 {
-  "compilerOptions": {
-    "module": "commonjs",
-    "target": "ES2020",
-    "outDir": "dist",
-    "lib": [
-      "ES2020",
-      "DOM"
-    ],
-    "sourceMap": true,
-    "strict": true,
-    "rootDir": "src",
-    "esModuleInterop": true,
-    "jsx": "react-jsx",
-    "baseUrl": ".",
-    "paths": {
-      "@/*": [
-        "src/*"
-      ]
-    }
-  },
-  "include": [
-    "src"
-  ],
-  "exclude": [
-    "node_modules",
-    ".vscode-test"
-  ]
+	"compilerOptions": {
+		"module": "commonjs",
+		"target": "ES2020",
+		"outDir": "dist",
+		"lib": ["ES2020"],
+		"sourceMap": true,
+		"strict": true,
+		"rootDir": "src",
+		"esModuleInterop": true,
+		"baseUrl": ".",
+		"paths": {
+			"@/extension/*": ["src/extension/*"],
+			"@/domain/*": ["src/domain/*"],
+			"@/shared/*": ["src/shared/*"]
+		}
+	},
+	"include": ["src/extension/**/*", "src/domain/**/*", "src/shared/**/*"],
+	"exclude": ["node_modules", ".vscode-test", "src/webview"],
+	"references": [{ "path": "./tsconfig.webview.json" }]
 }

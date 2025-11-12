@@ -1,29 +1,117 @@
+@import 'highlight.js/styles/github-dark.css'; /* Importing a highlight.js theme for code syntax highlighting */
 @import 'tailwindcss';
 @import 'tw-animate-css';
-/* @config "../tailwind.config.mjs"; */
+@plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:is(.dark *));
 
 :root {
+	/* ---------- Surfaces ---------- */
 	--background: var(--vscode-editor-background);
 	--foreground: var(--vscode-editor-foreground);
-	--card: var(--vscode-sideBar-background);
-	--card-foreground: var(--vscode-sideBar-foreground);
+	--muted: var(--vscode-sideBar-background);
+	--muted-foreground: var(--vscode-descriptionForeground);
+	--border: var(--vscode-panel-border);
+	--card: var(--vscode-editorWidget-background);
+	--card-foreground: var(--vscode-editorWidget-foreground);
+
+	/* ---------- Tooltip / Popover specificity ---------- */
+	--tooltip: var(--vscode-editorHoverWidget-background);
+	--tooltip-foreground: var(--vscode-editorHoverWidget-foreground);
 	--popover: var(--vscode-editorWidget-background);
 	--popover-foreground: var(--vscode-editorWidget-foreground);
+
+	/* ---------- Selection / Highlight ---------- */
+	--selection: var(--vscode-editor-selectionBackground);
+	--selection-foreground: var(--vscode-editor-selectionForeground);
+
+	/* ---------- Primary (Buttons) ---------- */
 	--primary: var(--vscode-button-background);
 	--primary-foreground: var(--vscode-button-foreground);
-	--secondary: var(--vscode-button-secondaryBackground);
-	--secondary-foreground: var(--vscode-button-secondaryForeground);
-	--muted: var(--vscode-input-background);
-	--muted-foreground: var(--vscode-input-placeholderForeground);
-	--accent: var(--vscode-list-hoverBackground);
-	--accent-foreground: var(--vscode-list-hoverForeground);
-	--destructive: var(--vscode-errorForeground);
-	--border: var(--vscode-input-border);
+	--primary-hover: var(--vscode-button-hoverBackground);
+	--primary-disabled: var(--vscode-button-secondaryBackground);
+
+	/* ---------- Secondary ---------- */
+	--button-secondary: var(--vscode-button-secondaryBackground);
+	--button-secondary-hover: var(--vscode-button-secondaryHoverBackground);
+	--button-secondary-foreground: var(--vscode-button-secondaryForeground);
+
+	/* ---------- Inputs ---------- */
 	--input: var(--vscode-input-background);
+	--input-border: var(--vscode-input-border);
+	--input-placeholder: var(--vscode-input-placeholderForeground);
 	--ring: var(--vscode-focusBorder);
-	--radius: 0.5rem;
+
+	/* ---------- Accent ---------- */
+	--accent: var(--vscode-textLink-foreground);
+	--accent-hover: var(--vscode-textLink-activeForeground);
+	--accent-foreground: var(--vscode-editor-foreground);
+
+	/* ---------- Destructive ---------- */
+	--destructive: var(--vscode-inputValidation-errorBackground);
+	--destructive-foreground: var(--vscode-errorForeground);
+
+	/* ---------- Shadows / Radius ---------- */
+	--shadow: var(--vscode-widget-shadow);
+	--radius: 0.375rem;
+
+	/* ---------- States (Info/Warning/Success) ---------- */
+	--info: var(--vscode-inputValidation-infoBackground);
+	--info-foreground: var(--vscode-editorInfo-foreground);
+	--warning: var(--vscode-inputValidation-warningBackground);
+	--warning-foreground: var(--vscode-editorWarning-foreground);
+	--success: var(--vscode-editor-background);
+	--success-foreground: var(--vscode-testing-iconPassed);
+	--surface-elevated: var(--vscode-panel-background);
+	--surface-elevated-border: var(--vscode-panel-border);
+
+	/* ---------- Lists (for treeviews) ---------- */
+	--list-hover: var(--vscode-list-hoverBackground);
+	--list-active: var(--vscode-list-activeSelectionBackground);
+	--list-active-foreground: var(--vscode-list-activeSelectionForeground);
+	--list-inactive: var(--vscode-list-inactiveSelectionBackground);
+
+	/* ---------- Badges / Pills ---------- */
+	--badge: var(--vscode-badge-background);
+	--badge-foreground: var(--vscode-badge-foreground);
+
+	/* ---------- Notifications / Toasts ---------- */
+	--toast: var(--vscode-notifications-background);
+	--toast-foreground: var(--vscode-notifications-foreground);
+	--toast-border: var(--vscode-notifications-border);
+
+	/* ---------- Scrollbar ---------- */
+	--scrollbar-thumb: var(--vscode-scrollbarSlider-background);
+	--scrollbar-thumb-hover: var(--vscode-scrollbarSlider-hoverBackground);
+	--scrollbar-thumb-active: var(--vscode-scrollbarSlider-activeBackground);
+
+	/* ---------- Code / Markdown helpers ---------- */
+	--codeblock: var(--vscode-textCodeBlock-background);
+	--blockquote: var(--vscode-textBlockQuote-background);
+	--blockquote-border: var(--vscode-textBlockQuote-border);
+
+	/* ---------- Subtle borders ---------- */
+	--subtle-border: var(--vscode-widget-border);
+
+	/* ---------- Charts ---------- */
+	--chart-1: var(--accent);
+	--chart-2: var(--info);
+	--chart-3: var(--warning);
+	--chart-4: var(--success);
+	--chart-5: var(--destructive);
+
+	/* ---------- Overlays ------------ */
+	--overlay: rgba(0, 0, 0, 0.35);
+
+	/* ---------- Sidebars ------------ */
+	--sidebar: var(--vscode-sideBar-background);
+	--sidebar-foreground: var(--vscode-sideBar-foreground);
+	--sidebar-primary: var(--vscode-button-secondaryBackground);
+	--sidebar-primary-foreground: var(--vscode-button-secondaryForeground);
+	--sidebar-accent: var(--vscode-textLink-foreground);
+	--sidebar-accent-foreground: var(--vscode-editor-foreground);
+	--sidebar-border: var(--vscode-sideBar-border);
+	--sidebar-ring: var(--vscode-focusBorder);
 }
 
 @theme inline {
@@ -35,8 +123,8 @@
 	--color-popover-foreground: var(--popover-foreground);
 	--color-primary: var(--primary);
 	--color-primary-foreground: var(--primary-foreground);
-	--color-secondary: var(--secondary);
-	--color-secondary-foreground: var(--secondary-foreground);
+	--color-secondary: var(--button-secondary);
+	--color-secondary-foreground: var(--button-secondary-foreground);
 	--color-muted: var(--muted);
 	--color-muted-foreground: var(--muted-foreground);
 	--color-accent: var(--accent);
@@ -67,11 +155,11 @@
 
 @layer base {
 	div {
-		@apply !border-0 !outline-0;
+		@apply border-0 outline-0;
 	}
 	body {
 		@apply bg-background text-foreground;
-		@apply !p-0;
+		@apply p-0;
 	}
 	button,
 	[role='button'] {
@@ -79,124 +167,352 @@
 	}
 }
 
+@layer components {
+}
+
 /* Force stable scrollbar gutter to prevent layout shifts */
 @layer utilities {
-	.stable-scrollbar {
-		scrollbar-gutter: stable;
-		overflow-anchor: none;
+	.http-get {
+		color: oklch(60% 0.15 150);
 	}
-
-	/* Force scrollbars to always be visible to prevent layout shifts */
-	.force-scrollbar-visible {
-		overflow-y: scroll !important;
-		scrollbar-width: thin;
-		scrollbar-color: var(--vscode-scrollbarSlider-background) transparent;
+	.border-get {
+		border-color: oklch(60% 0.15 150);
 	}
-
-	/* Custom scrollbar styling for WebKit browsers */
-	.force-scrollbar-visible::-webkit-scrollbar {
-		width: 12px;
+	.http-post {
+		color: oklch(65% 0.18 80);
 	}
-
-	.force-scrollbar-visible::-webkit-scrollbar-track {
-		background: transparent;
+	.border-post {
+		border-color: oklch(65% 0.18 80);
 	}
-
-	.force-scrollbar-visible::-webkit-scrollbar-thumb {
-		background-color: var(--vscode-scrollbarSlider-background);
-		border-radius: 6px;
-		border: 2px solid transparent;
-		background-clip: content-box;
+	.http-put {
+		color: oklch(60% 0.15 250);
 	}
-
-	.force-scrollbar-visible::-webkit-scrollbar-thumb:hover {
-		background-color: var(--vscode-scrollbarSlider-hoverBackground);
+	.border-put {
+		border-color: oklch(60% 0.15 250);
 	}
-
-	/* Alternative approach for better cross-browser support */
-	.force-scrollbar-space {
-		scrollbar-gutter: stable both-edges;
-		overflow: overlay;
+	.http-patch {
+		color: oklch(60% 0.16 310);
 	}
-
-	/* Response viewer specific scrolling */
-	.response-scroll-container {
-		overflow: auto !important;
-		scrollbar-width: thin;
-		scrollbar-color: var(--vscode-scrollbarSlider-background) var(--vscode-scrollbar-shadow);
-		-webkit-overflow-scrolling: touch;
+	.border-patch {
+		border-color: oklch(60% 0.16 310);
 	}
-
-	.response-scroll-container::-webkit-scrollbar {
-		width: 8px;
-		height: 8px;
+	.http-delete {
+		color: oklch(60% 0.18 25);
 	}
-
-	.response-scroll-container::-webkit-scrollbar-track {
-		background: var(--vscode-scrollbar-shadow);
-		border-radius: 4px;
+	.border-delete {
+		border-color: oklch(60% 0.18 25);
 	}
-
-	.response-scroll-container::-webkit-scrollbar-thumb {
-		background-color: var(--vscode-scrollbarSlider-background);
-		border-radius: 4px;
-		border: 1px solid var(--vscode-scrollbar-shadow);
+	.http-head {
+		color: oklch(85% 0 0);
 	}
-
-	.response-scroll-container::-webkit-scrollbar-thumb:hover {
-		background-color: var(--vscode-scrollbarSlider-hoverBackground);
+	.border-head {
+		border-color: oklch(85% 0 0);
 	}
-
-	.response-scroll-container::-webkit-scrollbar-corner {
-		background: var(--vscode-scrollbar-shadow);
+	.http-options {
+		color: oklch(70% 0 0);
 	}
-
-	/* Text highlighting improvements */
-	.response-text {
-		color: var(--vscode-editor-foreground);
-		background: var(--vscode-editor-background);
-		font-family: var(--vscode-editor-font-family), 'Courier New', monospace;
-		font-size: var(--vscode-editor-font-size, 12px);
-		line-height: 1.6;
-		tab-size: 2;
-		-webkit-font-smoothing: antialiased;
-		-moz-osx-font-smoothing: grayscale;
-	}
-
-	.response-formatted {
-		color: var(--vscode-editor-foreground);
-		background: var(--vscode-textCodeBlock-background);
-	}
-
-	.response-raw {
-		color: var(--vscode-editor-foreground);
-		background: var(--vscode-editor-background);
-	}
-
-	/* JSON syntax highlighting for formatted view */
-	.response-formatted .json-key {
-		color: var(--vscode-symbolIcon-keywordForeground, #569cd6);
-		font-weight: normal;
-	}
-
-	.response-formatted .json-string {
-		color: var(--vscode-symbolIcon-stringForeground, #ce9178);
-	}
-
-	.response-formatted .json-number {
-		color: var(--vscode-symbolIcon-numberForeground, #b5cea8);
-	}
-
-	.response-formatted .json-boolean {
-		color: var(--vscode-symbolIcon-booleanForeground, #569cd6);
-	}
-
-	.response-formatted .json-null {
-		color: var(--vscode-symbolIcon-nullForeground, #569cd6);
-	}
-
-	.response-formatted .json-punctuation {
-		color: var(--vscode-editor-foreground);
+	.border-options {
+		border-color: oklch(70% 0 0);
 	}
 }
 
+/* Tiptap Editor Styling */
+.tiptap {
+	/* Basic editor container styling */
+	position: relative;
+}
+
+.tiptap .ProseMirror {
+	/* Ensure the editor content area takes full width */
+	min-height: 80px; /* Matches the min-height set in the component */
+	outline: none; /* Remove default outline */
+	padding: 0.5rem 0.75rem; /* Padding inside the editor */
+	line-height: 1.5; /* Standard line height */
+	color: var(--vscode-editor-foreground); /* Text color from VS Code theme */
+	background-color: var(--vscode-editor-background); /* Background from VS Code theme */
+	border: 1px solid var(--vscode-input-border); /* Border from VS Code theme */
+	border-radius: 0 0 0.375rem 0.375rem; /* Rounded corners for bottom */
+	box-shadow: var(--vscode-widget-shadow); /* Subtle shadow */
+}
+
+/* Focus state for the editor */
+.tiptap .ProseMirror:focus-visible {
+	border-color: var(--vscode-focusBorder); /* Focus border color */
+	outline: 1px solid var(--vscode-focusBorder); /* Outline for focus */
+}
+
+/* Placeholder styling */
+.tiptap .ProseMirror p.is-editor-empty:first-child::before {
+	content: attr(data-placeholder);
+	float: left;
+	color: var(--vscode-input-placeholderForeground); /* Placeholder color */
+	pointer-events: none;
+	height: 0;
+}
+
+/* Basic typography for content within the editor */
+.tiptap .ProseMirror p {
+	margin-bottom: 0.5rem;
+}
+
+.tiptap .ProseMirror ul,
+.tiptap .ProseMirror ol {
+	margin-left: 1.25rem; /* Indent lists */
+	margin-bottom: 0.5rem;
+	padding: 0;
+}
+
+.tiptap .ProseMirror ul li,
+.tiptap .ProseMirror ol li {
+	margin-bottom: 0.25rem;
+}
+
+/* Toolbar styling */
+.tiptap-toolbar {
+	border: 1px solid var(--vscode-input-border); /* Toolbar border */
+	border-bottom: none; /* No bottom border, connects to editor */
+	border-radius: 0.375rem 0.375rem 0 0; /* Rounded corners for top */
+	background-color: var(--vscode-editorGroupHeader-tabsBackground); /* Toolbar background */
+	padding: 0.25rem;
+	display: flex;
+	gap: 0.25rem;
+}
+
+.tiptap-toolbar button {
+	/* Style for buttons within the toolbar */
+	color: var(--vscode-button-foreground); /* Button text color */
+	background-color: var(--vscode-button-background); /* Button background */
+	border: 1px solid transparent; /* Transparent border */
+	padding: 0.25rem 0.5rem;
+	border-radius: 0.25rem;
+	cursor: pointer;
+}
+
+.tiptap-toolbar button:hover {
+	background-color: var(--vscode-button-hoverBackground); /* Hover background */
+}
+
+.tiptap-toolbar button.is-active {
+	background-color: var(--vscode-button-secondaryBackground); /* Active button background */
+	color: var(--vscode-button-secondaryForeground); /* Active button text */
+}
+
+.tiptap-toolbar button:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.tree {
+	max-width: 300px;
+	min-height: 100px;
+}
+
+.tree button[role='treeitem'] {
+	display: flex;
+	background: transparent;
+	border: none;
+	width: 100%;
+	padding: 0 0 2px 0;
+}
+
+.treeitem {
+	width: 100%;
+	text-align: left;
+	background-color: white;
+	padding: 6px 10px;
+	position: relative;
+	border-radius: 8px;
+	transition: background-color 0.2s ease;
+	cursor: pointer;
+}
+.treeitem:hover {
+	background-color: var(--selected-color);
+}
+
+.renaming-item {
+	background-color: var(--selected-color);
+	margin-bottom: 2px;
+	border-radius: 8px;
+	padding: 4px 10px 5px 24px;
+}
+.renaming-item input {
+	width: 100%;
+	height: 100%;
+	border: none;
+	background: transparent;
+	outline: none;
+}
+
+.treeitem:hover {
+	border-color: black;
+}
+
+.tree button[role='treeitem']:focus {
+	outline: none;
+}
+
+.treeitem.selected {
+	background-color: #eee;
+}
+
+button:focus-visible .treeitem.focused,
+.treeitem.searchmatch.focused {
+	outline: 2px solid black;
+}
+
+.treeitem.drop {
+	border-color: var(--selected-color);
+	background-color: #e1f1f8;
+}
+
+.treeitem.searchmatch {
+	background-color: #e1f8ff;
+}
+
+.treeitem.folder:before {
+	content: url(data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IiB2aWV3Qm94PSIwIDAgMTYgMTYiIGVuYWJsZS1iYWNrZ3JvdW5kPSJuZXcgMCAwIDE2IDE2IiB4bWw6c3BhY2U9InByZXNlcnZlIj48Zz48Zz48cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTQuNjQ2IDEuNjQ2YS41LjUgMCAwIDEgLjcwOCAwbDYgNmEuNS41IDAgMCAxIDAgLjcwOGwtNiA2YS41LjUgMCAwIDEtLjcwOC0uNzA4TDEwLjI5MyA4IDQuNjQ2IDIuMzU0YS41LjUgMCAwIDEgMC0uNzA4eiIgY2xhc3M9InJjdC10cmVlLWl0ZW0tYXJyb3ctcGF0aCI+PC9wYXRoPjwvZz48L2c+PC9zdmc+);
+	width: 10px;
+	display: inline-block;
+	z-index: 1;
+	margin-right: 4px;
+	transition: transform 0.1s ease-in-out;
+}
+
+.treeitem.folder.expanded:before {
+	transform: rotate(90deg);
+}
+
+.treeitem:not(.folder) {
+	padding-left: 24px;
+}
+
+.treeitem.selected:after {
+	content: ' ';
+	position: absolute;
+	top: 5px;
+	left: -2px;
+	height: 16px;
+	width: 4px;
+	background-color: #0366d6;
+	border-radius: 99px;
+}
+
+.description {
+	font-family: sans-serif;
+	font-size: 0.8rem;
+	background-color: #eee;
+	border-radius: 8px;
+	padding: 8px 12px;
+}
+
+.dragline {
+	height: 2px;
+	margin-top: -1px;
+	background-color: #0366d6;
+}
+
+.dragline::before {
+	content: '';
+	position: absolute;
+	left: 0;
+	top: -3px;
+	height: 4px;
+	width: 4px;
+	background: #fff;
+	border: 2px solid #0366d6;
+	border-radius: 99px;
+}
+
+.outeritem {
+	display: flex;
+	align-items: center;
+	gap: 2px;
+}
+.outeritem button:not([role='treeitem']) {
+	padding: 2px 4px;
+	height: 80%;
+}
+
+.actionbar {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-wrap: wrap;
+	gap: 4px;
+	margin-top: 8px;
+}
+
+.foreign-dragsource,
+.foreign-dropzone,
+.searchbox,
+.actionbtn {
+	height: 30px;
+	background-color: transparent;
+	border: 1px solid #808080;
+	padding: 0 8px;
+	border-radius: 4px;
+	font-size: 0.8rem;
+	color: #393939;
+	display: flex;
+	align-items: center;
+	justify-items: center;
+}
+
+.foreign-dragsource {
+	cursor: grab;
+}
+.foreign-dragsource:active {
+	cursor: grabbing;
+}
+.foreign-dragsource:before {
+	content: url(data:image/svg+xml;base64,PHN2ZyBzdHJva2U9ImN1cnJlbnRDb2xvciIgZmlsbD0iIzAwMDAwMCIgc3Ryb2tlLXdpZHRoPSIwIiB2aWV3Qm94PSIwIDAgMjQgMjQiIGhlaWdodD0iMThweCIgd2lkdGg9IjE4cHgiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTkgMTNhMSAxIDAgMSAxIDAtMiAxIDEgMCAwIDEgMCAyWm03LTFhMSAxIDAgMSAxLTIgMCAxIDEgMCAwIDEgMiAwWk05IDhhMSAxIDAgMSAxIDAtMiAxIDEgMCAwIDEgMCAyWm03LTFhMSAxIDAgMSAxLTIgMCAxIDEgMCAwIDEgMiAwWk05IDE4YTEgMSAwIDEgMSAwLTIgMSAxIDAgMCAxIDAgMlptNiAwYTEgMSAwIDEgMSAwLTIgMSAxIDAgMCAxIDAgMloiPjwvcGF0aD48L3N2Zz4=);
+	width: 10px;
+	display: inline-block;
+	z-index: 1;
+	margin-right: 8px;
+	margin-top: 2px;
+}
+.foreign-dragsource:hover {
+	background-color: #f6f6f6;
+}
+
+.foreign-dropzone {
+	border: 1px dashed #808080;
+	padding: 0 26px;
+}
+
+.searchbox {
+	padding: 8px 16px;
+	margin-bottom: 8px;
+	flex-wrap: wrap;
+	gap: 4px;
+	height: unset;
+}
+
+.searchbox:before {
+	content: 'Navigate between search results with ArrowUp and ArrowDown. Press Escape to close search.';
+	display: block;
+	width: 100%;
+}
+.searchbox input {
+	flex-grow: 1;
+	padding: 4px;
+}
+
+.actionbtn:hover {
+	cursor: pointer;
+	background-color: #f6f6f6;
+}
+
+.visible-assistive-text {
+	position: unset !important;
+	width: unset !important;
+	height: 60px !important;
+	margin: unset !important;
+	overflow: auto !important;
+	clip: unset !important;
+
+	display: block;
+	margin-bottom: 1rem !important;
+	background-color: #e1f1f8;
+}

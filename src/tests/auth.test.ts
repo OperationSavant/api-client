@@ -1,4 +1,4 @@
-import { applyAuthentication, validateAuth, generateOAuth2Token } from '../utils/auth';
+import { applyAuthentication, validateAuth, generateOAuth2Token } from '../lib/auth';
 import { AuthConfig } from '../types/auth';
 
 // Mock fetch for OAuth tests
@@ -19,7 +19,7 @@ describe('Authentication Utils', () => {
 		it('should handle no authentication', async () => {
 			const auth: AuthConfig = { type: 'none' };
 
-			const result = await applyAuthentication(auth, mockMethod, mockUrl, mockHeaders, mockParams, mockBody);
+			const result = await applyAuthentication(auth, mockMethod, mockUrl, mockHeaders, mockParams);
 
 			expect(result.headers).toEqual(mockHeaders);
 			expect(result.params).toEqual(mockParams);
@@ -31,7 +31,7 @@ describe('Authentication Utils', () => {
 				basic: { username: 'testuser', password: 'testpass', showPassword: false },
 			};
 
-			const result = await applyAuthentication(auth, mockMethod, mockUrl, mockHeaders, mockParams, mockBody);
+			const result = await applyAuthentication(auth, mockMethod, mockUrl, mockHeaders, mockParams);
 
 			expect(result.headers['Authorization']).toBe('Basic dGVzdHVzZXI6dGVzdHBhc3M=');
 			expect(result.headers['Content-Type']).toBe('application/json');
@@ -43,7 +43,7 @@ describe('Authentication Utils', () => {
 				bearer: { token: 'abc123', prefix: 'Bearer' },
 			};
 
-			const result = await applyAuthentication(auth, mockMethod, mockUrl, mockHeaders, mockParams, mockBody);
+			const result = await applyAuthentication(auth, mockMethod, mockUrl, mockHeaders, mockParams);
 
 			expect(result.headers['Authorization']).toBe('Bearer abc123');
 		});
@@ -54,7 +54,7 @@ describe('Authentication Utils', () => {
 				bearer: { token: 'xyz789', prefix: 'Token' },
 			};
 
-			const result = await applyAuthentication(auth, mockMethod, mockUrl, mockHeaders, mockParams, mockBody);
+			const result = await applyAuthentication(auth, mockMethod, mockUrl, mockHeaders, mockParams);
 
 			expect(result.headers['Authorization']).toBe('Token xyz789');
 		});
@@ -65,7 +65,7 @@ describe('Authentication Utils', () => {
 				apikey: { key: 'X-API-Key', value: 'secret123', addTo: 'header' },
 			};
 
-			const result = await applyAuthentication(auth, mockMethod, mockUrl, mockHeaders, mockParams, mockBody);
+			const result = await applyAuthentication(auth, mockMethod, mockUrl, mockHeaders, mockParams);
 
 			expect(result.headers['X-API-Key']).toBe('secret123');
 		});
@@ -76,7 +76,7 @@ describe('Authentication Utils', () => {
 				apikey: { key: 'api_key', value: 'secret456', addTo: 'query' },
 			};
 
-			const result = await applyAuthentication(auth, mockMethod, mockUrl, mockHeaders, mockParams, mockBody);
+			const result = await applyAuthentication(auth, mockMethod, mockUrl, mockHeaders, mockParams);
 
 			expect(result.params['api_key']).toBe('secret456');
 			expect(result.params['page']).toBe('1'); // Preserve existing params
@@ -96,7 +96,7 @@ describe('Authentication Utils', () => {
 				},
 			};
 
-			const result = await applyAuthentication(auth, mockMethod, mockUrl, mockHeaders, mockParams, mockBody);
+			const result = await applyAuthentication(auth, mockMethod, mockUrl, mockHeaders, mockParams);
 
 			expect(result.headers['Authorization']).toBe('Bearer oauth_token_123');
 		});
