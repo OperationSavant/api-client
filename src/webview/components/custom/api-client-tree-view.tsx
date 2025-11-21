@@ -1,525 +1,415 @@
-'use client';
-
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { UncontrolledTreeEnvironment, Tree, type TreeItemIndex, type TreeItem, type TreeRef, type TreeViewState, TreeDataProvider } from 'react-complex-tree';
-import {
-	ChevronDown,
-	ChevronRight,
-	Copy,
-	FilePlus,
-	Files,
-	Folder,
-	FolderOpen,
-	FolderPlus,
-	MoreHorizontal,
-	MoveRight,
-	Pencil,
-	Plus,
-	Trash2,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import React from 'react';
 import { cn } from '@/shared/lib/utils';
-import ApiClientButton from './api-client-button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '../ui/dropdown-menu';
-import { ApiClientInput } from './api-client-input';
+import { ChevronRight, ChevronDown, Folder, File, MoreHorizontal } from 'lucide-react';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
-const treeData: Record<TreeItemIndex, TreeItem> = {
-	root: {
-		index: 'root',
-		isFolder: true,
-		children: ['item1', 'item9', 'item32', 'item35'],
-		data: 'root',
-	},
-	item1: {
-		index: 'item1',
-		isFolder: true,
-		children: ['item2', 'item3', 'item4', 'item5', 'item8'],
-		data: 'Fruit',
-	},
-	item2: {
-		index: 'item2',
-		isFolder: false,
-		data: 'Apple',
-	},
-	item3: {
-		index: 'item3',
-		isFolder: false,
-		data: 'Orange',
-	},
-	item4: {
-		index: 'item4',
-		isFolder: false,
-		data: 'Lemon',
-	},
-	item5: {
-		index: 'item5',
-		isFolder: true,
-		children: ['item6', 'item7'],
-		data: 'Berries',
-	},
-	item6: {
-		index: 'item6',
-		isFolder: false,
-		data: 'Strawberry',
-	},
-	item7: {
-		index: 'item7',
-		isFolder: false,
-		data: 'Blueberry',
-	},
-	item8: {
-		index: 'item8',
-		isFolder: false,
-		data: 'Banana',
-	},
-	item9: {
-		index: 'item9',
-		isFolder: true,
-		children: ['item10', 'item16', 'item22', 'item27'],
-		data: 'Meals',
-	},
-	item10: {
-		index: 'item10',
-		isFolder: true,
-		children: ['item11', 'item12', 'item13', 'item14', 'item15'],
-		data: 'America',
-	},
-	item11: {
-		index: 'item11',
-		isFolder: false,
-		data: 'SmashBurger',
-	},
-	item12: {
-		index: 'item12',
-		isFolder: false,
-		data: 'Chowder',
-	},
-	item13: {
-		index: 'item13',
-		isFolder: false,
-		data: 'Ravioli',
-	},
-	item14: {
-		index: 'item14',
-		isFolder: false,
-		data: 'MacAndCheese',
-	},
-	item15: {
-		index: 'item15',
-		isFolder: false,
-		data: 'Brownies',
-	},
-	item16: {
-		index: 'item16',
-		isFolder: true,
-		children: ['item17', 'item18', 'item19', 'item20', 'item21'],
-		data: 'Europe',
-	},
-	item17: {
-		index: 'item17',
-		isFolder: false,
-		data: 'Risotto',
-	},
-	item18: {
-		index: 'item18',
-		isFolder: false,
-		data: 'Spaghetti',
-	},
-	item19: {
-		index: 'item19',
-		isFolder: false,
-		data: 'Pizza',
-	},
-	item20: {
-		index: 'item20',
-		isFolder: false,
-		data: 'Weisswurst',
-	},
-	item21: {
-		index: 'item21',
-		isFolder: false,
-		data: 'Spargel',
-	},
-	item22: {
-		index: 'item22',
-		isFolder: true,
-		children: ['item23', 'item24', 'item25', 'item26'],
-		data: 'Asia',
-	},
-	item23: {
-		index: 'item23',
-		isFolder: false,
-		data: 'Curry',
-	},
-	item24: {
-		index: 'item24',
-		isFolder: false,
-		data: 'PadThai',
-	},
-	item25: {
-		index: 'item25',
-		isFolder: false,
-		data: 'Jiaozi',
-	},
-	item26: {
-		index: 'item26',
-		isFolder: false,
-		data: 'Sushi',
-	},
-	item27: {
-		index: 'item27',
-		isFolder: true,
-		children: ['item28', 'item29', 'item30', 'item31'],
-		data: 'Australia',
-	},
-	item28: {
-		index: 'item28',
-		isFolder: false,
-		data: 'PotatoWedges',
-	},
-	item29: {
-		index: 'item29',
-		isFolder: false,
-		data: 'PokeBowl',
-	},
-	item30: {
-		index: 'item30',
-		isFolder: false,
-		data: 'Curd',
-	},
-	item31: {
-		index: 'item31',
-		isFolder: false,
-		data: 'KumaraFries',
-	},
-	item32: {
-		index: 'item32',
-		isFolder: true,
-		children: ['item33', 'item34'],
-		data: 'Desserts',
-	},
-	item33: {
-		index: 'item33',
-		isFolder: false,
-		data: 'Cookies',
-	},
-	item34: {
-		index: 'item34',
-		isFolder: false,
-		data: 'IceCream',
-	},
-	item35: {
-		index: 'item35',
-		isFolder: true,
-		children: ['item36', 'item37', 'item38'],
-		data: 'Drinks',
-	},
-	item36: {
-		index: 'item36',
-		isFolder: false,
-		data: 'PinaColada',
-	},
-	item37: {
-		index: 'item37',
-		isFolder: false,
-		data: 'Cola',
-	},
-	item38: {
-		index: 'item38',
-		isFolder: false,
-		data: 'Juice',
-	},
+/* ------------------------------------------------------
+   TYPES
+------------------------------------------------------- */
+
+export type TreeNode = {
+	id: string;
+	label: string;
+	icon?: React.ReactNode;
+	children?: TreeNode[];
+	disabled?: boolean;
+	defaultExpanded?: boolean;
 };
 
-class CustomTreeDataProvider implements TreeDataProvider {
-	private items: Record<TreeItemIndex, TreeItem>;
-	constructor(items: Record<TreeItemIndex, TreeItem>) {
-		this.items = items;
-	}
+/* ------------------------------------------------------
+   MAIN TREEVIEW
+------------------------------------------------------- */
 
-	private treeChangeListeners: ((changedItemIds: TreeItemIndex[]) => void)[] = [];
+export const TreeView: React.FC<{
+	data: TreeNode[];
+	className?: string;
+	onSelect?: (node: TreeNode) => void;
+	onChange?: (data: TreeNode[]) => void;
+}> = ({ data: initial, className, onSelect, onChange }) => {
+	const [data, setData] = React.useState<TreeNode[]>(structuredClone(initial));
+	const [expanded, setExpanded] = React.useState<Record<string, boolean>>(() => initExpanded(initial));
 
-	public async getTreeItem(itemId: TreeItemIndex) {
-		const item = this.items[itemId];
-		if (!item) {
-			return {
-				index: itemId,
-				isFolder: false,
-				data: `Unknown Item: ${itemId}` as string,
-			};
+	const [activeId, setActiveId] = React.useState<string | null>(null);
+	const [draggingId, setDraggingId] = React.useState<string | null>(null);
+
+	const [dropIndicator, setDropIndicator] = React.useState<{
+		targetId: string;
+		position: 'above' | 'inside' | 'below';
+	} | null>(null);
+
+	const autoExpandTimeoutRef = React.useRef<number | null>(null);
+
+	const updateData = (newData: TreeNode[]) => {
+		setData(newData);
+		onChange?.(newData);
+	};
+
+	const handleMove = (sourceId: string, targetId: string, position: 'above' | 'inside' | 'below') => {
+		const cloned = structuredClone(data);
+		const source = removeNode(cloned, sourceId);
+		if (!source) return;
+
+		if (position === 'inside') {
+			const target = findNode(cloned, targetId);
+			if (!target) return;
+			target.children ??= [];
+			target.children.push(source);
+		} else if (position === 'above') {
+			insertBefore(cloned, targetId, source);
+		} else {
+			insertAfter(cloned, targetId, source);
 		}
-		return item;
-	}
 
-	public async onChangeItemChildren(itemId: TreeItemIndex, newChildren: TreeItemIndex[]) {
-		this.items[itemId].children = newChildren;
-		this.treeChangeListeners.forEach(listener => listener([itemId]));
-	}
-
-	public onDidChangeTreeData(listener: (changedItemIds: TreeItemIndex[]) => void) {
-		this.treeChangeListeners.push(listener);
-		return {
-			dispose: () => {
-				const index = this.treeChangeListeners.indexOf(listener);
-				if (index > -1) this.treeChangeListeners.splice(index, 1);
-			},
-		};
-	}
-
-	public async onRenameItem(item: TreeItem, name: string) {
-		this.items[item.index].data = name;
-	}
-
-	public injectItem(name: string) {
-		const rand = `${Math.random()}`;
-		this.items[rand] = { data: name, index: rand } as TreeItem;
-		this.items.root.children?.push(rand);
-		this.treeChangeListeners.forEach(listener => listener(['root']));
-	}
-}
-
-const viewStateInitial: TreeViewState = {
-	'tree-sample': {},
-};
-
-const TreeView: React.FC = () => {
-	const tree = useRef<TreeRef>(null);
-	const [viewState, setViewState] = useState<TreeViewState>(viewStateInitial);
-	const [search, setSearch] = useState<string | undefined>('');
-	const [openMenuItem, setOpenMenuItem] = useState<TreeItemIndex | null>(null);
-
-	const dataProvider = useMemo(() => new CustomTreeDataProvider(treeData), []);
-
-	const getItemPath = useCallback(
-		async (search: string, searchRoot: TreeItemIndex = 'root'): Promise<TreeItemIndex[] | null> => {
-			const item = await dataProvider.getTreeItem(searchRoot);
-
-			if (item.data.toLowerCase().includes(search.toLowerCase())) {
-				return [item.index];
-			}
-
-			const searchedItems = await Promise.all(item.children?.map(child => getItemPath(search, child)) ?? []);
-
-			const result = searchedItems.find(item => item !== null);
-			if (!result) {
-				return null;
-			}
-
-			return [item.index, ...result];
-		},
-		[dataProvider]
-	);
-
-	const onSubmit = useCallback(
-		(e: React.FormEvent<HTMLFormElement>) => {
-			e.preventDefault();
-			if (search) {
-				getItemPath(search)
-					.then(path => {
-						if (path) {
-							return tree.current?.expandSubsequently(path).then(() => {
-								tree.current?.selectItems([...[path.at(-1) ?? '']]);
-								tree.current?.focusItem(path.at(-1) ?? '');
-							});
-						}
-					})
-					.catch(error => {
-						console.error('Error getting item:', error);
-					});
-			}
-		},
-		[getItemPath, search]
-	);
-
-	const runSearch = useCallback(
-		async (searchTerm: string) => {
-			const treeApi = tree.current;
-			if (!treeApi) return;
-			try {
-				const itemPath = await getItemPath(searchTerm);
-				if (!itemPath || itemPath.length === 0) return;
-				if (!tree.current) return;
-				await treeApi.expandSubsequently(itemPath);
-				const lastItemId = itemPath[itemPath.length - 1] ?? '';
-				treeApi.selectItems([lastItemId]);
-				treeApi.focusItem(lastItemId);
-			} catch (error) {
-				console.error('Error getting item:', error);
-			}
-		},
-		[getItemPath, tree]
-	);
-
-	useEffect(() => {
-		const term = (search ?? '').trim();
-		if (term.length === 0) return;
-		const handle = setTimeout(() => {
-			runSearch(term);
-		}, 300);
-		return () => clearTimeout(handle);
-	}, [search, runSearch]);
+		updateData(cloned);
+	};
 
 	return (
-		<div className='flex w-full flex-1 flex-col gap-2 min-h-0'>
-			<div className='flex items-center justify-between gap-2'>
-				<ApiClientButton size={'icon'} variant={'ghost'} className='border border-input rounded-none'>
-					<Plus className='w-4 h-4' />
-				</ApiClientButton>
-				<ApiClientInput value={search} onChange={e => setSearch(e.target.value)} placeholder='Search...' />
+		<ScrollArea className={cn('h-full w-full [&_.scroll-area-viewport]:overflow-visible', className)}>
+			<div role='tree' className='py-1 text-sm'>
+				{data.map(node => (
+					<TreeNodeItem
+						key={node.id}
+						node={node}
+						level={0}
+						expanded={expanded}
+						setExpanded={setExpanded}
+						onSelect={onSelect}
+						activeId={activeId}
+						setActiveId={setActiveId}
+						draggingId={draggingId}
+						setDraggingId={setDraggingId}
+						dropIndicator={dropIndicator}
+						setDropIndicator={setDropIndicator}
+						onMove={handleMove}
+						autoExpandTimeoutRef={autoExpandTimeoutRef}
+					/>
+				))}
 			</div>
-			<UncontrolledTreeEnvironment
-				dataProvider={dataProvider}
-				getItemTitle={item => item.data}
-				canSearch={true}
-				canSearchByStartingTyping={true}
-				canRename={false}
-				viewState={viewState}
-				canDragAndDrop={true}
-				canReorderItems={true}
-				canDropOnFolder={true}
-				canDropOnNonFolder={true}
-				renderTreeContainer={({ children, containerProps }) => {
-					return (
-						<div {...containerProps} className='w-full h-full overflow-y-auto [scrollbar-gutter:stable]'>
-							{children}
-						</div>
-					);
-				}}
-				renderLiveDescriptorContainer={() => <></>}
-				renderItemsContainer={({ children, containerProps }) => {
-					return (
-						<ul {...containerProps} className='space-y-1 w-full'>
-							{children}
-						</ul>
-					);
-				}}
-				renderItem={({ title, item, arrow, context, depth, children, info }) => {
-					const indentation = 10 * depth;
-					return (
-						<li {...context.itemContainerWithChildrenProps}>
-							<div
-								className='flex items-center justify-between bg-background group'
-								onContextMenu={e => {
-									e.preventDefault();
-									e.stopPropagation();
-									setOpenMenuItem(item.index);
-								}}>
-								{item.isFolder && (
-									<div
-										className={cn(
-											'flex gap-2 items-center h-9 pr-2 transition-colors duration-100 group-hover:bg-muted-foreground/10!',
-											openMenuItem === item.index && 'bg-red-600!'
-										)}>
-										{arrow}
-									</div>
-								)}
-								<ApiClientButton
-									{...context.itemContainerWithoutChildrenProps}
-									{...context.interactiveElementProps}
-									type='button'
-									variant='ghost'
-									size='sm'
-									className={cn(
-										'flex h-9 flex-1 items-center gap-1.5 border-none text-xs shadow-none justify-start bg-transparent rounded-none transition-colors duration-100',
-										'group-hover:bg-muted-foreground/10!',
-										openMenuItem === item.index && 'bg-red-600!'
-									)}
-									style={{ paddingLeft: `${item.isFolder ? indentation : indentation + 24}px` }}
-									onKeyDown={e => {
-										if (e.key === 'ContextMenu' || (e.shiftKey && e.key === 'F10') || (e.altKey && e.key === 'ArrowDown')) {
-											e.preventDefault();
-											setOpenMenuItem(item.index);
-										}
-									}}>
-									<span className='capitalize'>{title}</span>
-								</ApiClientButton>
-								<DropdownMenu open={openMenuItem === item.index} onOpenChange={open => setOpenMenuItem(open ? item.index : null)}>
-									<DropdownMenuTrigger asChild>
-										<span
-											tabIndex={-1}
-											aria-label='More actions'
-											className={cn(
-												`inline-flex w-8 h-9 items-center justify-center rounded-none opacity-0 transition-colors duration-100 group-hover:opacity-100 group-hover:bg-muted-foreground/10! cursor-pointer`,
-												openMenuItem === item.index && 'bg-red-600! opacity-100'
-											)}
-											onPointerDown={e => {
-												e.stopPropagation();
-											}}
-											onClick={e => {
-												e.stopPropagation();
-											}}
-											onKeyDown={e => {
-												if (e.key === 'Enter' || e.key === ' ') {
-													e.preventDefault();
-													e.stopPropagation();
-												}
-											}}>
-											<MoreHorizontal className={cn('w-8 h-4 px-1 rounded-sm', openMenuItem === item.index && 'text-foreground bg-muted-foreground/20!')} />
-										</span>
-									</DropdownMenuTrigger>
-									<DropdownMenuContent align='end' onPointerDown={e => e.stopPropagation()} onPointerDownOutside={e => {}}>
-										<DropdownMenuGroup>
-											<DropdownMenuItem onClick={e => {}}>
-												<FilePlus className='h-4 w-4 mr-2' />
-												Add New Request
-											</DropdownMenuItem>
-											<DropdownMenuItem>
-												<FolderPlus className='h-4 w-4 mr-2' />
-												Add New Folder
-											</DropdownMenuItem>
-										</DropdownMenuGroup>
-										<DropdownMenuSeparator />
-										<DropdownMenuGroup>
-											<DropdownMenuItem>
-												<Copy className='h-4 w-4 mr-2' />
-												Copy To
-											</DropdownMenuItem>
-											<DropdownMenuItem>
-												<MoveRight className='h-4 w-4 mr-2' />
-												Move To
-											</DropdownMenuItem>
-										</DropdownMenuGroup>
-										<DropdownMenuSeparator />
-										<DropdownMenuGroup>
-											<DropdownMenuItem>
-												<Pencil className='h-4 w-4 mr-2' />
-												Rename
-											</DropdownMenuItem>
-											<DropdownMenuItem>
-												<Files className='h-4 w-4 mr-2' />
-												Duplicate
-											</DropdownMenuItem>
-											<DropdownMenuItem variant='destructive'>
-												<Trash2 className='h-4 w-4 mr-2' />
-												Delete
-											</DropdownMenuItem>
-										</DropdownMenuGroup>
-									</DropdownMenuContent>
-								</DropdownMenu>
-							</div>
-							<div className='mt-1'>{children}</div>
-						</li>
-					);
-				}}
-				renderItemArrow={({ context }) => {
-					return context.isExpanded ? (
-						<>
-							<ChevronDown {...context.arrowProps} className={cn('size-3.5!')} />
-							<FolderOpen stroke='#dcb67a' className={cn('size-3.5!')} />
-						</>
-					) : (
-						<>
-							<ChevronRight {...context.arrowProps} className={cn('size-3.5!')} />
-							<Folder fill='#c09553' stroke='#c09553' className={cn('size-3.5!')} />
-						</>
-					);
-				}}
-				renderItemTitle={({ title }) => <span>{title}</span>}>
-				<Tree ref={tree} treeId='tree-sample' rootItem='root' treeLabel='Sample Tree' />
-			</UncontrolledTreeEnvironment>
-		</div>
+		</ScrollArea>
 	);
 };
 
-export default TreeView;
+/* ------------------------------------------------------
+   SINGLE TREE NODE
+------------------------------------------------------- */
+
+const TreeNodeItem: React.FC<{
+	node: TreeNode;
+	level: number;
+	expanded: Record<string, boolean>;
+	setExpanded: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
+	onSelect?: (node: TreeNode) => void;
+	activeId: string | null;
+	setActiveId: (id: string | null) => void;
+
+	draggingId: string | null;
+	setDraggingId: (id: string | null) => void;
+
+	dropIndicator: { targetId: string; position: 'above' | 'inside' | 'below' } | null;
+	setDropIndicator: (v: any) => void;
+
+	onMove: (sourceId: string, targetId: string, position: 'above' | 'inside' | 'below') => void;
+	autoExpandTimeoutRef: React.RefObject<number | null>;
+}> = ({
+	node,
+	level,
+	expanded,
+	setExpanded,
+	onSelect,
+	activeId,
+	setActiveId,
+	draggingId,
+	setDraggingId,
+	dropIndicator,
+	setDropIndicator,
+	onMove,
+	autoExpandTimeoutRef,
+}) => {
+	const hasChildren = Boolean(node.children?.length);
+	const isExpanded = Boolean(expanded[node.id]);
+	const isActive = activeId === node.id;
+
+	const [menuOpen, setMenuOpen] = React.useState(false);
+	const ref = React.useRef<HTMLDivElement | null>(null);
+
+	/* ---------------- CLICK BEHAVIOR (FIXED!) ---------------- */
+
+	const handleClick = (e: React.MouseEvent) => {
+		e.stopPropagation();
+
+		// Single click: select
+		setActiveId(node.id);
+		onSelect?.(node);
+
+		// Single click: expand/collapse (VS Code default)
+		if (hasChildren) {
+			setExpanded(prev => ({ ...prev, [node.id]: !prev[node.id] }));
+		}
+
+		const el = ref.current;
+		if (el && !isElementHidden(el)) {
+			try {
+				el.focus({ preventScroll: true } as FocusOptions);
+			} catch {
+				el.focus();
+			}
+		}
+	};
+
+	const handleChevron = (e: React.MouseEvent) => {
+		e.stopPropagation();
+		setExpanded(prev => ({ ...prev, [node.id]: !prev[node.id] }));
+	};
+
+	/* ---------------- CONTEXT MENU ---------------- */
+
+	const handleContextMenu = (e: React.MouseEvent) => {
+		e.preventDefault();
+		e.stopPropagation();
+		setActiveId(node.id);
+		setMenuOpen(true);
+	};
+
+	/* ---------------- DRAG & DROP ---------------- */
+
+	const dragStart = (e: React.DragEvent) => {
+		e.stopPropagation();
+		setDraggingId(node.id);
+		e.dataTransfer.setData('text/plain', node.id);
+	};
+
+	const dragEnd = () => {
+		setDraggingId(null);
+		setDropIndicator(null);
+	};
+
+	const getDropPosition = (e: React.DragEvent): 'above' | 'inside' | 'below' => {
+		const el = ref.current!;
+		const rect = el.getBoundingClientRect();
+		const offset = e.clientY - rect.top;
+		if (offset < rect.height * 0.25) return 'above';
+		if (offset > rect.height * 0.75) return 'below';
+		return 'inside';
+	};
+
+	const dragOver = (e: React.DragEvent) => {
+		e.preventDefault();
+		const pos = getDropPosition(e);
+
+		if (!hasChildren && pos === 'inside') {
+			// files can't accept "inside"
+			const el = ref.current!;
+			const rect = el.getBoundingClientRect();
+			const offset = e.clientY - rect.top;
+			const fallback = offset < rect.height / 2 ? 'above' : 'below';
+			setDropIndicator({ targetId: node.id, position: fallback });
+			return;
+		}
+
+		setDropIndicator({ targetId: node.id, position: pos });
+
+		// auto expand on hover
+		if (pos === 'inside' && hasChildren && !isExpanded) {
+			if (!autoExpandTimeoutRef.current) {
+				autoExpandTimeoutRef.current = window.setTimeout(() => {
+					setExpanded(prev => ({ ...prev, [node.id]: true }));
+					autoExpandTimeoutRef.current = null;
+				}, 300);
+			}
+		}
+	};
+
+	const dragLeave = () => {
+		if (autoExpandTimeoutRef.current) {
+			clearTimeout(autoExpandTimeoutRef.current);
+			autoExpandTimeoutRef.current = null;
+		}
+	};
+
+	const drop = (e: React.DragEvent) => {
+		e.preventDefault();
+		const sourceId = e.dataTransfer.getData('text/plain');
+		const pos = dropIndicator?.position ?? 'inside';
+
+		if (sourceId !== node.id) {
+			onMove(sourceId, node.id, pos);
+		}
+
+		setDraggingId(null);
+		setDropIndicator(null);
+	};
+
+	/* ---------------- RENDER ---------------- */
+
+	return (
+		<>
+			{dropIndicator?.targetId === node.id && dropIndicator.position === 'above' && <div className='h-0.5 bg-accent w-full -mt-px' />}
+
+			<DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
+				<div
+					ref={ref}
+					role='treeitem'
+					tabIndex={isActive ? 0 : -1}
+					data-tree-id={node.id}
+					draggable
+					onDragStart={dragStart}
+					onDragEnd={dragEnd}
+					onDragOver={dragOver}
+					onDragLeave={dragLeave}
+					onDrop={drop}
+					onContextMenu={handleContextMenu}
+					onClick={handleClick}
+					className={cn(
+						'flex items-center justify-between pr-2 cursor-pointer rounded-sm select-none',
+						'h-9 py-1.5',
+						isActive && 'bg-sidebar-accent text-sidebar-accent-foreground',
+						dropIndicator?.targetId === node.id && dropIndicator.position === 'inside' ? 'bg-accent/10' : ''
+					)}
+					style={{ paddingLeft: 8 + level * 16 }}>
+					<div className='flex items-center gap-1 flex-1 min-w-0'>
+						{/* Chevron */}
+						{hasChildren ? (
+							<Button variant='ghost' size='icon' className='h-5 w-5 p-0 hover:bg-transparent' onClick={handleChevron} tabIndex={-1}>
+								{isExpanded ? <ChevronDown className='h-4 w-4' /> : <ChevronRight className='h-4 w-4' />}
+							</Button>
+						) : (
+							<span className='h-5 w-5' />
+						)}
+
+						{/* Icon */}
+						<span className='h-5 w-5 flex items-center justify-center shrink-0'>
+							{node.icon ?? (hasChildren ? <Folder className='h-4 w-4' /> : <File className='h-4 w-4' />)}
+						</span>
+
+						{/* Label */}
+						<span className='truncate'>{node.label}</span>
+					</div>
+
+					{/* More Options */}
+					<DropdownMenuTrigger asChild>
+						<Button variant='ghost' size='icon' className='h-5 w-5 p-0 hover:bg-muted rounded-sm' onClick={e => e.stopPropagation()} tabIndex={-1}>
+							<MoreHorizontal className='h-4 w-4' />
+						</Button>
+					</DropdownMenuTrigger>
+				</div>
+				<TreeNodeMenu node={node} />
+			</DropdownMenu>
+
+			{hasChildren && isExpanded && (
+				<div role='group'>
+					{node.children!.map(child => (
+						<TreeNodeItem
+							key={child.id}
+							node={child}
+							level={level + 1}
+							expanded={expanded}
+							setExpanded={setExpanded}
+							onSelect={onSelect}
+							activeId={activeId}
+							setActiveId={setActiveId}
+							draggingId={draggingId}
+							setDraggingId={setDraggingId}
+							dropIndicator={dropIndicator}
+							setDropIndicator={setDropIndicator}
+							onMove={onMove}
+							autoExpandTimeoutRef={autoExpandTimeoutRef}
+						/>
+					))}
+				</div>
+			)}
+
+			{dropIndicator?.targetId === node.id && dropIndicator.position === 'below' && <div className='h-0.5 bg-accent w-full -mb-px' />}
+		</>
+	);
+};
+
+type NodeMenuProps = {
+	node: TreeNode;
+};
+
+const TreeNodeMenu: React.FC<NodeMenuProps> = ({ node }) => {
+	return (
+		<DropdownMenuContent align='end' side='right' className='min-w-[140px]' onClick={e => e.stopPropagation()}>
+			<DropdownMenuItem onClick={() => console.log('Rename', node)}>Rename</DropdownMenuItem>
+
+			<DropdownMenuItem onClick={() => console.log('Delete', node)}>Delete</DropdownMenuItem>
+
+			<DropdownMenuItem onClick={() => console.log('New File', node)}>New File</DropdownMenuItem>
+
+			<DropdownMenuItem onClick={() => console.log('New Folder', node)}>New Folder</DropdownMenuItem>
+		</DropdownMenuContent>
+	);
+};
+
+/* ------------------------------------------------------
+   UTILITIES
+------------------------------------------------------- */
+
+function initExpanded(nodes: TreeNode[]) {
+	const out: Record<string, boolean> = {};
+	const walk = (arr: TreeNode[]) => {
+		arr.forEach(n => {
+			if (n.defaultExpanded) out[n.id] = true;
+			if (n.children) walk(n.children);
+		});
+	};
+	walk(nodes);
+	return out;
+}
+
+function findNode(nodes: TreeNode[], id: string): TreeNode | null {
+	for (const n of nodes) {
+		if (n.id === id) return n;
+		if (n.children) {
+			const f = findNode(n.children, id);
+			if (f) return f;
+		}
+	}
+	return null;
+}
+
+function removeNode(nodes: TreeNode[], id: string): TreeNode | null {
+	for (let i = 0; i < nodes.length; i++) {
+		if (nodes[i].id === id) return nodes.splice(i, 1)[0];
+		if (nodes[i].children) {
+			const child = removeNode(nodes[i].children!, id);
+			if (child) return child;
+		}
+	}
+	return null;
+}
+
+function insertBefore(nodes: TreeNode[], targetId: string, item: TreeNode): boolean {
+	for (let i = 0; i < nodes.length; i++) {
+		if (nodes[i].id === targetId) {
+			nodes.splice(i, 0, item);
+			return true;
+		}
+		if (nodes[i].children && insertBefore(nodes[i].children!, targetId, item)) return true;
+	}
+	return false;
+}
+
+function insertAfter(nodes: TreeNode[], targetId: string, item: TreeNode): boolean {
+	for (let i = 0; i < nodes.length; i++) {
+		if (nodes[i].id === targetId) {
+			nodes.splice(i + 1, 0, item);
+			return true;
+		}
+		if (nodes[i].children && insertAfter(nodes[i].children!, targetId, item)) return true;
+	}
+	return false;
+}
+
+/* ------------------------------------------------------
+   ARIA-HIDDEN GUARD
+   Check if an element (or its ancestor) is aria-hidden
+------------------------------------------------------- */
+
+function isElementHidden(el: HTMLElement | null): boolean {
+	if (!el) return true;
+	// closest will search up the ancestor chain; if any ancestor has aria-hidden="true", treat as hidden
+	return el.closest('[aria-hidden="true"]') !== null;
+}
