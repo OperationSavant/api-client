@@ -2,7 +2,8 @@
 	"name": "vscode-api-client",
 	"displayName": "VS Code API Client",
 	"description": "A feature-rich API client for Visual Studio Code, similar to Postman.",
-	"version": "0.0.1",
+	"publisher": "wizard",
+	"version": "1.0.0",
 	"engines": {
 		"vscode": "^1.104.0"
 	},
@@ -31,39 +32,8 @@
 				}
 			]
 		},
-		"commands": [
-			{
-				"command": "apiClient.openRequest",
-				"title": "Open API Client",
-				"icon": "$(globe)"
-			},
-			{
-				"command": "apiClient.createRequest",
-				"title": "Create Request",
-				"icon": "$(add)"
-			},
-			{
-				"command": "apiClient.deleteRequest",
-				"title": "Delete Request",
-				"icon": "$(trash)"
-			}
-		],
-		"menus": {
-			"view/title": [
-				{
-					"command": "apiClient.openRequest",
-					"when": "view == apiClient.sidebar",
-					"group": "navigation"
-				}
-			],
-			"view/item/context": [
-				{
-					"command": "apiClient.createRequest",
-					"when": "view == apiClient.sidebar",
-					"group": "inline"
-				}
-			]
-		}
+		"commands": [],
+		"menus": {}
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run package",
@@ -85,16 +55,10 @@
 	"devDependencies": {
 		"@prettier/plugin-xml": "^3.4.2",
 		"@tailwindcss/typography": "^0.5.19",
-		"@testing-library/jest-dom": "^6.6.4",
-		"@testing-library/react": "^16.3.0",
-		"@testing-library/user-event": "^14.6.1",
 		"@types/glob": "^8.1.0",
-		"@types/jest": "^30.0.0",
 		"@types/mime-types": "^3.0.1",
-		"@types/mocha": "^10.0.6",
 		"@types/node": "20.x",
 		"@types/prettier": "^2.7.3",
-		"@types/turndown": "^5.0.5",
 		"@types/vscode": "^1.70.0",
 		"@typescript-eslint/eslint-plugin": "^7.7.1",
 		"@typescript-eslint/parser": "^7.7.1",
@@ -104,15 +68,11 @@
 		"cross-env": "^10.0.0",
 		"eslint": "^8.57.0",
 		"glob": "^8.1.0",
-		"jest": "^30.0.5",
-		"jest-environment-jsdom": "^30.0.5",
-		"mocha": "^10.4.0",
+		"node-loader": "^2.1.0",
 		"postcss-cli": "^11.0.1",
 		"prettier": "^3.6.2",
-		"react-scan": "^0.4.3",
 		"rimraf": "^6.0.1",
 		"text-encoding": "^0.7.0",
-		"ts-jest": "^29.4.0",
 		"ts-loader": "^9.5.4",
 		"typescript": "~5.5.4",
 		"webpack": "^5.91.0",
@@ -142,6 +102,7 @@
 		"@types/marked": "^5.0.2",
 		"@types/react": "^19.1.8",
 		"@types/react-dom": "^19.1.6",
+		"@vscode/sqlite3": "^5.1.8-vscode",
 		"autoprefixer": "^10.4.21",
 		"axios": "^1.13.1",
 		"buffer": "^6.0.3",
@@ -152,8 +113,6 @@
 		"css-loader": "^7.1.2",
 		"file-loader": "^6.2.0",
 		"form-data": "^4.0.4",
-		"framer-motion": "^12.23.24",
-		"is-html": "^3.2.0",
 		"jsonc-parser": "^3.3.1",
 		"lucide-react": "^0.532.0",
 		"mime-types": "^3.0.1",

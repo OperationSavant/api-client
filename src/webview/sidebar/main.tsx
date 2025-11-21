@@ -13,11 +13,9 @@ const root = ReactDOM.createRoot(document.getElementById('sidebar-root') as HTML
 root.render(
 	<React.StrictMode>
 		<ErrorBoundary FallbackComponent={ErrorFallback}>
-			<Provider store={store}>
-				<Suspense fallback={<LoadingFallback />}>
-					<App />
-				</Suspense>
-			</Provider>
+			<Suspense fallback={<LoadingFallback />}>
+				<App />
+			</Suspense>
 		</ErrorBoundary>
 	</React.StrictMode>
 );

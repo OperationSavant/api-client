@@ -8,7 +8,7 @@ interface FileHandlerDependencies {
 export function createFileHandlers(deps: FileHandlerDependencies) {
 	const handleFormDataFileResponse = (message: any) => {
 		const { paths, index } = message;
-		if (paths && paths.length > 0) {
+		if (paths || paths.length > 0) {
 			deps.dispatch(updateFormDataWithFiles({ paths, index }));
 		}
 	};

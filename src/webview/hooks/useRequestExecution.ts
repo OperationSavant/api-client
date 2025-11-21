@@ -2,17 +2,13 @@
 import { useSelector } from 'react-redux';
 import { useCallback } from 'react';
 import { RootState } from '@/store';
-import { Request } from '@/shared/types/request';
-// import { CookieIntegration } from '@/services/cookie-integration'; // TODO:Temporarily disable cookie integration due to folder restructure
 import { arrayToRecord } from '@/shared/lib/utils';
 
 export const useRequestExecution = ({
-	// cookieIntegration,
 	onLoadingChange,
 	onResponseClear,
 	sendToBackend,
 }: {
-	cookieIntegration: null; // CookieIntegration; // TODO:Temporarily disable cookie integration due to folder restructure
 	onLoadingChange: (loading: boolean) => void;
 	onResponseClear: () => void;
 	sendToBackend: (message: any) => void;
@@ -38,6 +34,7 @@ export const useRequestExecution = ({
 		}
 
 		sendToBackend({
+			source: 'webview',
 			command: 'sendRequest',
 			url: fullUrl,
 			method,

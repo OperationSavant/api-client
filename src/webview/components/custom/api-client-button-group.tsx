@@ -7,10 +7,11 @@ import React from 'react';
 
 interface ApiClientButtonGroupProps extends React.ComponentProps<typeof Button> {
 	downloadClick?: () => void;
+	buttonText?: string;
 	loading?: boolean;
 }
 
-export const ApiClientButtonGroup = ({ onClick, disabled, size, downloadClick, loading }: ApiClientButtonGroupProps) => {
+export const ApiClientButtonGroup = ({ onClick, disabled, size, downloadClick, loading, buttonText }: ApiClientButtonGroupProps) => {
 	return (
 		<ButtonGroup className='ring-0 focus:ring-0 border-muted-foreground hover:rounded-md text-xs w-full'>
 			<Button
@@ -21,7 +22,7 @@ export const ApiClientButtonGroup = ({ onClick, disabled, size, downloadClick, l
 				className='border-muted-foreground text-xs font-medium hover:text-accent-foreground flex-1 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-muted-foreground!'>
 				<div className='flex items-center gap-2'>
 					{loading ? <Loader2 className='animate-spin h-4 w-4 hover:text-accent-foreground' /> : <Send className='h-4 w-4 hover:text-accent-foreground' />}
-					<span>Send</span>
+					<span>{buttonText}</span>
 				</div>
 			</Button>
 			<DropdownMenu>

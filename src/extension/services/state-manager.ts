@@ -2,9 +2,17 @@ import { storageService } from '@/domain/services/storageService';
 import { collectionService } from '@/domain/services/collectionService';
 import { historyService } from '@/domain/services/history-service';
 import { environmentService } from '@/domain/services/environment-service';
+import { SQLiteCollectionPersistence } from './collection-persistence';
+import { getDatabase } from './db-service';
 
 export class StateManager {
 	private static saveTimeout: NodeJS.Timeout | undefined;
+
+	static initialize(): void {
+		collectionService.setPersistence(new SQLiteCollectionPersistence(getDatabase()));
+		this.loadState();
+	}
+
 	/**
 	 * Save all application state to disk
 	 * Called after any state-modifying operation
@@ -13,7 +21,6 @@ export class StateManager {
 		clearTimeout(this.saveTimeout);
 		this.saveTimeout = setTimeout(() => {
 			const state = {
-				collections: collectionService.exportData(),
 				history: historyService.exportData(),
 				environments: environmentService.exportData(),
 			};
@@ -25,10 +32,10 @@ export class StateManager {
 	 * Load all application state from disk
 	 * Called during extension activation
 	 */
-	static loadState(): void {
+	private static loadState(): void {
+		collectionService.loadFromPersistence();
 		const state = storageService.loadState();
 		if (state) {
-			collectionService.importData(state.collections);
 			historyService.importData(state.history);
 			environmentService.importData(state.environments);
 		}
@@ -41,7 +48,6 @@ export class StateManager {
 	static flush(): void {
 		clearTimeout(this.saveTimeout);
 		const state = {
-			collections: collectionService.exportData(),
 			history: historyService.exportData(),
 			environments: environmentService.exportData(),
 		};

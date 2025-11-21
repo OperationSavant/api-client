@@ -71,7 +71,7 @@ export function ApiClientRequestBar({
 				<ApiClientButton onClick={onSaveClick} disabled={loading} size={'lg'} variant={'outline'}>
 					Save
 				</ApiClientButton>
-				<ApiClientButtonGroup onClick={onSend} disabled={loading} size={'lg'} downloadClick={undefined} loading={loading} />
+				<ApiClientButtonGroup onClick={onSend} disabled={loading} size={'lg'} downloadClick={undefined} loading={loading} buttonText='Send' />
 			</div>
 		</div>
 	);

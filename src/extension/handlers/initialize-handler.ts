@@ -27,7 +27,6 @@ export class InitializeHandler {
 			collections: collections,
 			environments: environments,
 			history: history,
-			// cookies: cookies, // TODO: Phase 4
 		});
 	}
 }

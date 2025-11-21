@@ -1,16 +1,22 @@
 import { window, WebviewPanel } from 'vscode';
 import { collectionService } from '@/domain/services/collectionService';
 import { v4 as uuidv4 } from 'uuid';
+import { SidebarProvider } from '../providers/sidebar-provider';
 
 interface CollectionCommandDependencies {
 	saveState: () => void;
 	// refreshProvider: () => void;
 	createWebview: (tabId: string, name?: string, args?: any[]) => WebviewPanel;
 	getAllPanels: () => Map<string, WebviewPanel>;
+	sidebarProvider?: SidebarProvider;
 }
 
 export class CollectionCommands {
-	constructor(private deps: CollectionCommandDependencies) {}
+	constructor(
+		private deps: CollectionCommandDependencies & {
+			sidebarProvider?: SidebarProvider;
+		}
+	) {}
 
 	/**
 	 * Command: apiClient.createCollection

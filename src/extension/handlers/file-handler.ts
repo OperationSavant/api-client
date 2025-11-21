@@ -1,5 +1,6 @@
 import { WebviewPanel, window, workspace, OpenDialogOptions, Uri, ViewColumn } from 'vscode';
 import * as path from 'path';
+import { contentType as mimeContentType } from 'mime-types';
 
 export class FileHandler {
 	constructor() {}
@@ -13,21 +14,19 @@ export class FileHandler {
 		const options: OpenDialogOptions = {
 			canSelectFiles: true,
 			canSelectFolders: false,
-			canSelectMany: false,
+			canSelectMany: true,
 			openLabel: 'Select File',
 		};
 
 		const fileUris = await window.showOpenDialog(options);
 
 		if (fileUris && fileUris.length > 0) {
-			const filePath = fileUris[0].fsPath;
-			const fileName = path.basename(filePath);
+			const paths = fileUris.map(uri => uri.fsPath);
 
 			panel.webview.postMessage({
-				command: 'formDataFileSelected',
-				index: index,
-				filePath: filePath,
-				fileName: fileName,
+				command: 'formDataFileResponse',
+				index,
+				paths,
 			});
 		}
 	}
@@ -46,11 +45,15 @@ export class FileHandler {
 		const fileUris = await window.showOpenDialog(options);
 
 		if (fileUris && fileUris.length > 0) {
-			const filePath = fileUris[0].fsPath;
+			const path = fileUris[0].fsPath;
+			const size = (await workspace.fs.stat(fileUris[0])).size;
+			const contentType = mimeContentType(path) || 'application/octet-stream';
 
 			panel.webview.postMessage({
-				command: 'binaryFileSelected',
-				filePath: filePath,
+				command: 'binaryFileResponse',
+				path,
+				size,
+				contentType,
 			});
 		}
 	}

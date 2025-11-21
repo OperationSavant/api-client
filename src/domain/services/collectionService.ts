@@ -1,14 +1,33 @@
 import { Collection, CollectionFolder, CollectionRequest, CollectionMetadata, CollectionTreeNode } from '@/shared/types/collection';
+import { ICollectionPersistence } from '@/domain/types/collection-persistence';
 
 export class CollectionService {
 	private static instance: CollectionService;
 	private collections: Map<string, Collection> = new Map();
+	private persistence: ICollectionPersistence | null = null;
 
 	static getInstance(): CollectionService {
 		if (!CollectionService.instance) {
 			CollectionService.instance = new CollectionService();
 		}
 		return CollectionService.instance;
+	}
+
+	setPersistence(adapter: ICollectionPersistence): void {
+		this.persistence = adapter;
+	}
+
+	loadFromPersistence(): void {
+		if (!this.persistence) {
+			console.warn('No persistence adapter set');
+			return;
+		}
+
+		const collections = this.persistence.loadAll();
+		this.collections.clear();
+		collections.forEach(collection => {
+			this.collections.set(collection.id, collection);
+		});
 	}
 
 	// Collection CRUD Operations
@@ -24,6 +43,9 @@ export class CollectionService {
 		};
 
 		this.collections.set(collection.id, collection);
+		if (this.persistence) {
+			this.persistence.createCollection(collection);
+		}
 		return collection;
 	}
 
@@ -46,11 +68,19 @@ export class CollectionService {
 		};
 
 		this.collections.set(id, updatedCollection);
+		if (this.persistence) {
+			this.persistence.updateCollection(id, updates);
+		}
 		return updatedCollection;
 	}
 
 	deleteCollection(id: string): boolean {
-		return this.collections.delete(id);
+		const deleted = this.collections.delete(id);
+		if (deleted && this.persistence) {
+			this.persistence.deleteCollection(id);
+		}
+
+		return deleted;
 	}
 
 	// Folder CRUD Operations
@@ -78,6 +108,10 @@ export class CollectionService {
 		}
 
 		collection.updatedAt = new Date();
+
+		if (this.persistence) {
+			this.persistence.createFolder(collectionId, folder);
+		}
 		return folder;
 	}
 
@@ -97,6 +131,9 @@ export class CollectionService {
 
 		Object.assign(folder, updates);
 		collection.updatedAt = new Date();
+		if (this.persistence) {
+			this.persistence.updateFolder(folderId, updates);
+		}
 		return folder;
 	}
 
@@ -118,6 +155,9 @@ export class CollectionService {
 		}
 
 		collection.updatedAt = new Date();
+		if (this.persistence) {
+			this.persistence.deleteFolder(folderId);
+		}
 		return true;
 	}
 
@@ -142,6 +182,9 @@ export class CollectionService {
 		}
 
 		collection.updatedAt = new Date();
+		if (this.persistence) {
+			this.persistence.createRequest(newRequest, collectionId);
+		}
 		return newRequest;
 	}
 
@@ -161,6 +204,9 @@ export class CollectionService {
 
 		Object.assign(request, updates);
 		collection.updatedAt = new Date();
+		if (this.persistence) {
+			this.persistence.updateRequest(requestId, updates);
+		}
 		return request;
 	}
 
@@ -181,6 +227,9 @@ export class CollectionService {
 		}
 
 		collection.updatedAt = new Date();
+		if (this.persistence) {
+			this.persistence.deleteRequest(requestId);
+		}
 		return true;
 	}
 
@@ -258,6 +307,9 @@ export class CollectionService {
 		}
 
 		collection.updatedAt = new Date();
+		if (this.persistence) {
+			this.persistence.updateRequest(requestId, { folderId: targetFolderId });
+		}
 		return true;
 	}
 
@@ -293,6 +345,9 @@ export class CollectionService {
 		}
 
 		collection.updatedAt = new Date();
+		if (this.persistence) {
+			this.persistence.updateFolder(folderId, { parentId: targetParentId });
+		}
 		return true;
 	}
 
@@ -405,11 +460,11 @@ export class CollectionService {
 		return Array.from(this.collections.entries());
 	}
 
-	public importData(data: [string, Collection][]): void {
+	public importData(data: Collection[]): void {
 		if (data && Array.isArray(data)) {
-			const revivedData = data.map(([id, collection]) => {
+			const revivedData = data.map(collection => {
 				const revivedCollection: Collection = { ...collection, createdAt: new Date(collection.createdAt), updatedAt: new Date(collection.updatedAt) };
-				return [id, revivedCollection] as [string, Collection];
+				return [revivedCollection.id, revivedCollection] as [string, Collection];
 			});
 			this.collections = new Map(revivedData);
 		} else {

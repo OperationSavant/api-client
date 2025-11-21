@@ -1,13 +1,28 @@
 'use client';
 
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { UncontrolledTreeEnvironment, Tree, type TreeItemIndex, type TreeItem, type TreeRef, type TreeViewState, TreeDataProvider } from 'react-complex-tree';
-import { ChevronDown, ChevronRight, Copy, FilePlus, Files, Folder, FolderOpen, FolderPlus, MoreHorizontal, MoveRight, Pencil, Trash2 } from 'lucide-react';
+import {
+	ChevronDown,
+	ChevronRight,
+	Copy,
+	FilePlus,
+	Files,
+	Folder,
+	FolderOpen,
+	FolderPlus,
+	MoreHorizontal,
+	MoveRight,
+	Pencil,
+	Plus,
+	Trash2,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/shared/lib/utils';
 import ApiClientButton from './api-client-button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import { ApiClientInput } from './api-client-input';
 
 const treeData: Record<TreeItemIndex, TreeItem> = {
 	root: {
@@ -306,7 +321,6 @@ const TreeView: React.FC = () => {
 							return tree.current?.expandSubsequently(path).then(() => {
 								tree.current?.selectItems([...[path.at(-1) ?? '']]);
 								tree.current?.focusItem(path.at(-1) ?? '');
-								// tree.current?.toggleItemSelectStatus(path.at(-1) ?? '');
 							});
 						}
 					})
@@ -318,12 +332,42 @@ const TreeView: React.FC = () => {
 		[getItemPath, search]
 	);
 
+	const runSearch = useCallback(
+		async (searchTerm: string) => {
+			const treeApi = tree.current;
+			if (!treeApi) return;
+			try {
+				const itemPath = await getItemPath(searchTerm);
+				if (!itemPath || itemPath.length === 0) return;
+				if (!tree.current) return;
+				await treeApi.expandSubsequently(itemPath);
+				const lastItemId = itemPath[itemPath.length - 1] ?? '';
+				treeApi.selectItems([lastItemId]);
+				treeApi.focusItem(lastItemId);
+			} catch (error) {
+				console.error('Error getting item:', error);
+			}
+		},
+		[getItemPath, tree]
+	);
+
+	useEffect(() => {
+		const term = (search ?? '').trim();
+		if (term.length === 0) return;
+		const handle = setTimeout(() => {
+			runSearch(term);
+		}, 300);
+		return () => clearTimeout(handle);
+	}, [search, runSearch]);
+
 	return (
 		<div className='flex w-full flex-1 flex-col gap-2 min-h-0'>
-			<form onSubmit={onSubmit} className='flex items-center justify-start gap-2'>
-				<Input value={search} onChange={e => setSearch(e.target.value)} placeholder='Search...' />
-				<Button type='submit'>Search</Button>
-			</form>
+			<div className='flex items-center justify-between gap-2'>
+				<ApiClientButton size={'icon'} variant={'ghost'} className='border border-input rounded-none'>
+					<Plus className='w-4 h-4' />
+				</ApiClientButton>
+				<ApiClientInput value={search} onChange={e => setSearch(e.target.value)} placeholder='Search...' />
+			</div>
 			<UncontrolledTreeEnvironment
 				dataProvider={dataProvider}
 				getItemTitle={item => item.data}
@@ -337,7 +381,7 @@ const TreeView: React.FC = () => {
 				canDropOnNonFolder={true}
 				renderTreeContainer={({ children, containerProps }) => {
 					return (
-						<div {...containerProps} className='w-full h-full overflow-y-auto [scrollbar-gutter:stable] pl-4 pr-1'>
+						<div {...containerProps} className='w-full h-full overflow-y-auto [scrollbar-gutter:stable]'>
 							{children}
 						</div>
 					);

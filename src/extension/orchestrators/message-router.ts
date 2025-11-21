@@ -1,4 +1,4 @@
-import { WebviewPanel } from 'vscode';
+import { commands, Webview, WebviewPanel, WebviewView } from 'vscode';
 import { ApplicationServices } from '../services/application-services';
 import { RequestHandler } from '../handlers/request-handler';
 import { InitializeHandler } from '../handlers/initialize-handler';
@@ -7,8 +7,10 @@ import { OAuth2Handler } from '../handlers/oauth2-handler';
 import { CollectionHandler } from '../handlers/collection-handler';
 import { EnvironmentHandler } from '../handlers/environment-handler';
 import { HistoryHandler } from '../handlers/history-handler';
-import { WebviewMessage } from '@/shared/types/webview-messages';
+import { WebviewMessage, WebviewViewMessage } from '@/shared/types/webview-messages';
+import { SidebarHandler } from '../handlers/sidebar-handler';
 
+/* eslint-disable no-dupe-class-members */
 export class MessageRouter {
 	private requestHandler: RequestHandler;
 	private initializeHandler: InitializeHandler;
@@ -17,6 +19,7 @@ export class MessageRouter {
 	private collectionHandler: CollectionHandler;
 	private environmentHandler: EnvironmentHandler;
 	private historyHandler: HistoryHandler;
+	private sidebarHandler: SidebarHandler;
 
 	constructor(private services: ApplicationServices) {
 		this.requestHandler = new RequestHandler({
@@ -30,78 +33,88 @@ export class MessageRouter {
 		});
 		this.fileHandler = new FileHandler();
 		this.oauth2Handler = new OAuth2Handler();
-		this.collectionHandler = new CollectionHandler({ collectionService: services.collections });
+		this.collectionHandler = new CollectionHandler();
 		this.environmentHandler = new EnvironmentHandler({ environmentService: services.environment });
 		this.historyHandler = new HistoryHandler({ historyService: services.history });
+		this.sidebarHandler = new SidebarHandler({ collectionPersistence: services.collectionPersistence });
 	}
 
 	/**
 	 * Route message to appropriate handler
 	 */
-	async route(message: WebviewMessage, panel: WebviewPanel): Promise<void> {
-		switch (message.command) {
-			case 'webviewReady':
-				return this.initializeHandler.handle(message, panel);
+	async route(message: WebviewMessage, panel: WebviewPanel): Promise<void>;
 
-			case 'sendRequest':
-				return this.requestHandler.handle(message, panel);
+	async route(message: WebviewViewMessage, host: WebviewView): Promise<void>;
 
-			case 'startOAuth2Authorization':
-			case 'exchangeOAuth2Code':
-			case 'generateOAuth2Token':
-			case 'requestDeviceCode':
-				return this.oauth2Handler.handle(message, panel);
+	async route(message: WebviewMessage | WebviewViewMessage, target: WebviewPanel | WebviewView): Promise<void> {
+		if ('reveal' in target && message.source === 'webview') {
+			switch (message.command) {
+				case 'webviewReady':
+					return this.initializeHandler.handle(message, target);
 
-			case 'formDataFileRequest':
-				return this.fileHandler.handleFormDataFileSelect(message, panel);
+				case 'sendRequest':
+					return this.requestHandler.handle(message, target);
 
-			case 'binaryFileRequest':
-				return this.fileHandler.handleBinaryFileSelect(message, panel);
+				case 'startOAuth2Authorization':
+				case 'exchangeOAuth2Code':
+				case 'generateOAuth2Token':
+				case 'requestDeviceCode':
+					return this.oauth2Handler.handle(message, target);
 
-			case 'openFileInEditor':
-				return this.fileHandler.handleOpenFileInEditor(message, panel);
+				case 'formDataFileRequest':
+					return this.fileHandler.handleFormDataFileSelect(message, target);
 
-			case 'createCollection':
-				return this.collectionHandler.handleCreateCollection(message, panel);
+				case 'binaryFileRequest':
+					return this.fileHandler.handleBinaryFileSelect(message, target);
 
-			case 'saveRequest':
-				return this.collectionHandler.handleSaveRequest(message, panel);
+				case 'openFileInEditor':
+					return this.fileHandler.handleOpenFileInEditor(message, target);
 
-			case 'updateCollection':
-				return this.collectionHandler.handleUpdateCollection(message, panel);
+				case 'createCollection':
+					return this.collectionHandler.handleCreateCollection(message, target);
 
-			case 'deleteCollection':
-				return this.collectionHandler.handleDeleteCollection(message, panel);
+				case 'saveRequest':
+					return this.collectionHandler.handleSaveRequest(message, target);
 
-			case 'deleteRequest':
-				return this.collectionHandler.handleDeleteRequest(message, panel);
+				case 'updateCollection':
+					return this.collectionHandler.handleUpdateCollection(message, target);
 
-			case 'updateRequest':
-				return this.collectionHandler.handleUpdateRequest(message, panel);
+				case 'deleteCollection':
+					return this.collectionHandler.handleDeleteCollection(message, target);
 
-			case 'reorderRequests':
-				return this.collectionHandler.handleReorderRequests(message, panel);
+				case 'deleteRequest':
+					return this.collectionHandler.handleDeleteRequest(message, target);
 
-			case 'createEnvironment':
-				return this.environmentHandler.handleCreateEnvironment(message, panel);
+				case 'updateRequest':
+					return this.collectionHandler.handleUpdateRequest(message, target);
 
-			case 'deleteEnvironment':
-				return this.environmentHandler.handleDeleteEnvironment(message, panel);
+				case 'reorderRequests':
+					return this.collectionHandler.handleReorderRequests(message, target);
 
-			case 'setActiveEnvironment':
-				return this.environmentHandler.handleSetActiveEnvironment(message, panel);
+				case 'createEnvironment':
+					return this.environmentHandler.handleCreateEnvironment(message, target);
 
-			case 'clearHistory':
-				return this.historyHandler.handleClearHistory(message, panel);
+				case 'deleteEnvironment':
+					return this.environmentHandler.handleDeleteEnvironment(message, target);
 
-			case 'deleteHistoryItem':
-				return this.historyHandler.handleDeleteHistoryItem(message, panel);
+				case 'setActiveEnvironment':
+					return this.environmentHandler.handleSetActiveEnvironment(message, target);
 
-			default: {
-				const _exhaustive: never = message;
-				console.warn('Unhandled message:', _exhaustive);
-				return;
+				case 'clearHistory':
+					return this.historyHandler.handleClearHistory(message, target);
+
+				case 'deleteHistoryItem':
+					return this.historyHandler.handleDeleteHistoryItem(message, target);
+			}
+		} else if ('show' in target && message.source === 'webviewView') {
+			switch (message.command) {
+				case 'executeCommand':
+				case 'sidebarReady':
+				case 'refreshSidebar':
+					await this.sidebarHandler.handle(message, target);
+					break;
 			}
 		}
 	}
 }
+/* eslint-disable no-dupe-class-members */

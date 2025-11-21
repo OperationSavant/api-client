@@ -3,8 +3,6 @@ import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { ImperativePanelGroupHandle } from 'react-resizable-panels';
 import { ResponseViewer } from '@/components/response/response-viewer';
-// import { CookieIntegration } from '@/services/cookie-integration';
-// import { cookieService } from '@/services/cookie-service';
 import { ApiClientRequestBar } from '@/components/custom/app/api-client-request-bar';
 import { useSelector } from 'react-redux';
 import { RootState, store, useAppDispatch } from '@/store';
@@ -29,10 +27,7 @@ import { WebviewState } from '@/shared/types/state';
 import { useStateRestoration } from '@/hooks/useStateRestoration';
 import { useRequestExecution } from '@/hooks/useRequestExecution';
 import { RequestTabContext } from '@/shared/types/tabs';
-// import { useCookieOperations } from '@/hooks/useCookieOperations';
 import { LoadingFallback } from '@/components/custom/states/loading-fallback';
-import { EmptyState } from '@/components/custom/states/empty-state';
-import { Send } from 'lucide-react';
 import { createInitializeHandlers } from '@/handlers/initialize-handlers';
 
 const App = () => {
@@ -41,7 +36,6 @@ const App = () => {
 	const [loading, setLoading] = useState(false);
 	const [responseData, setResponseData] = useState<Response | null>(null);
 	const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
-	// const cookieIntegration = useRef(new CookieIntegration(cookieService));
 
 	const [responsePanelState, setResponsePanelState] = useState<PanelState>('default');
 	const panelGroupRef = useRef<ImperativePanelGroupHandle>(null);
@@ -51,8 +45,6 @@ const App = () => {
 		request: { url, method, auth },
 	} = useSelector((state: RootState) => state);
 
-	// const { cookies, addCookie, updateCookie, deleteCookie, deleteAllCookies, importCookies, exportCookies } = useCookieOperations();
-
 	const initialState = useMemo(() => vscode.getState<WebviewState>(), []);
 	const getReduxState = useCallback(() => store.getState(), []);
 
@@ -61,8 +53,6 @@ const App = () => {
 	}, []);
 
 	const { executeRequest } = useRequestExecution({
-		// cookieIntegration: cookieIntegration.current,
-		cookieIntegration: null, // TODO:Temporarily disable cookie integration due to folder restructure
 		onLoadingChange: setLoading,
 		onResponseClear: () => setResponseData(null),
 		sendToBackend: sendToExtension,
@@ -80,6 +70,7 @@ const App = () => {
 	const handleGenerateOAuth2Token = useCallback(
 		async (oauth2Config: OAuth2Auth) => {
 			sendToExtension({
+				source: 'webview',
 				command: 'generateOAuth2Token',
 				oauth2Config,
 			});
@@ -89,18 +80,18 @@ const App = () => {
 
 	const handleSelectFile = useCallback(
 		(index: number) => {
-			sendToExtension({ command: 'formDataFileRequest', index });
+			sendToExtension({ source: 'webview', command: 'formDataFileRequest', index });
 		},
 		[sendToExtension]
 	);
 
 	const handleSelectBinaryFile = useCallback(() => {
-		sendToExtension({ command: 'binaryFileRequest' });
+		sendToExtension({ source: 'webview', command: 'binaryFileRequest' });
 	}, [sendToExtension]);
 
 	const handleOpenFileInEditor = useCallback(
 		(filePath: string) => {
-			sendToExtension({ command: 'openFileInEditor', filePath });
+			sendToExtension({ source: 'webview', command: 'openFileInEditor', filePath });
 		},
 		[sendToExtension]
 	);
@@ -118,15 +109,15 @@ const App = () => {
 
 		switch (responsePanelState) {
 			case 'default':
-				panelGroup.setLayout([10, 90]); // Maximize response panel
+				panelGroup.setLayout([10, 90]);
 				setResponsePanelState('maximized');
 				break;
 			case 'maximized':
-				panelGroup.setLayout([95, 5]); // Minimize response panel
+				panelGroup.setLayout([95, 5]);
 				setResponsePanelState('minimized');
 				break;
 			case 'minimized':
-				panelGroup.setLayout([60, 40]); // Reset to default
+				panelGroup.setLayout([60, 40]);
 				setResponsePanelState('default');
 				break;
 		}
@@ -139,7 +130,6 @@ const App = () => {
 			createResponseHandlers({
 				setResponseData,
 				setLoading,
-				// cookieIntegration: cookieIntegration.current, // TODO:Temporarily disable cookie integration due to folder restructure
 				getState: getReduxState,
 			}),
 		[getReduxState]
@@ -160,18 +150,11 @@ const App = () => {
 		onGenerateOAuth2Token: handleGenerateOAuth2Token,
 		onSelectFile: handleSelectFile,
 		onSelectBinaryFile: handleSelectBinaryFile,
-		// cookies,
-		// onAddCookie: addCookie,
-		// onUpdateCookie: updateCookie,
-		// onDeleteCookie: deleteCookie,
-		// onDeleteAllCookies: deleteAllCookies,
-		// onImportCookies: importCookies,
-		// onExportCookies: exportCookies,
 	};
 
 	useEffect(() => {
 		if (isRestored) {
-			sendToExtension({ command: 'webviewReady' });
+			sendToExtension({ source: 'webview', command: 'webviewReady' });
 		}
 	}, [isRestored]);
 
@@ -203,13 +186,12 @@ const App = () => {
 
 	const handleSaveRequest = useCallback(
 		(payload: SaveRequestPayload) => {
-			sendToExtension({ command: 'saveRequest', payload });
+			sendToExtension({ source: 'webview', command: 'saveRequest', payload });
 			setIsSaveDialogOpen(false);
 		},
 		[sendToExtension]
 	);
 
-	// Show loading state until session is restored
 	if (!isRestored) {
 		return <LoadingFallback message='Restoring session...' description='Please wait while we restore your previous workspace state' />;
 	}

@@ -1,4 +1,3 @@
-import { scan } from 'react-scan';
 import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
 import { ErrorBoundary } from 'react-error-boundary';
@@ -7,8 +6,6 @@ import { Provider } from 'react-redux';
 import { ErrorFallback } from '@/components/custom/states/error-fallback';
 import { LoadingFallback } from '@/components/custom/states/loading-fallback';
 import '../../style.css';
-
-scan({ enabled: true });
 
 const App = lazy(() => import('./App'));
 
