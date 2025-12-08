@@ -1,13 +1,13 @@
 import { ApiClientTable } from '@/components/custom/api-client-kvp';
 import ApiClientHeader from '../custom/api-client-header';
 import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '@/store';
-import { setParams } from '@/features/requestParams/requestParamsSlice';
+import { RootState } from '@/store/main-store';
 import { useKeyValueTable } from '@/hooks/useKeyValueTable';
+import { setParams } from '@/features/request/requestSlice';
 
 const ParamsTab: React.FC = () => {
 	const dispatch = useDispatch();
-	const params = useSelector((state: RootState) => state.requestParams.params);
+	const params = useSelector((state: RootState) => state.request.params);
 
 	const { handleChange, handleCheck, handleDelete } = useKeyValueTable(params, newParams => dispatch(setParams(newParams)), {
 		key: '',

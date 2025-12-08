@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" role="img">
+  <title>WebSocket request</title>
+  <!-- Frame -->
+  <rect x="2" y="3" width="20" height="18" rx="2" fill="none" stroke="#3B82F6" stroke-width="1.4" stroke-linejoin="round"/>
+  <!-- Wave (real-time signal) -->
+  <path d="M5.5 8.5c1.8-1.6 3.6-1.6 5.4 0 1.8 1.6 3.6 1.6 5.4 0" fill="none" stroke="#3B82F6" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Bidirectional line -->
+  <path d="M7 12h10" fill="none" stroke="#3B82F6" stroke-width="1.6" stroke-linecap="round"/>
+  <!-- Left arrow head -->
+  <path d="M8.2 10.8 6 12l2.2 1.2" fill="none" stroke="#3B82F6" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Right arrow head -->
+  <path d="M15.8 10.8 18 12l-2.2 1.2" fill="none" stroke="#3B82F6" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Lightning bolt (real-time / push) -->
+  <path d="M12.2 7.2 10.7 11h1.8L10.6 15.2 12.8 11.8H11.7z" fill="#3B82F6" stroke="none"/>
+</svg>

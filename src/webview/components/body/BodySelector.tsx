@@ -1,16 +1,18 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { Label } from '../ui/label';
 import { Separator } from '../ui/separator';
 import FormDataBody from './FormDataBody';
 import UrlEncodedBody from './UrlEncodedBody';
-import RawBody from './RawBody';
+// ✅ Lazy load Monaco-heavy components to prevent bundling in main chunk
+const RawBody = lazy(() => import('./RawBody'));
 import BinaryBody from './BinaryBody';
-import GraphQLBody from './GraphQLBody';
+const GraphQLBody = lazy(() => import('./GraphQLBody'));
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '@/store';
-import { setBodyType } from '@/features/requestBody/requestBodySlice';
+import { RootState } from '@/store/main-store';
 import { BodyType } from '@/shared/types';
+import { setBodyType } from '@/features/request/requestSlice';
+import { LoadingFallback } from '../custom/states/loading-fallback';
 
 interface BodySelectorProps {
 	onSelectFile: (index: number) => void;
@@ -19,7 +21,7 @@ interface BodySelectorProps {
 
 export const BodySelector: React.FC<BodySelectorProps> = ({ onSelectFile, onSelectBinaryFile }) => {
 	const dispatch = useDispatch();
-	const bodyConfig = useSelector((state: RootState) => state.requestBody.config);
+	const bodyConfig = useSelector((state: RootState) => state.request.body);
 	const onSelectionChanged = (type: BodyType) => {
 		dispatch(setBodyType(type));
 	};
@@ -31,11 +33,19 @@ export const BodySelector: React.FC<BodySelectorProps> = ({ onSelectFile, onSele
 			case 'x-www-form-urlencoded':
 				return <UrlEncodedBody />;
 			case 'raw':
-				return <RawBody />;
+				return (
+					<Suspense fallback={<LoadingFallback message='Loading editor...' />}>
+						<RawBody />
+					</Suspense>
+				);
 			case 'binary':
 				return <BinaryBody onSelectFile={onSelectBinaryFile} />;
 			case 'graphql':
-				return <GraphQLBody />;
+				return (
+					<Suspense fallback={<LoadingFallback message='Loading GraphQL editor...' />}>
+						<GraphQLBody />
+					</Suspense>
+				);
 			case 'none':
 			default:
 				return (

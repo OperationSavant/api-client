@@ -3,16 +3,18 @@
 	"compilerOptions": {
 		"module": "ESNext",
 		"moduleResolution": "bundler",
+		"esModuleInterop": true,
 		"lib": ["DOM", "DOM.Iterable", "ESNext"],
 		"jsx": "react-jsx",
+		"resolveJsonModule": true,
 		"composite": true,
 		"baseUrl": ".",
-		"rootDir": "src",
+		"rootDir": "src/",
 		"paths": {
 			"@/*": ["src/webview/*"],
 			"@/shared/*": ["src/shared/*"]
 		}
 	},
-	"include": ["src/webview/**/*", "src/shared/**/*"],
+	"include": ["src/webview/**/*", "src/shared/**/*", "src/webview/**/*.json"],
 	"exclude": ["node_modules", "src/extension", "src/domain"]
 }

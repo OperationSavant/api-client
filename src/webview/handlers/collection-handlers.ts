@@ -1,5 +1,5 @@
-import { addCollection, setCollections } from '@/features/collections/collectionsSlice';
-import { AppDispatch } from '@/store';
+import { addCollection, setCollections } from '@/features/collections/main-collectionsSlice';
+import { AppDispatch } from '@/store/main-store';
 
 interface CollectionHandlerDependencies {
 	dispatch: AppDispatch;
@@ -13,8 +13,8 @@ export function createCollectionHandlers(deps: CollectionHandlerDependencies) {
 	};
 
 	const handleSetCollections = (data: any) => {
-		if (data && Array.isArray(data)) {
-			deps.dispatch(setCollections(data));
+		if (data && data.collections && Array.isArray(data.collections)) {
+			deps.dispatch(setCollections(data.collections));
 		}
 	};
 

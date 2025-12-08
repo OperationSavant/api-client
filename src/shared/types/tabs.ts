@@ -1,5 +1,4 @@
 import { AuthConfig, OAuth2Auth } from './auth';
-import { Cookie, CookieImportExport } from './cookie';
 
 export interface TabConfig<T extends string = string> {
 	id: T;
@@ -13,19 +12,34 @@ export interface TabConfig<T extends string = string> {
 	props?: Record<string, any>;
 	hidden?: boolean;
 	testId?: string;
+	selectMode?: {
+		enabled: boolean;
+		options: Array<{
+			value: string;
+			label: string;
+			icon?: React.ComponentType<{ className?: string }>;
+		}>;
+		selectedValue?: string;
+		onSelectChange?: (value: string) => void;
+		placeholder?: string;
+	};
 }
 
 export interface RequestTabContext {
-	auth: AuthConfig;
+	auth?: AuthConfig;
 	onAuthChange: (auth: AuthConfig) => void;
 	onGenerateOAuth2Token: (oauth2Config: OAuth2Auth) => Promise<void>;
 	onSelectFile: (index: number) => void;
 	onSelectBinaryFile: () => void;
-	cookies?: Cookie[];
-	onAddCookie?: (cookie: Omit<Cookie, 'created' | 'lastAccessed'>) => void;
-	onUpdateCookie?: (name: string, domain: string, path: string, updates: Partial<Cookie>) => void;
-	onDeleteCookie?: (name: string, domain: string, path: string) => void;
-	onDeleteAllCookies?: () => void;
-	onImportCookies?: (cookies: Cookie[]) => void;
-	onExportCookies?: (exportConfig: CookieImportExport) => void;
+}
+
+export interface ResponseTabContext {
+	responseBody?: string;
+	contentType?: string;
+	headers?: Record<string, string>;
+	handleCopy: () => void;
+}
+
+export interface SidebarTabContext {
+	sendToExtension: (message: any) => void;
 }

@@ -1,15 +1,14 @@
+import { setIsExecuting } from '@/features/editor/editorUISlice';
+import { setResponse } from '@/features/response/responseSlice';
 import { Response } from '@/shared/types/response';
 // import { CookieIntegration } from '@/services/cookie-integration'; // TODO:Temporarily disable cookie integration due to folder restructure
-import { RootState } from '@/store';
+import { AppDispatch, RootState } from '@/store/main-store';
 
 interface ResponseHandlerDependencies {
-	setResponseData: (data: Response | null) => void;
-	setLoading: (loading: boolean) => void;
-	// cookieIntegration: CookieIntegration;
-	getState: () => RootState;
+	dispatch: AppDispatch;
 }
 
-export function createResponseHandlers({ setResponseData, setLoading, getState }: ResponseHandlerDependencies) {
+export function createResponseHandlers({ dispatch }: ResponseHandlerDependencies) {
 	const handleApiResponse = (message: Response) => {
 		if (message?.error) {
 			const errorResponse: Response = {
@@ -23,8 +22,8 @@ export function createResponseHandlers({ setResponseData, setLoading, getState }
 				isError: true,
 				error: message?.error,
 			};
-			setResponseData(errorResponse);
-			setLoading(false);
+			dispatch(setResponse(errorResponse));
+			dispatch(setIsExecuting(false));
 			return;
 		}
 
@@ -62,8 +61,8 @@ export function createResponseHandlers({ setResponseData, setLoading, getState }
 			isLargeBody: message.isLargeBody,
 			bodyFilePath: message.bodyFilePath,
 		};
-		setResponseData(enhancedResponseData);
-		setLoading(false);
+		dispatch(setResponse(enhancedResponseData));
+		dispatch(setIsExecuting(false));
 	};
 
 	return {

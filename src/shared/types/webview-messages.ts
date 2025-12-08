@@ -33,7 +33,8 @@ export type WebviewMessage =
 	| { source: 'webview'; command: 'requestDeviceCode'; oauth2Config: any };
 
 export type WebviewViewMessage =
-	| { source: 'webviewView'; command: 'executeCommand'; commandId: string; args?: any[] }
+	| { source: 'webviewView'; command: 'createNewRequest'; commandId: string; args?: any[] }
+	| { source: 'webviewView'; command: 'openRequest'; commandId: string; args?: any[] }
 	| { source: 'webviewView'; command: 'sidebarReady' }
 	| { source: 'webviewView'; command: 'refreshSidebar' }
 	| { source: 'webviewView'; command: 'searchCollections'; query: string }

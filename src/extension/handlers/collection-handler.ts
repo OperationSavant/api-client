@@ -1,7 +1,9 @@
 import { WebviewPanel, window } from 'vscode';
 import { collectionService } from '@/domain/services/collectionService';
+import { unitOfWork } from '@/domain/services/unit-of-work';
 import { StateManager } from '../services/state-manager';
 import { SQLiteCollectionPersistence } from '../services/collection-persistence';
+import { broadcasterHub } from '../orchestrators/broadcaster-hub';
 
 type webViewPanelMessage = {
 	command: string;
@@ -14,99 +16,171 @@ export class CollectionHandler {
 	/**
 	 * Create new collection
 	 */
-	async handleCreateCollection(message: any, panel: WebviewPanel): Promise<void> {
-		// const name = message.name;
+	async handleCreateCollection(message: any): Promise<void> {
+		try {
+			// Domain operation (synchronous)
+			collectionService.createCollection(message.name, message.description);
 
-		// this.deps.collectionService.createCollection(name);
+			// Commit to database (async)
+			await unitOfWork.commit();
 
-		// StateManager.saveState();
+			const allCollections = collectionService.getAllCollections();
+			this.broadcastToAllPanels({ command: 'setCollections', data: allCollections });
+		} catch (error) {
+			console.error('Failed to create collection:', error);
 
-		// panel.webview.postMessage({
-		// 	command: 'collectionsUpdated',
-		// 	collections: this.deps.collectionService.exportData(),
-		// });
-		collectionService.createCollection(message.name, message.description);
+			// Rollback in-memory changes
+			unitOfWork.rollback();
 
-		const allCollections = collectionService.getAllCollections();
-		this.broadcastToAllPanels({ command: 'setCollections', data: allCollections }, panel);
+			this.broadcastToAllPanels({
+				command: 'error',
+				data: { message: `Failed to create collection: ${error instanceof Error ? error.message : 'Unknown error'}` },
+			});
+			throw error;
+		}
 	}
 
 	/**
 	 * Update collection metadata (name, description)
 	 */
-	async handleUpdateCollection(message: any, panel: WebviewPanel): Promise<void> {
-		// const { collectionId, name, description } = message;
+	async handleUpdateCollection(message: any): Promise<void> {
+		try {
+			// Domain operation (synchronous)
+			collectionService.updateCollection(message.collectionId, {
+				name: message.name,
+				description: message.description,
+				variables: message.variables,
+				auth: message.auth,
+			});
 
-		// this.deps.collectionService.updateCollection(collectionId, { name, description });
+			// Commit to database (async)
+			await unitOfWork.commit();
 
-		// StateManager.saveState();
+			const allCollections = collectionService.getAllCollections();
+			this.broadcastToAllPanels({ command: 'setCollections', data: allCollections });
+		} catch (error) {
+			console.error('Failed to update collection:', error);
 
-		// panel.webview.postMessage({
-		// 	command: 'collectionsUpdated',
-		// 	collections: this.deps.collectionService.exportData(),
-		// });
-		collectionService.updateCollection(message.collectionId, {
-			name: message.name,
-			description: message.description,
-			variables: message.variables,
-			auth: message.auth,
-		});
+			// Rollback in-memory changes
+			unitOfWork.rollback();
 
-		const allCollections = collectionService.getAllCollections();
-		this.broadcastToAllPanels({ command: 'setCollections', data: allCollections }, panel);
+			this.broadcastToAllPanels({
+				command: 'error',
+				data: { message: `Failed to update collection: ${error instanceof Error ? error.message : 'Unknown error'}` },
+			});
+			throw error;
+		}
 	}
 
 	/**
 	 * Delete collection
 	 */
-	async handleDeleteCollection(message: any, panel: WebviewPanel): Promise<void> {
-		// const { collectionId } = message;
+	async handleDeleteCollection(message: any): Promise<void> {
+		try {
+			// Domain operation (synchronous)
+			collectionService.deleteCollection(message.collectionId);
 
-		// this.deps.collectionService.deleteCollection(collectionId);
+			// Commit to database (async)
+			await unitOfWork.commit();
 
-		// StateManager.saveState();
+			const allCollections = collectionService.getAllCollections();
+			this.broadcastToAllPanels({ command: 'setCollections', data: allCollections });
+		} catch (error) {
+			console.error('Failed to delete collection:', error);
 
-		// panel.webview.postMessage({
-		// 	command: 'collectionsUpdated',
-		// 	collections: this.deps.collectionService.exportData(),
-		// });
-		collectionService.deleteCollection(message.collectionId);
+			// Rollback in-memory changes
+			unitOfWork.rollback();
 
-		const allCollections = collectionService.getAllCollections();
-		this.broadcastToAllPanels({ command: 'setCollections', data: allCollections }, panel);
+			this.broadcastToAllPanels({
+				command: 'error',
+				data: { message: `Failed to delete collection: ${error instanceof Error ? error.message : 'Unknown error'}` },
+			});
+			throw error;
+		}
 	}
 
-	async handleCreateFolder(message: any, panel: WebviewPanel): Promise<void> {
-		collectionService.createFolder(message.collectionId, message.name, message.parentId, message.description);
+	async handleCreateFolder(message: any): Promise<void> {
+		try {
+			// Domain operation (synchronous)
+			collectionService.createFolder(message.collectionId, message.name, message.parentId, message.description);
 
-		const allCollections = collectionService.getAllCollections();
-		this.broadcastToAllPanels({ command: 'setCollections', data: allCollections }, panel);
+			// Commit to database (async)
+			await unitOfWork.commit();
+
+			const allCollections = collectionService.getAllCollections();
+			this.broadcastToAllPanels({ command: 'setCollections', data: allCollections });
+		} catch (error) {
+			console.error('Failed to create folder:', error);
+
+			// Rollback in-memory changes
+			unitOfWork.rollback();
+
+			this.broadcastToAllPanels({
+				command: 'error',
+				data: { message: `Failed to create folder: ${error instanceof Error ? error.message : 'Unknown error'}` },
+			});
+			throw error;
+		}
 	}
 
-	async handleUpdateFolder(message: any, panel: WebviewPanel): Promise<void> {
-		collectionService.updateFolder(message.collectionId, message.folderId, {
-			name: message.name,
-			description: message.description,
-			parentId: message.parentId,
-			variables: message.variables,
-			auth: message.auth,
-		});
+	async handleUpdateFolder(message: any): Promise<void> {
+		try {
+			// Domain operation (synchronous)
+			collectionService.updateFolder(message.collectionId, message.folderId, {
+				name: message.name,
+				description: message.description,
+				parentId: message.parentId,
+				variables: message.variables,
+				auth: message.auth,
+			});
 
-		const allCollections = collectionService.getAllCollections();
-		this.broadcastToAllPanels({ command: 'setCollections', data: allCollections }, panel);
+			// Commit to database (async)
+			await unitOfWork.commit();
+
+			const allCollections = collectionService.getAllCollections();
+			this.broadcastToAllPanels({ command: 'setCollections', data: allCollections });
+		} catch (error) {
+			console.error('Failed to update folder:', error);
+
+			// Rollback in-memory changes
+			unitOfWork.rollback();
+
+			this.broadcastToAllPanels({
+				command: 'error',
+				data: { message: `Failed to update folder: ${error instanceof Error ? error.message : 'Unknown error'}` },
+			});
+			throw error;
+		}
 	}
 
-	async handleDeleteFolder(message: any, panel: WebviewPanel): Promise<void> {
-		collectionService.deleteFolder(message.collectionId, message.folderId);
+	async handleDeleteFolder(message: any): Promise<void> {
+		try {
+			// Domain operation (synchronous)
+			collectionService.deleteFolder(message.collectionId, message.folderId);
 
-		const allCollections = collectionService.getAllCollections();
-		this.broadcastToAllPanels({ command: 'setCollections', data: allCollections }, panel);
+			// Commit to database (async)
+			await unitOfWork.commit();
+
+			const allCollections = collectionService.getAllCollections();
+			this.broadcastToAllPanels({ command: 'setCollections', data: allCollections });
+		} catch (error) {
+			console.error('Failed to delete folder:', error);
+
+			// Rollback in-memory changes
+			unitOfWork.rollback();
+
+			this.broadcastToAllPanels({
+				command: 'error',
+				data: { message: `Failed to delete folder: ${error instanceof Error ? error.message : 'Unknown error'}` },
+			});
+			throw error;
+		}
 	}
 
 	/**
 	 * Save request to collection
 	 */
-	async handleSaveRequest(message: any, panel: WebviewPanel): Promise<void> {
+	async handleSaveRequest(message: any): Promise<void> {
 		// const { collectionId, requestId, request } = message.payload;
 
 		// if (requestId) {
@@ -128,82 +202,112 @@ export class CollectionHandler {
 		//   data: newCollection,
 		// });
 
-		const { collectionId, request, requestId } = message;
+		const { requestId } = message?.payload;
 
-		if (requestId) {
-			this.handleUpdateRequest(message, panel);
-		} else {
-			collectionService.createRequest(message.collectionId, message.request, message.folderId);
+		try {
+			if (requestId) {
+				await this.handleUpdateRequest(message?.payload);
+			} else {
+				// Domain operation (synchronous)
+				collectionService.createRequest(message?.payload?.collectionId, message.payload?.request, message.payload?.folderId);
+
+				// Commit to database (async)
+				await unitOfWork.commit();
+			}
+
+			const allCollections = collectionService.getAllCollections();
+			this.broadcastToAllPanels({ command: 'setCollections', data: allCollections });
+		} catch (error) {
+			console.error('Failed to save request:', error);
+
+			// Rollback in-memory changes
+			unitOfWork.rollback();
+
+			this.broadcastToAllPanels({
+				command: 'error',
+				data: { message: `Failed to save request: ${error instanceof Error ? error.message : 'Unknown error'}` },
+			});
+			throw error;
 		}
-
-		const allCollections = collectionService.getAllCollections();
-		this.broadcastToAllPanels({ command: 'setCollections', data: allCollections }, panel);
 	}
 
 	/**
 	 * Update request in collection
 	 */
-	async handleUpdateRequest(message: any, panel: WebviewPanel): Promise<void> {
-		// const { collectionId, requestId, request } = message;
+	async handleUpdateRequest(message: any): Promise<void> {
+		try {
+			// Domain operation (synchronous)
+			collectionService.updateRequest(message.collectionId, message.requestId, {
+				name: message?.request?.name,
+				description: message?.request?.description,
+				method: message?.request?.method,
+				url: message?.request?.url,
+				headers: message?.request?.headers,
+				params: message?.request?.params,
+				body: message?.request?.body,
+				auth: message?.request?.auth,
+				tests: message?.request?.tests,
+				folderId: message?.request?.folderId,
+				operationName: message?.request?.operationName,
+			});
 
-		// this.deps.collectionService.updateRequest(collectionId, requestId, request);
+			// Commit to database (async)
+			await unitOfWork.commit();
 
-		// StateManager.saveState();
+			const allCollections = collectionService.getAllCollections();
+			this.broadcastToAllPanels({ command: 'setCollections', data: allCollections });
+		} catch (error) {
+			console.error('Failed to update request:', error);
 
-		// panel.webview.postMessage({
-		// 	command: 'collectionsUpdated',
-		// 	collections: this.deps.collectionService.exportData(),
-		// });
+			// Rollback in-memory changes
+			unitOfWork.rollback();
 
-		collectionService.updateRequest(message.collectionId, message.requestId, {
-			name: message.name,
-			description: message.description,
-			method: message.method,
-			url: message.url,
-			headers: message.headers,
-			params: message.params,
-			body: message.body,
-			auth: message.auth,
-			tests: message.tests,
-			folderId: message.folderId,
-			operationName: message.operationName,
-		});
-
-		const allCollections = collectionService.getAllCollections();
-		this.broadcastToAllPanels({ command: 'setCollections', data: allCollections }, panel);
+			this.broadcastToAllPanels({
+				command: 'error',
+				data: { message: `Failed to update request: ${error instanceof Error ? error.message : 'Unknown error'}` },
+			});
+			throw error;
+		}
 	}
 
 	/**
 	 * Delete request from collection
 	 */
-	async handleDeleteRequest(message: any, panel: WebviewPanel): Promise<void> {
-		// const { collectionId, requestId } = message;
+	async handleDeleteRequest(message: any): Promise<void> {
+		try {
+			// Domain operation (synchronous)
+			collectionService.deleteRequest(message.collectionId, message.requestId);
 
-		// this.deps.collectionService.deleteRequest(collectionId, requestId);
+			// Commit to database (async)
+			await unitOfWork.commit();
 
-		// StateManager.saveState();
+			const allCollections = collectionService.getAllCollections();
+			this.broadcastToAllPanels({ command: 'setCollections', data: allCollections });
+		} catch (error) {
+			console.error('Failed to delete request:', error);
 
-		// panel.webview.postMessage({
-		// 	command: 'collectionsUpdated',
-		// 	collections: this.deps.collectionService.exportData(),
-		// });
-		collectionService.deleteRequest(message.collectionId, message.requestId);
+			// Rollback in-memory changes
+			unitOfWork.rollback();
 
-		const allCollections = collectionService.getAllCollections();
-		this.broadcastToAllPanels({ command: 'setCollections', data: allCollections }, panel);
+			this.broadcastToAllPanels({
+				command: 'error',
+				data: { message: `Failed to delete request: ${error instanceof Error ? error.message : 'Unknown error'}` },
+			});
+			throw error;
+		}
 	}
 
-	private broadcastToAllPanels({ command, data }: webViewPanelMessage, panel: WebviewPanel): void {
-		panel.webview.postMessage({
+	private broadcastToAllPanels({ command, data }: webViewPanelMessage): void {
+		broadcasterHub.broadcast({
 			command,
-			collections: { ...data },
+			collections: [...data],
 		});
 	}
 
 	/**
 	 * Reorder requests in collection (drag & drop)
 	 */
-	async handleReorderRequests(message: any, panel: WebviewPanel): Promise<void> {
+	async handleReorderRequests(message: any): Promise<void> {
 		// const { collectionId, requestIds } = message;
 		// this.deps.collectionService.reorderRequests(collectionId, requestIds);
 		// StateManager.saveState();

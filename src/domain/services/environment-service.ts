@@ -12,6 +12,7 @@ import {
 	SystemVariable,
 	VariableConfiguration,
 } from '@/shared/types/environment';
+import { unitOfWork } from './unit-of-work';
 
 class EnvironmentService {
 	private scopes: Map<string, EnvironmentScope> = new Map();
@@ -47,6 +48,8 @@ class EnvironmentService {
 		};
 
 		this.scopes.set(scope.id, scope);
+		// Register with Unit of Work for persistence
+		unitOfWork.registerNew(scope, 'environment');
 		return scope;
 	}
 
@@ -69,15 +72,22 @@ class EnvironmentService {
 		Object.assign(scope, updates, { updatedAt: new Date() });
 		this.scopes.set(id, scope);
 		this.clearResolutionCache();
+		// Register with Unit of Work for persistence
+		unitOfWork.registerModified(scope, 'environment');
 		return true;
 	}
 
 	deleteScope(id: string): boolean {
+		const scope = this.scopes.get(id);
+		if (!scope) return false;
+
 		const deleted = this.scopes.delete(id);
 		if (deleted) {
 			if (this.activeScope === id) {
 				this.activeScope = null;
 			}
+			// Register with Unit of Work for persistence
+			unitOfWork.registerRemoved(scope, 'environment');
 			this.clearResolutionCache();
 		}
 		return deleted;
@@ -92,6 +102,8 @@ class EnvironmentService {
 			const currentScope = this.scopes.get(this.activeScope);
 			if (currentScope) {
 				currentScope.isActive = false;
+				// Register deactivated scope as modified
+				unitOfWork.registerModified(currentScope, 'environment');
 			}
 		}
 
@@ -99,6 +111,8 @@ class EnvironmentService {
 		scope.isActive = true;
 		this.activeScope = id;
 		this.clearResolutionCache();
+		// Register activated scope as modified
+		unitOfWork.registerModified(scope, 'environment');
 		return true;
 	}
 

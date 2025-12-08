@@ -1,5 +1,5 @@
 import { AuthConfig } from './auth';
-import { RequestBodyConfig } from './body';
+import { RequestBody } from './body';
 import { TestSuite } from './testing';
 
 export interface SaveRequestPayload {
@@ -39,18 +39,18 @@ export interface CollectionRequest {
 	url: string;
 	headers: Record<string, string>;
 	params: Record<string, string>;
-	body?: RequestBodyConfig;
+	body?: RequestBody;
 	auth?: AuthConfig;
 	tests?: TestSuite[];
 	folderId?: string;
 	operationName?: string;
 }
 
-export interface RequestBody {
-	type: 'none' | 'form-data' | 'url-encoded' | 'raw' | 'binary' | 'graphql';
-	data: any;
-	contentType?: string;
-}
+// export interface RequestBody {
+// 	type: 'none' | 'form-data' | 'url-encoded' | 'raw' | 'binary' | 'graphql';
+// 	data: any;
+// 	contentType?: string;
+// }
 
 export interface CollectionMetadata {
 	id: string;

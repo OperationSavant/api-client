@@ -29,15 +29,12 @@ export function initializeDatabase(dbFilePath: string): Promise<sqlite3.Database
 				return;
 			}
 
-			console.log('Connected to the SQLite database.');
-
 			// Use .run() within the callback to ensure the DB is open
-			dbInstance!.run('PRAGMA journal_mode = WAL;', pragmaError => {
+			dbInstance!.exec(`PRAGMA journal_mode = WAL; PRAGMA foreign_keys = ON;`, pragmaError => {
 				if (pragmaError) {
 					console.error('Failed to set WAL mode:', pragmaError.message);
 					reject(pragmaError);
 				} else {
-					console.log('WAL mode enabled.');
 					resolve(dbInstance!); // Resolve the Promise once setup is complete
 				}
 			});

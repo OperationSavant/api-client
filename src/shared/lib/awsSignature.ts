@@ -1,7 +1,7 @@
 // AWS Signature Version 4 implementation
 // Based on AWS documentation: https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html
 
-import { RequestBodyConfig } from '@/shared/types/body';
+import { RequestBody } from '@/shared/types/body';
 
 export async function hmacSha256(key: ArrayBuffer, data: string): Promise<ArrayBuffer> {
 	const cryptoKey = await crypto.subtle.importKey('raw', key, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
@@ -36,7 +36,7 @@ export async function createAwsSignature(
 	sessionToken: string,
 	region: string,
 	service: string,
-	body?: RequestBodyConfig
+	body?: RequestBody
 ): Promise<Record<string, string>> {
 	const urlObj = new URL(url);
 	const host = urlObj.hostname;
@@ -66,7 +66,7 @@ export async function createAwsSignature(
 		.sort()
 		.join(';');
 
-	const payloadHash = await sha256(body?.raw?.content || '');
+	const payloadHash = await sha256(body?.type === 'raw' ? body.raw?.content || '' : '');
 
 	const canonicalRequest = [method, canonicalUri, canonicalQuerystring, canonicalHeaders, signedHeaders, payloadHash].join('\n');
 

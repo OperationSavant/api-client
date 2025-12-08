@@ -1,4 +1,4 @@
-import { commands, Webview, WebviewPanel, WebviewView } from 'vscode';
+import { WebviewPanel, WebviewView } from 'vscode';
 import { ApplicationServices } from '../services/application-services';
 import { RequestHandler } from '../handlers/request-handler';
 import { InitializeHandler } from '../handlers/initialize-handler';
@@ -22,21 +22,14 @@ export class MessageRouter {
 	private sidebarHandler: SidebarHandler;
 
 	constructor(private services: ApplicationServices) {
-		this.requestHandler = new RequestHandler({
-			requestExecutor: services.requestExecutor,
-			historyService: services.history,
-		});
-		this.initializeHandler = new InitializeHandler({
-			collectionService: services.collections,
-			environmentService: services.environment,
-			historyService: services.history,
-		});
+		this.requestHandler = new RequestHandler({ requestExecutor: services.requestExecutor });
+		this.initializeHandler = new InitializeHandler();
 		this.fileHandler = new FileHandler();
 		this.oauth2Handler = new OAuth2Handler();
 		this.collectionHandler = new CollectionHandler();
-		this.environmentHandler = new EnvironmentHandler({ environmentService: services.environment });
-		this.historyHandler = new HistoryHandler({ historyService: services.history });
-		this.sidebarHandler = new SidebarHandler({ collectionPersistence: services.collectionPersistence });
+		this.environmentHandler = new EnvironmentHandler();
+		this.historyHandler = new HistoryHandler();
+		this.sidebarHandler = new SidebarHandler();
 	}
 
 	/**
@@ -71,25 +64,25 @@ export class MessageRouter {
 					return this.fileHandler.handleOpenFileInEditor(message, target);
 
 				case 'createCollection':
-					return this.collectionHandler.handleCreateCollection(message, target);
+					return this.collectionHandler.handleCreateCollection(message);
 
 				case 'saveRequest':
-					return this.collectionHandler.handleSaveRequest(message, target);
+					return this.collectionHandler.handleSaveRequest(message);
 
 				case 'updateCollection':
-					return this.collectionHandler.handleUpdateCollection(message, target);
+					return this.collectionHandler.handleUpdateCollection(message);
 
 				case 'deleteCollection':
-					return this.collectionHandler.handleDeleteCollection(message, target);
+					return this.collectionHandler.handleDeleteCollection(message);
 
 				case 'deleteRequest':
-					return this.collectionHandler.handleDeleteRequest(message, target);
+					return this.collectionHandler.handleDeleteRequest(message);
 
 				case 'updateRequest':
-					return this.collectionHandler.handleUpdateRequest(message, target);
+					return this.collectionHandler.handleUpdateRequest(message);
 
 				case 'reorderRequests':
-					return this.collectionHandler.handleReorderRequests(message, target);
+					return this.collectionHandler.handleReorderRequests(message);
 
 				case 'createEnvironment':
 					return this.environmentHandler.handleCreateEnvironment(message, target);
@@ -108,7 +101,8 @@ export class MessageRouter {
 			}
 		} else if ('show' in target && message.source === 'webviewView') {
 			switch (message.command) {
-				case 'executeCommand':
+				case 'createNewRequest':
+				case 'openRequest':
 				case 'sidebarReady':
 				case 'refreshSidebar':
 					await this.sidebarHandler.handle(message, target);

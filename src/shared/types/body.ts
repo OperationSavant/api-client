@@ -9,138 +9,63 @@ export interface KeyValuePair {
 	description?: string;
 }
 
-export interface FormDataField extends KeyValuePair {
+export interface FormDataBody extends KeyValuePair {
 	type: 'text' | 'file';
 	file?: File;
 	fileName?: string;
 }
 
-export interface RawBodyConfig {
+export interface RawBody {
 	content?: string;
 	language?: 'json' | 'xml' | 'html' | 'text' | 'javascript' | 'css';
 	autoFormat?: boolean;
 }
 
-export interface BinaryBodyConfig {
+export interface BinaryBody {
 	filePath?: string;
 	fileName?: string;
 	contentType?: string;
 	size?: number;
 }
 
-export interface GraphQLBodyConfig {
+export interface GraphQLBody {
 	query?: string;
-	variables?: string; // JSON string
+	variables?: string;
 	operationName?: string;
 }
 
-export interface RequestBodyConfig {
-	type: BodyType;
-	formData: FormDataField[];
-	urlEncoded: KeyValuePair[];
-	raw: RawBodyConfig;
-	binary: BinaryBodyConfig;
-	graphql: GraphQLBodyConfig;
-}
+export type RequestBody =
+	| { type: 'none' }
+	| { type: 'form-data'; formData: FormDataBody[] }
+	| { type: 'x-www-form-urlencoded'; urlEncoded: KeyValuePair[] }
+	| { type: 'raw'; raw: RawBody }
+	| { type: 'binary'; binary: BinaryBody }
+	| { type: 'graphql'; graphql: GraphQLBody };
 
-// Default configurations
-export const createDefaultRequestBody = (): RequestBodyConfig => ({
+export const createDefaultRequestBody = (): RequestBody => ({
 	type: 'none',
-	formData: [],
-	urlEncoded: [],
-	raw: {
-		content: '',
-		language: 'json',
-		autoFormat: true,
-	},
-	binary: {},
-	graphql: {
-		query: '',
-		variables: '',
-		operationName: '',
-	},
 });
 
-// Helper functions for body content generation
-export const generateRequestBody = (config: RequestBodyConfig): { body: string | FormData | File | undefined | null; contentType?: string } => {
-	switch (config.type) {
-		case 'none':
-			return { body: null };
+export function isFormDataBody(body: RequestBody): body is { type: 'form-data'; formData: FormDataBody[] } {
+	return body.type === 'form-data';
+}
 
-		case 'form-data': {
-			const formData = new FormData();
-			config.formData
-				.filter(field => field.checked && field.key)
-				.forEach(field => {
-					if (field.type === 'file' && field.file) {
-						formData.append(field.key, field.file, field.fileName || field.file.name);
-					} else {
-						formData.append(field.key, field.value);
-					}
-				});
-			return { body: formData }; // Don't set Content-Type, let browser set it with boundary
-		}
+export function isRawBody(body: RequestBody): body is { type: 'raw'; raw: RawBody } {
+	return body.type === 'raw';
+}
 
-		case 'x-www-form-urlencoded': {
-			const params = new URLSearchParams();
-			config.urlEncoded
-				.filter(field => field.checked && field.key)
-				.forEach(field => {
-					params.append(field.key, field.value);
-				});
-			return {
-				body: params.toString(),
-				contentType: 'application/x-www-form-urlencoded',
-			};
-		}
+export function isUrlEncodedBody(body: RequestBody): body is { type: 'x-www-form-urlencoded'; urlEncoded: KeyValuePair[] } {
+	return body.type === 'x-www-form-urlencoded';
+}
 
-		case 'raw':
-			return {
-				body: config.raw.content,
-				contentType: getContentTypeForLanguage(config.raw.language),
-			};
+export function isBinaryBody(body: RequestBody): body is { type: 'binary'; binary: BinaryBody } {
+	return body.type === 'binary';
+}
 
-		case 'binary': {
-			if (config.binary.filePath) {
-				return {
-					body: null,
-					contentType: config.binary.contentType || 'application/octet-stream',
-				};
-			}
-			return { body: null };
-		}
+export function isGraphQLBody(body: RequestBody): body is { type: 'graphql'; graphql: GraphQLBody } {
+	return body.type === 'graphql';
+}
 
-		case 'graphql': {
-			const graphqlBody = {
-				query: config.graphql.query,
-				variables: JSON.parse(config.graphql.variables || '{}'),
-				...(config.graphql.operationName && { operationName: config.graphql.operationName }),
-			};
-			return {
-				body: JSON.stringify(graphqlBody, null, 2),
-				contentType: 'application/json',
-			};
-		}
-
-		default:
-			return { body: null };
-	}
-};
-
-const getContentTypeForLanguage = (language: string | undefined): string => {
-	switch (language) {
-		case 'json':
-			return 'application/json';
-		case 'xml':
-			return 'application/xml';
-		case 'html':
-			return 'text/html';
-		case 'javascript':
-			return 'application/javascript';
-		case 'css':
-			return 'text/css';
-		case 'text':
-		default:
-			return 'text/plain';
-	}
-};
+export function isNoneBody(body: RequestBody): body is { type: 'none' } {
+	return body.type === 'none';
+}

@@ -1,12 +1,10 @@
 import { commands, ExtensionContext, WebviewPanel } from 'vscode';
 import { v4 as uuidv4 } from 'uuid';
-import { SidebarProvider } from '../providers/sidebar-provider';
+import { broadcasterHub } from '../orchestrators/broadcaster-hub';
 
 interface CommandRegistryDependencies {
 	context: ExtensionContext;
-	createWebview: (tabId: string, name?: string, args?: any[]) => WebviewPanel;
-	panels: Map<string, WebviewPanel>;
-	sidebarProvider?: SidebarProvider;
+	createWebview: (name?: string) => WebviewPanel;
 }
 
 export class CommandRegistry {
@@ -27,22 +25,16 @@ export class CommandRegistry {
 		this.deps.context.subscriptions.push(
 			commands.registerCommand('apiClient.openRequest', (...args) => {
 				const tabId = uuidv4();
-				const request = args?.[0];
-				const panelName = request?.name || 'API Client';
-				const panel = this.deps.createWebview(tabId, panelName, args);
-				this.deps.panels.set(tabId, panel);
-			})
-		);
-	}
-
-	private registerSidebarCommand(): void {
-		this.deps.context.subscriptions.push(
-			commands.registerCommand('apiClient.openFromSidebar', (...args) => {
-				const tabId = uuidv4();
-				const request = args?.[0];
-				const panelName = request?.name || 'API Client';
-				const panel = this.deps.createWebview(tabId, panelName, args);
-				this.deps.panels.set(tabId, panel);
+				let panelName = 'API Client';
+				let panel = undefined;
+				if (args && args.length > 0) {
+					panelName = args?.[0]?.request?.name || 'API Client';
+					panel = this.deps.createWebview(panelName);
+					broadcasterHub.registerPanel(tabId, panel, [args[0]]);
+				} else {
+					panel = this.deps.createWebview(panelName);
+					broadcasterHub.registerPanel(tabId, panel);
+				}
 			})
 		);
 	}

@@ -1,5 +1,6 @@
 import { window, WebviewPanel } from 'vscode';
 import { collectionService } from '@/domain/services/collectionService';
+import { unitOfWork } from '@/domain/services/unit-of-work';
 import { v4 as uuidv4 } from 'uuid';
 import { SidebarProvider } from '../providers/sidebar-provider';
 
@@ -35,21 +36,30 @@ export class CollectionCommands {
 			placeHolder: 'Description',
 		});
 
-		collectionService.createCollection(name, description || undefined);
+		try {
+			// Domain operation (synchronous)
+			collectionService.createCollection(name, description || undefined);
 
-		this.deps.saveState();
+			// Commit to database (async)
+			await unitOfWork.commit();
 
-		// this.deps.refreshProvider();
-
-		const panels = this.deps.getAllPanels();
-		panels.forEach(panel => {
-			panel.webview.postMessage({
-				command: 'setCollections',
-				data: collectionService.getAllCollections(),
+			const panels = this.deps.getAllPanels();
+			panels.forEach(panel => {
+				panel.webview.postMessage({
+					command: 'setCollections',
+					data: collectionService.getAllCollections(),
+				});
 			});
-		});
 
-		window.showInformationMessage(`Collection '${name}' created.`);
+			window.showInformationMessage(`Collection '${name}' created.`);
+		} catch (error) {
+			console.error('Failed to create collection:', error);
+
+			// Rollback in-memory changes
+			unitOfWork.rollback();
+
+			window.showErrorMessage(`Failed to create collection: ${error instanceof Error ? error.message : 'Unknown error'}`);
+		}
 	}
 
 	/**
@@ -63,11 +73,22 @@ export class CollectionCommands {
 
 		if (confirmation !== 'Delete') return;
 
-		collectionService.deleteCollection(item.collection.id);
+		try {
+			// Domain operation (synchronous)
+			collectionService.deleteCollection(item.collection.id);
 
-		this.deps.saveState();
+			// Commit to database (async)
+			await unitOfWork.commit();
 
-		// this.deps.refreshProvider();
+			window.showInformationMessage(`Collection '${item.collection.name}' deleted.`);
+		} catch (error) {
+			console.error('Failed to delete collection:', error);
+
+			// Rollback in-memory changes
+			unitOfWork.rollback();
+
+			window.showErrorMessage(`Failed to delete collection: ${error instanceof Error ? error.message : 'Unknown error'}`);
+		}
 	}
 
 	/**
@@ -93,11 +114,22 @@ export class CollectionCommands {
 
 		if (confirmation !== 'Delete') return;
 
-		collectionService.deleteRequest(item.collection.id, item.request.id);
+		try {
+			// Domain operation (synchronous)
+			collectionService.deleteRequest(item.collection.id, item.request.id);
 
-		this.deps.saveState();
+			// Commit to database (async)
+			await unitOfWork.commit();
 
-		// this.deps.refreshProvider();
+			window.showInformationMessage(`Request '${item.request.name}' deleted.`);
+		} catch (error) {
+			console.error('Failed to delete request:', error);
+
+			// Rollback in-memory changes
+			unitOfWork.rollback();
+
+			window.showErrorMessage(`Failed to delete request: ${error instanceof Error ? error.message : 'Unknown error'}`);
+		}
 	}
 
 	/**

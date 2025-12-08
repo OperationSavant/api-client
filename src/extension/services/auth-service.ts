@@ -1,7 +1,7 @@
 import { AuthConfig } from '@/shared/types/auth';
 import { buildBasicAuthCredentials } from '@/shared/lib/auth-utils';
 import { createAwsSignature } from '@/shared/lib/awsSignature';
-import { RequestBodyConfig } from '@/shared/types/body';
+import { RequestBody } from '@/shared/types/body';
 
 export class AuthService {
 	/**
@@ -13,7 +13,7 @@ export class AuthService {
 		url: string,
 		headers: Record<string, string>,
 		params: Record<string, string>,
-		body?: RequestBodyConfig
+		body?: RequestBody
 	): Promise<{
 		headers: Record<string, string>;
 		params: Record<string, string>;

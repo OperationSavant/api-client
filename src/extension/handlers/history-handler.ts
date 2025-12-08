@@ -1,15 +1,18 @@
 import { WebviewPanel, window } from 'vscode';
 import { historyService } from '@/domain/services/history-service';
-import { StateManager } from '../services/state-manager';
-
-interface HistoryHandlerDependencies {
-	historyService: typeof historyService;
-}
+import { unitOfWork } from '@/domain/services/unit-of-work';
+import { broadcasterHub } from '../orchestrators/broadcaster-hub';
 
 export class HistoryHandler {
-	constructor(private deps: HistoryHandlerDependencies) {}
+	constructor() {}
 
-	/**
+	private broadcastHistoryUpdate(): void {
+		const allHistory = historyService.getAllHistory();
+		broadcasterHub.broadcast({
+			command: 'setHistory',
+			history: allHistory,
+		});
+	} /**
 	 * Clear all history
 	 * ACTUAL CODE: extension.ts lines 156-164
 	 */
@@ -17,11 +20,26 @@ export class HistoryHandler {
 		const confirmation = await window.showWarningMessage('Clear all request history?', { modal: true }, 'Clear');
 
 		if (confirmation === 'Clear') {
-			this.deps.historyService.clearHistory();
+			try {
+				// Domain operation (synchronous)
+				historyService.clearHistory();
 
-			StateManager.saveState();
+				// Commit to database (async)
+				await unitOfWork.commit();
 
-			window.showInformationMessage('History cleared.');
+				// Broadcast update to all panels
+				this.broadcastHistoryUpdate();
+
+				window.showInformationMessage('History cleared.');
+			} catch (error) {
+				console.error('Failed to clear history:', error);
+
+				// Rollback in-memory changes
+				unitOfWork.rollback();
+
+				window.showErrorMessage(`Failed to clear history: ${error instanceof Error ? error.message : 'Unknown error'}`);
+				throw error;
+			}
 		}
 	}
 
@@ -30,12 +48,27 @@ export class HistoryHandler {
 	 * NOTE: No webview message handler in commented code, but method exists in service
 	 */
 	async handleDeleteHistoryItem(message: any, panel: WebviewPanel): Promise<void> {
-		const { historyId } = message;
+		try {
+			const { historyId } = message;
 
-		this.deps.historyService.deleteHistoryItem(historyId);
+			// Domain operation (synchronous)
+			historyService.deleteHistoryItem(historyId);
 
-		StateManager.saveState();
+			// Commit to database (async)
+			await unitOfWork.commit();
 
-		window.showInformationMessage('History item deleted.');
+			// Broadcast update to all panels
+			this.broadcastHistoryUpdate();
+
+			window.showInformationMessage('History item deleted.');
+		} catch (error) {
+			console.error('Failed to delete history item:', error);
+
+			// Rollback in-memory changes
+			unitOfWork.rollback();
+
+			window.showErrorMessage(`Failed to delete history item: ${error instanceof Error ? error.message : 'Unknown error'}`);
+			throw error;
+		}
 	}
 }

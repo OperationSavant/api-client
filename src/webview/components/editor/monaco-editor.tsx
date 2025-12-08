@@ -1,23 +1,7 @@
-import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
+import { editor as monacoEditorInstance, languages } from 'monaco-editor/esm/vs/editor/editor.api';
 import { useEffect, useRef, useState, forwardRef, useImperativeHandle } from 'react';
 import { format } from 'prettier/standalone';
-import prettierPluginGraphql from 'prettier/plugins/graphql';
-import prettierPluginXml from '@prettier/plugin-xml';
-import { MonacoEditorHandle } from '@/shared/types/monaco';
-
-export interface MonacoEditorProps {
-	value: string;
-	language: string;
-	readOnly?: boolean;
-	height?: string | number;
-	wordWrap?: boolean;
-	minimap?: boolean;
-	lineNumbers?: boolean;
-	copyButtonVisible?: boolean;
-	formatOnMount?: boolean;
-	onContentChange?: (value: string) => void;
-	className?: string;
-}
+import { MonacoEditorHandle, MonacoEditorProps } from '@/shared/types/monaco';
 
 export const MonacoEditor = forwardRef<MonacoEditorHandle, MonacoEditorProps>(
 	(
@@ -37,7 +21,7 @@ export const MonacoEditor = forwardRef<MonacoEditorHandle, MonacoEditorProps>(
 		ref
 	) => {
 		const editorRef = useRef<HTMLDivElement>(null);
-		const editorInstanceRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
+		const editorInstanceRef = useRef<monacoEditorInstance.IStandaloneCodeEditor | null>(null);
 		const onContentChangeRef = useRef(onContentChange);
 		const [copyText, setCopyText] = useState('Copy');
 
@@ -76,7 +60,7 @@ export const MonacoEditor = forwardRef<MonacoEditorHandle, MonacoEditorProps>(
 
 		useEffect(() => {
 			if (editorRef.current) {
-				const editor = monaco.editor.create(editorRef.current, {
+				const editor = monacoEditorInstance.create(editorRef.current, {
 					value,
 					language,
 					readOnly,
@@ -105,18 +89,8 @@ export const MonacoEditor = forwardRef<MonacoEditorHandle, MonacoEditorProps>(
 					overviewRulerLanes: 0,
 					hideCursorInOverviewRuler: true,
 					overviewRulerBorder: false,
-					quickSuggestions: false,
-					wordBasedSuggestions: 'off',
-					suggestOnTriggerCharacters: false,
-					acceptSuggestionOnEnter: 'off',
-					tabCompletion: 'off',
-					parameterHints: { enabled: false },
-					contextmenu: false,
-					mouseWheelZoom: true,
 					formatOnPaste: true,
 					formatOnType: true,
-					fontLigatures: true,
-					stickyScroll: { enabled: false },
 				});
 				editorInstanceRef.current = editor;
 				editor.onDidChangeModelContent(() => {
@@ -157,14 +131,15 @@ export const MonacoEditor = forwardRef<MonacoEditorHandle, MonacoEditorProps>(
 			if (editor) {
 				const model = editor.getModel();
 				if (model) {
-					monaco.editor.setModelLanguage(model, language);
+					monacoEditorInstance.setModelLanguage(model, language);
 				}
 			}
 		}, [language]);
 
 		useEffect(() => {
-			const provider: monaco.languages.DocumentFormattingEditProvider = {
+			const provider: languages.DocumentFormattingEditProvider = {
 				async provideDocumentFormattingEdits(model) {
+					const { default: prettierPluginGraphql } = await import('prettier/plugins/graphql');
 					const text = model.getValue();
 					try {
 						const formatted = await format(text, {
@@ -183,10 +158,11 @@ export const MonacoEditor = forwardRef<MonacoEditorHandle, MonacoEditorProps>(
 					}
 				},
 			};
-			const graphqlFormattingProvider = monaco.languages.registerDocumentFormattingEditProvider('graphql', provider);
+			const graphqlFormattingProvider = languages.registerDocumentFormattingEditProvider('graphql', provider);
 
-			const xmlProvider: monaco.languages.DocumentFormattingEditProvider = {
+			const xmlProvider: languages.DocumentFormattingEditProvider = {
 				async provideDocumentFormattingEdits(model) {
+					const { default: prettierPluginXml } = await import('@prettier/plugin-xml');
 					const text = model.getValue();
 					try {
 						const formatted = await format(text, {
@@ -205,7 +181,7 @@ export const MonacoEditor = forwardRef<MonacoEditorHandle, MonacoEditorProps>(
 					}
 				},
 			};
-			const xmlFormattingProvider = monaco.languages.registerDocumentFormattingEditProvider('xml', xmlProvider);
+			const xmlFormattingProvider = languages.registerDocumentFormattingEditProvider('xml', xmlProvider);
 			return () => {
 				graphqlFormattingProvider.dispose();
 				xmlFormattingProvider.dispose();

@@ -3,10 +3,9 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { contentType as mimeContentType, lookup } from 'mime-types';
 import FormData from 'form-data';
-import { Uri } from 'vscode';
 
 // Import shared types
-import { RequestBodyConfig } from '@/shared/types/body';
+import { RequestBody } from '@/shared/types/body';
 import { AuthConfig } from '@/shared/types/auth';
 import { AuthService } from './auth-service';
 
@@ -16,7 +15,7 @@ export interface RequestExecutionConfig {
 	method: string;
 	headers: Record<string, string>;
 	params?: Record<string, string>;
-	bodyConfig?: RequestBodyConfig;
+	bodyConfig?: RequestBody;
 	auth?: AuthConfig;
 }
 
@@ -36,15 +35,9 @@ export interface RequestExecutionResult {
 
 export class RequestExecutorService {
 	private httpClient: AxiosInstance;
-	private storageUri: Uri;
-	private readonly SIZE_THRESHOLD = 5 * 1024 * 1024; // 1MB
+	private readonly SIZE_THRESHOLD = 5 * 1024 * 1024; // TODO: Add configurable size threshold (5MB default)
 
-	constructor(
-		storageUri: Uri,
-		private authService: AuthService
-	) {
-		this.storageUri = storageUri;
-
+	constructor(private authService: AuthService) {
 		this.httpClient = axios.create({
 			timeout: 0,
 			maxRedirects: 5,
@@ -131,28 +124,47 @@ export class RequestExecutorService {
 	/**
 	 * Apply request body based on type
 	 */
-	private async applyRequestBody(axiosConfig: AxiosRequestConfig, bodyConfig: RequestBodyConfig): Promise<void> {
-		switch (bodyConfig.type) {
+	private async applyRequestBody(axiosConfig: AxiosRequestConfig, body: RequestBody): Promise<void> {
+		switch (body.type) {
 			case 'form-data':
-				await this.applyFormDataBody(axiosConfig, bodyConfig.formData);
+				await this.applyFormDataBody(axiosConfig, body.formData);
 				break;
 
 			case 'x-www-form-urlencoded':
-				this.applyUrlEncodedBody(axiosConfig, bodyConfig.urlEncoded);
+				this.applyUrlEncodedBody(axiosConfig, body.urlEncoded);
 				break;
 
 			case 'binary':
-				await this.applyBinaryBody(axiosConfig, bodyConfig.binary);
+				await this.applyBinaryBody(axiosConfig, body.binary);
 				break;
 
 			case 'raw':
-				this.applyRawBody(axiosConfig, bodyConfig.raw);
+				this.applyRawBody(axiosConfig, body.raw);
 				break;
+
+			case 'graphql': {
+				this.applyGraphQLBody(axiosConfig, body.graphql);
+				break;
+			}
 
 			case 'none':
 			default:
 				break;
 		}
+	}
+
+	/**
+	 * Handle GraphQL body
+	 */
+	private applyGraphQLBody(axiosConfig: AxiosRequestConfig, graphql: any): void {
+		if (!axiosConfig.headers) axiosConfig.headers = {};
+		const payload = {
+			query: graphql.query || '',
+			variables: graphql.variables ? JSON.parse(graphql.variables) : undefined,
+			...(graphql.operationName && { operationName: graphql.operationName }),
+		};
+		axiosConfig.data = JSON.stringify(payload);
+		axiosConfig.headers['Content-Type'] = 'application/json';
 	}
 
 	/**
