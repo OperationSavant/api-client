@@ -9,6 +9,7 @@ import { Search, Filter, Download, Trash2, Clock, CheckCircle, XCircle, MoreHori
 import { HistoryFilter, HistoryItem, HistorySort } from '@/shared/types/history';
 import { RootState } from '@/store/sidebar-store';
 import { SidebarTabContext } from '@/shared/types/tabs';
+import { ScrollArea } from '../ui/scroll-area';
 
 interface HistoryListProps {
 	onRequestSelect?: (request: HistoryItem) => void;
@@ -207,8 +208,64 @@ export const HistoryList: React.FC<HistoryListProps> = ({ onRequestSelect, onSav
 		return filtered;
 	}, [history, filter, sort]);
 
+	const [groupBy, setGroupBy] = useState<string>('date');
+
+	const groupedHistory = useMemo(() => {
+		if (groupBy === 'none' || !groupBy) {
+			return { all: filteredAndSortedHistory };
+		}
+
+		const groups: { [key: string]: HistoryItem[] } = {};
+
+		filteredAndSortedHistory.forEach(item => {
+			let groupKey: string;
+			if (groupBy === 'date') {
+				const itemDate = new Date(item.timestamp);
+				const today = new Date();
+				const yesterday = new Date();
+				yesterday.setDate(today.getDate() - 1);
+
+				if (itemDate.toDateString() === today.toDateString()) {
+					groupKey = 'Today';
+				} else if (itemDate.toDateString() === yesterday.toDateString()) {
+					groupKey = 'Yesterday';
+				} else {
+					groupKey = itemDate.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+				}
+			} else if (groupBy === 'method') {
+				groupKey = item.request.method;
+			} else {
+				groupKey = 'Unknown';
+			}
+
+			if (!groups[groupKey]) {
+				groups[groupKey] = [];
+			}
+			groups[groupKey].push(item);
+		});
+
+		// if grouping by date, sort the date groups
+		if (groupBy === 'date') {
+			const sortedGroupKeys = Object.keys(groups).sort((a, b) => {
+				if (a === 'Today') return -1;
+				if (b === 'Today') return 1;
+				if (a === 'Yesterday') return -1;
+				if (b === 'Yesterday') return 1;
+				return new Date(b).getTime() - new Date(a).getTime();
+			});
+
+			const sortedGroups: { [key: string]: HistoryItem[] } = {};
+			for (const key of sortedGroupKeys) {
+				sortedGroups[key] = groups[key];
+			}
+			return sortedGroups;
+		}
+
+		return groups;
+	}, [groupBy, filteredAndSortedHistory]);
+
 	return (
-		<Card className='h-full border-border bg-card text-card-foreground'>
+		<Card className='h-full border-border bg-card text-card-foreground flex flex-col'>
 			<CardHeader className='flex flex-row items-center justify-between space-y-0 pb-4'>
 				<CardTitle className='text-lg font-semibold text-foreground'>Request History</CardTitle>
 				<div className='flex items-center gap-2'>
@@ -231,7 +288,7 @@ export const HistoryList: React.FC<HistoryListProps> = ({ onRequestSelect, onSav
 				</div>
 			</CardHeader>
 
-			<CardContent className='space-y-4'>
+			<CardContent className='flex flex-1 flex-col gap-4 min-h-0'>
 				{/* Search and Quick Actions */}
 				<div className='flex items-center gap-2'>
 					<div className='relative flex-1'>
@@ -245,7 +302,7 @@ export const HistoryList: React.FC<HistoryListProps> = ({ onRequestSelect, onSav
 					</div>
 					{selectedItems.size > 0 && (
 						<>
-							<Button variant='outline' size='sm' onClick={handleDeleteSelected} className='border-border text-destructive hover:bg-destructive/10'>
+							<Button variant='destructive' size='sm' onClick={handleDeleteSelected}>
 								<Trash2 className='h-4 w-4 mr-1' />
 								Delete ({selectedItems.size})
 							</Button>
@@ -268,9 +325,9 @@ export const HistoryList: React.FC<HistoryListProps> = ({ onRequestSelect, onSav
 				{showFilters && (
 					<Card className='border-border bg-muted/30'>
 						<CardContent className='p-4 space-y-3'>
-							<div className='grid grid-cols-1 md:grid-cols-3 gap-3'>
-								<div>
-									<label className='text-sm font-medium text-foreground mb-1 block'>Method</label>
+							<div className='grid grid-cols-1 gap-3'>
+								<div className='flex justify-between items-center w-full gap-4'>
+									<label className='text-sm font-medium text-foreground mb-1 block w-2/5'>Method</label>
 									<Select
 										value={filter.method?.join(',') || 'all'}
 										onValueChange={value => {
@@ -280,10 +337,10 @@ export const HistoryList: React.FC<HistoryListProps> = ({ onRequestSelect, onSav
 												setFilter(prev => ({ ...prev, method: [value] }));
 											}
 										}}>
-										<SelectTrigger className='bg-input border-border text-foreground'>
+										<SelectTrigger className='bg-input border-border text-foreground w-3/5'>
 											<SelectValue placeholder='All methods' />
 										</SelectTrigger>
-										<SelectContent className='bg-popover border-border'>
+										<SelectContent className='bg-popover border-border w-full'>
 											<SelectItem value='all'>All methods</SelectItem>
 											{HTTP_METHODS.map(method => (
 												<SelectItem key={method} value={method}>
@@ -294,8 +351,8 @@ export const HistoryList: React.FC<HistoryListProps> = ({ onRequestSelect, onSav
 									</Select>
 								</div>
 
-								<div>
-									<label className='text-sm font-medium text-foreground mb-1 block'>Status</label>
+								<div className='flex justify-between items-center w-full gap-4'>
+									<label className='text-sm font-medium text-foreground mb-1 block w-2/5'>Status</label>
 									<Select
 										value={filter.status || 'all'}
 										onValueChange={value => {
@@ -304,10 +361,10 @@ export const HistoryList: React.FC<HistoryListProps> = ({ onRequestSelect, onSav
 												status: value === 'all' ? undefined : (value as 'success' | 'error'),
 											}));
 										}}>
-										<SelectTrigger className='bg-input border-border text-foreground'>
+										<SelectTrigger className='bg-input border-border text-foreground w-3/5'>
 											<SelectValue placeholder='All statuses' />
 										</SelectTrigger>
-										<SelectContent className='bg-popover border-border'>
+										<SelectContent className='bg-popover border-border w-full'>
 											<SelectItem value='all'>All statuses</SelectItem>
 											<SelectItem value='success'>Success</SelectItem>
 											<SelectItem value='error'>Error</SelectItem>
@@ -315,8 +372,8 @@ export const HistoryList: React.FC<HistoryListProps> = ({ onRequestSelect, onSav
 									</Select>
 								</div>
 
-								<div>
-									<label className='text-sm font-medium text-foreground mb-1 block'>Sort by</label>
+								<div className='flex justify-between items-center w-full gap-4'>
+									<label className='text-sm font-medium text-foreground mb-1 block w-2/5'>Sort by</label>
 									<Select
 										value={`${sort.field}-${sort.direction}`}
 										onValueChange={value => {
@@ -326,10 +383,10 @@ export const HistoryList: React.FC<HistoryListProps> = ({ onRequestSelect, onSav
 												direction: direction as 'asc' | 'desc',
 											});
 										}}>
-										<SelectTrigger className='bg-input border-border text-foreground'>
+										<SelectTrigger className='bg-input border-border text-foreground w-3/5'>
 											<SelectValue />
 										</SelectTrigger>
-										<SelectContent className='bg-popover border-border'>
+										<SelectContent className='bg-popover border-border w-full'>
 											<SelectItem value='timestamp-desc'>Latest first</SelectItem>
 											<SelectItem value='timestamp-asc'>Oldest first</SelectItem>
 											<SelectItem value='url-asc'>URL A-Z</SelectItem>
@@ -338,6 +395,20 @@ export const HistoryList: React.FC<HistoryListProps> = ({ onRequestSelect, onSav
 											<SelectItem value='status-desc'>Status ↓</SelectItem>
 											<SelectItem value='responseTime-asc'>Fastest first</SelectItem>
 											<SelectItem value='responseTime-desc'>Slowest first</SelectItem>
+										</SelectContent>
+									</Select>
+								</div>
+
+								<div className='flex justify-between items-center w-full gap-4'>
+									<label className='text-sm font-medium text-foreground mb-1 block w-2/5'>Group by</label>
+									<Select value={groupBy} onValueChange={setGroupBy}>
+										<SelectTrigger className='bg-input border-border text-foreground w-3/5'>
+											<SelectValue placeholder='Group by...' />
+										</SelectTrigger>
+										<SelectContent className='bg-popover border-border w-full'>
+											<SelectItem value='date'>Date</SelectItem>
+											<SelectItem value='method'>Method</SelectItem>
+											<SelectItem value='none'>None</SelectItem>
 										</SelectContent>
 									</Select>
 								</div>
@@ -356,7 +427,7 @@ export const HistoryList: React.FC<HistoryListProps> = ({ onRequestSelect, onSav
 										Select all ({history.length} items)
 									</label>
 								</div>
-								<Button variant='ghost' size='sm' onClick={handleClearAll} className='text-destructive hover:bg-destructive/10'>
+								<Button variant='destructive' size='sm' onClick={handleClearAll}>
 									Clear All History
 								</Button>
 							</div>
@@ -366,102 +437,113 @@ export const HistoryList: React.FC<HistoryListProps> = ({ onRequestSelect, onSav
 
 				{/* History List */}
 				{history.length === 0 ? (
-					<div className='text-center py-8 text-muted-foreground'>
+					<div className='flex-1 flex flex-col items-center justify-center text-center text-muted-foreground'>
 						<Clock className='h-12 w-12 mx-auto mb-4 opacity-50' />
 						<p className='text-sm'>No request history yet</p>
 						<p className='text-xs opacity-70'>Your API requests will appear here automatically</p>
 					</div>
 				) : (
-					<div className='space-y-2 max-h-[60vh] overflow-y-auto'>
-						{filteredAndSortedHistory.map(item => {
-							const isSelected = selectedItems.has(item.historyId);
-							const isActiveItem = selectedHistoryId === item.historyId;
+					<ScrollArea className='flex-1 w-full min-h-0'>
+						<div className='pr-4 pb-px'>
+							{Object.entries(groupedHistory).map(([groupName, items]) => (
+								<div key={groupName}>
+									{groupBy !== 'none' && <div className='px-3 py-2 text-sm font-semibold text-muted-foreground sticky top-0 bg-card z-10'>{groupName}</div>}
+									<div className='space-y-2'>
+										{items.map(item => {
+											const isSelected = selectedItems.has(item.historyId);
+											const isActiveItem = selectedHistoryId === item.historyId;
 
-							return (
-								<Card
-									key={item.historyId}
-									className={`cursor-pointer transition-all duration-200 hover:shadow-sm group ${
-										isActiveItem ? 'border-primary bg-accent/50 shadow-sm' : 'border-border hover:border-primary/50 hover:bg-accent/30'
-									}`}
-									onClick={() => onRequestSelect?.(item)}>
-									<CardContent className='p-3'>
-										<div className='flex items-start justify-between'>
-											<div className='flex items-start gap-3 flex-1 min-w-0'>
-												<input
-													type='checkbox'
-													checked={isSelected}
-													onChange={e => {
-														e.stopPropagation();
-														handleItemSelect(item.historyId, e.target.checked);
-													}}
-													className='mt-1 rounded border-border'
-												/>
+											return (
+												<Card
+													key={item.historyId}
+													className={`cursor-pointer transition-all duration-200 hover:shadow-sm group ${
+														isActiveItem ? 'border-primary bg-accent/50 shadow-sm' : 'border-border hover:border-primary/50 hover:bg-accent/30'
+													}`}
+													onClick={() => onRequestSelect?.(item)}>
+													<CardContent className='p-3'>
+														<div className='flex items-start justify-between'>
+															<div className='flex items-start gap-3 flex-1 min-w-0'>
+																<input
+																	type='checkbox'
+																	checked={isSelected}
+																	onChange={e => {
+																		e.stopPropagation();
+																		handleItemSelect(item.historyId, e.target.checked);
+																	}}
+																	className='mt-1 rounded border-border'
+																/>
 
-												<div className='flex-1 min-w-0'>
-													<div className='flex items-center gap-2 mb-2'>
-														<Badge className={`text-xs font-medium ${getMethodColor(item.request.method)}`}>{item.request.method}</Badge>
-														{item.response?.status && <Badge className={`text-xs ${getStatusColor(item.response.status)}`}>{item.response.status}</Badge>}
-														{item.success ? <CheckCircle className='h-3 w-3 text-green-500' /> : <XCircle className='h-3 w-3 text-red-500' />}
-													</div>
+																<div className='flex-1 min-w-0'>
+																	<div className='flex items-center gap-2 mb-2'>
+																		<Badge className={`text-xs font-medium ${getMethodColor(item.request.method)}`}>{item.request.method}</Badge>
+																		{item.response?.status && (
+																			<Badge className={`text-xs ${getStatusColor(item.response.status)}`}>{item.response.status}</Badge>
+																		)}
+																		{item.success ? <CheckCircle className='h-3 w-3 text-green-500' /> : <XCircle className='h-3 w-3 text-red-500' />}
+																	</div>
 
-													<div className='mb-2'>
-														<p className='font-medium text-foreground truncate' title={item.request.url}>
-															{item.request.url}
-														</p>
-														{item.error && <p className='text-xs text-destructive mt-1'>{item.error}</p>}
-													</div>
+																	<div className='mb-2'>
+																		<p className='font-medium text-foreground truncate' title={item.request.url}>
+																			{item.request.url}
+																		</p>
+																		{item.error && <p className='text-xs text-destructive mt-1'>{item.error}</p>}
+																	</div>
 
-													<div className='flex items-center gap-4 text-xs text-muted-foreground'>
-														<div className='flex items-center gap-1'>
-															<Calendar className='h-3 w-3' />
-															<span>{formatDate(item.timestamp)}</span>
+																	<div className='flex items-center gap-4 text-xs text-muted-foreground'>
+																		<div className='flex items-center gap-1'>
+																			<Calendar className='h-3 w-3' />
+																			<span>{formatDate(item.timestamp)}</span>
+																		</div>
+																		{item.response?.duration && (
+																			<div className='flex items-center gap-1'>
+																				<Clock className='h-3 w-3' />
+																				<span>{item.response.duration}ms</span>
+																			</div>
+																		)}
+																		{item.collectionId && (
+																			<div className='flex items-center gap-1'>
+																				<FileText className='h-3 w-3' />
+																				<span>In Collection</span>
+																			</div>
+																		)}
+																	</div>
+																</div>
+															</div>
+
+															<div className='flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity'>
+																<Button
+																	variant='ghost'
+																	size='sm'
+																	className='h-8 w-8 p-0 text-muted-foreground hover:text-foreground'
+																	onClick={e => {
+																		e.stopPropagation();
+																		onSaveToCollection?.(item.historyId);
+																	}}
+																	title='Save to Collection'>
+																	<FolderPlus className='h-4 w-4' />
+																</Button>
+																<Button
+																	variant='ghost'
+																	size='sm'
+																	className='h-8 w-8 p-0 text-muted-foreground hover:text-destructive'
+																	onClick={e => {
+																		e.stopPropagation();
+																		handleDeleteItem(item.historyId);
+																	}}
+																	title='Delete'>
+																	<Trash2 className='h-4 w-4' />
+																</Button>
+															</div>
 														</div>
-														{item.response?.duration && (
-															<div className='flex items-center gap-1'>
-																<Clock className='h-3 w-3' />
-																<span>{item.response.duration}ms</span>
-															</div>
-														)}
-														{item.collectionId && (
-															<div className='flex items-center gap-1'>
-																<FileText className='h-3 w-3' />
-																<span>In Collection</span>
-															</div>
-														)}
-													</div>
-												</div>
-											</div>
-
-											<div className='flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity'>
-												<Button
-													variant='ghost'
-													size='sm'
-													className='h-8 w-8 p-0 text-muted-foreground hover:text-foreground'
-													onClick={e => {
-														e.stopPropagation();
-														onSaveToCollection?.(item.historyId);
-													}}
-													title='Save to Collection'>
-													<FolderPlus className='h-4 w-4' />
-												</Button>
-												<Button
-													variant='ghost'
-													size='sm'
-													className='h-8 w-8 p-0 text-muted-foreground hover:text-destructive'
-													onClick={e => {
-														e.stopPropagation();
-														handleDeleteItem(item.historyId);
-													}}
-													title='Delete'>
-													<Trash2 className='h-4 w-4' />
-												</Button>
-											</div>
-										</div>
-									</CardContent>
-								</Card>
-							);
-						})}
-					</div>
+													</CardContent>
+												</Card>
+											);
+										})}
+									</div>
+								</div>
+							))}
+						</div>
+					</ScrollArea>
 				)}
 			</CardContent>
 		</Card>
