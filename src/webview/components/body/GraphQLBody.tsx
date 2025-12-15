@@ -1,12 +1,10 @@
-import { useRef, useState } from 'react';
+import { Suspense, useRef, useState } from 'react';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import MonacoEditor from '@/components/editor/monaco-editor';
-import { RootState, useAppDispatch } from '@/store';
+import { RootState, useAppDispatch } from '@/store/main-store';
 import { useSelector } from 'react-redux';
-import { setGraphQLBody, setGraphQLOperationName } from '@/features/requestBody/requestBodySlice';
-import { GraphQLBodyConfig } from '@/shared/types/body';
+import { GraphQLBody } from '@/shared/types/body';
 import { Label } from '@/components/ui/label';
 import { Code, Database, Pencil, Settings2 } from 'lucide-react';
 import ApiClientHeader from '@/components/custom/api-client-header';
@@ -14,17 +12,27 @@ import ApiClientButton from '@/components/custom/api-client-button';
 import ApiClientFieldRow from '@/components/custom/api-client-field-row';
 import { ApiClientInput } from '@/components/custom/api-client-input';
 import { MonacoEditorHandle } from '@/shared/types/monaco';
+import { setGraphQLBody, setGraphQLOperationName } from '@/features/request/requestSlice';
+import { LoadingFallback } from '../custom/states/loading-fallback';
+import { MonacoEditor } from '@/components/editor/lazy-monaco-editor';
 
 const GraphQLBody: React.FC = () => {
 	const [isQueryCollapsed, setIsQueryCollapsed] = useState(false);
 	const [isVarsCollapsed, setIsVarsCollapsed] = useState(false);
 
 	const dispatch = useAppDispatch();
-	const graphqlConfig = useSelector((state: RootState) => state.requestBody.config.graphql);
+	const bodyConfig = useSelector((state: RootState) => state.request.body);
+
+	if (bodyConfig.type !== 'graphql' || !bodyConfig.graphql) {
+		return null;
+	}
+
+	const graphqlConfig = bodyConfig.graphql;
+
 	const queryEditorRef = useRef<MonacoEditorHandle>(null);
 	const variablesEditorRef = useRef<MonacoEditorHandle>(null);
 
-	const updateConfig = (newValues: Partial<GraphQLBodyConfig>) => {
+	const updateConfig = (newValues: Partial<GraphQLBody>) => {
 		dispatch(setGraphQLBody({ ...graphqlConfig, ...newValues }));
 	};
 
@@ -154,12 +162,14 @@ const GraphQLBody: React.FC = () => {
 							</div>
 						</div>
 						<div className='w-full'>
-							<MonacoEditor
-								ref={queryEditorRef}
-								value={graphqlConfig.query || ''}
-								language='graphql'
-								onContentChange={value => updateConfig({ query: value })}
-							/>
+							<Suspense fallback={<LoadingFallback message='Loading Request Body Editor' />}>
+								<MonacoEditor
+									ref={queryEditorRef}
+									value={graphqlConfig.query || ''}
+									language='graphql'
+									onContentChange={value => updateConfig({ query: value })}
+								/>
+							</Suspense>
 						</div>
 					</div>
 				</ResizablePanel>
@@ -193,12 +203,14 @@ const GraphQLBody: React.FC = () => {
 							</div>
 						</div>
 						<div className='w-full'>
-							<MonacoEditor
-								ref={variablesEditorRef}
-								value={graphqlConfig.variables || ''}
-								language='json'
-								onContentChange={value => updateConfig({ variables: value })}
-							/>
+							<Suspense fallback={<LoadingFallback message='Loading Request Body Editor' />}>
+								<MonacoEditor
+									ref={variablesEditorRef}
+									value={graphqlConfig.variables || ''}
+									language='json'
+									onContentChange={value => updateConfig({ variables: value })}
+								/>
+							</Suspense>
 						</div>
 					</div>
 				</ResizablePanel>

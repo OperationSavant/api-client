@@ -1,10 +1,13 @@
 import { Collection, CollectionFolder, CollectionRequest, CollectionMetadata, CollectionTreeNode } from '@/shared/types/collection';
 import { ICollectionPersistence } from '@/domain/types/collection-persistence';
+import { unitOfWork } from './unit-of-work';
 
 export class CollectionService {
 	private static instance: CollectionService;
 	private collections: Map<string, Collection> = new Map();
 	private persistence: ICollectionPersistence | null = null;
+
+	private constructor() {}
 
 	static getInstance(): CollectionService {
 		if (!CollectionService.instance) {
@@ -17,13 +20,13 @@ export class CollectionService {
 		this.persistence = adapter;
 	}
 
-	loadFromPersistence(): void {
+	async loadFromPersistence(): Promise<void> {
 		if (!this.persistence) {
 			console.warn('No persistence adapter set');
 			return;
 		}
 
-		const collections = this.persistence.loadAll();
+		const collections = await this.persistence.loadAll();
 		this.collections.clear();
 		collections.forEach(collection => {
 			this.collections.set(collection.id, collection);
@@ -43,9 +46,10 @@ export class CollectionService {
 		};
 
 		this.collections.set(collection.id, collection);
-		if (this.persistence) {
-			this.persistence.createCollection(collection);
-		}
+
+		// Register with Unit of Work for persistence
+		unitOfWork.registerNew(collection, 'collection');
+
 		return collection;
 	}
 
@@ -61,6 +65,9 @@ export class CollectionService {
 		const collection = this.collections.get(id);
 		if (!collection) return undefined;
 
+		// Clone original for rollback
+		const original = { ...collection };
+
 		const updatedCollection = {
 			...collection,
 			...updates,
@@ -68,16 +75,22 @@ export class CollectionService {
 		};
 
 		this.collections.set(id, updatedCollection);
-		if (this.persistence) {
-			this.persistence.updateCollection(id, updates);
-		}
+
+		// Register with Unit of Work for persistence
+		unitOfWork.registerModified(updatedCollection, 'collection', original);
+
 		return updatedCollection;
 	}
 
 	deleteCollection(id: string): boolean {
+		const collection = this.collections.get(id);
+		if (!collection) return false;
+
 		const deleted = this.collections.delete(id);
-		if (deleted && this.persistence) {
-			this.persistence.deleteCollection(id);
+
+		if (deleted) {
+			// Register with Unit of Work for persistence
+			unitOfWork.registerRemoved(collection, 'collection');
 		}
 
 		return deleted;
@@ -88,7 +101,7 @@ export class CollectionService {
 		const collection = this.collections.get(collectionId);
 		if (!collection) return undefined;
 
-		const folder: CollectionFolder = {
+		const folder: CollectionFolder & { collectionId?: string } = {
 			id: this.generateId(),
 			name,
 			description,
@@ -96,6 +109,7 @@ export class CollectionService {
 			collapsed: false,
 			requests: [],
 			subfolders: [],
+			collectionId, // Store for UoW persistence
 		};
 
 		if (parentId) {
@@ -109,9 +123,9 @@ export class CollectionService {
 
 		collection.updatedAt = new Date();
 
-		if (this.persistence) {
-			this.persistence.createFolder(collectionId, folder);
-		}
+		// Register with Unit of Work for persistence
+		unitOfWork.registerNew(folder, 'folder');
+
 		return folder;
 	}
 
@@ -129,11 +143,15 @@ export class CollectionService {
 		const folder = this.findFolder(collection, folderId);
 		if (!folder) return undefined;
 
+		// Clone original for rollback
+		const original = { ...folder };
+
 		Object.assign(folder, updates);
 		collection.updatedAt = new Date();
-		if (this.persistence) {
-			this.persistence.updateFolder(folderId, updates);
-		}
+
+		// Register with Unit of Work for persistence
+		unitOfWork.registerModified(folder, 'folder', original);
+
 		return folder;
 	}
 
@@ -155,9 +173,10 @@ export class CollectionService {
 		}
 
 		collection.updatedAt = new Date();
-		if (this.persistence) {
-			this.persistence.deleteFolder(folderId);
-		}
+
+		// Register with Unit of Work for persistence
+		unitOfWork.registerRemoved(folder, 'folder');
+
 		return true;
 	}
 
@@ -166,10 +185,11 @@ export class CollectionService {
 		const collection = this.collections.get(collectionId);
 		if (!collection) return undefined;
 
-		const newRequest: CollectionRequest = {
+		const newRequest: CollectionRequest & { collectionId?: string } = {
 			...request,
 			id: this.generateId(),
 			folderId,
+			collectionId, // Store for UoW persistence
 		};
 
 		if (folderId) {
@@ -182,9 +202,10 @@ export class CollectionService {
 		}
 
 		collection.updatedAt = new Date();
-		if (this.persistence) {
-			this.persistence.createRequest(newRequest, collectionId);
-		}
+
+		// Register with Unit of Work for persistence
+		unitOfWork.registerNew(newRequest, 'request');
+
 		return newRequest;
 	}
 
@@ -202,11 +223,15 @@ export class CollectionService {
 		const request = this.findRequest(collection, requestId);
 		if (!request) return undefined;
 
+		// Clone original for rollback
+		const original = { ...request };
+
 		Object.assign(request, updates);
 		collection.updatedAt = new Date();
-		if (this.persistence) {
-			this.persistence.updateRequest(requestId, updates);
-		}
+
+		// Register with Unit of Work for persistence
+		unitOfWork.registerModified(request, 'request', original);
+
 		return request;
 	}
 
@@ -227,9 +252,10 @@ export class CollectionService {
 		}
 
 		collection.updatedAt = new Date();
-		if (this.persistence) {
-			this.persistence.deleteRequest(requestId);
-		}
+
+		// Register with Unit of Work for persistence
+		unitOfWork.registerRemoved(request, 'request');
+
 		return true;
 	}
 
@@ -456,8 +482,8 @@ export class CollectionService {
 		return checkDescendants(ancestor.subfolders);
 	}
 
-	public exportData(): [string, Collection][] {
-		return Array.from(this.collections.entries());
+	public exportData(): Collection[] {
+		return Array.from(this.collections.values());
 	}
 
 	public importData(data: Collection[]): void {

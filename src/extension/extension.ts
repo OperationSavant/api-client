@@ -11,31 +11,21 @@ export async function activate(context: ExtensionContext) {
 	const appService = await ApplicationServices.create(context);
 	const messageRouter = new MessageRouter(appService);
 	const webviewOrchestrator = new WebviewOrchestrator({ context, messageRouter });
-	const viewOrchestrator = new ViewOrchestrator({
-		context,
-		messageRouter,
-		collectionPersistence: appService.collectionPersistence, // ✅ Wire persistence
-	});
-	const panels = new Map<string, WebviewPanel>();
-	StateManager.initialize();
+	const _ = new ViewOrchestrator({ context, messageRouter });
+	await StateManager.initialize();
 
 	const commandRegistry = new CommandRegistry({
 		context,
-		createWebview: (tabId, name, args) => {
-			const panel = webviewOrchestrator.createPanel(tabId, name, args);
-			panel.onDidDispose(() => {
-				panels.delete(tabId);
-			});
+		createWebview: name => {
+			const panel = webviewOrchestrator.createPanel(name);
 			return panel;
 		},
-		panels,
-		sidebarProvider: viewOrchestrator.sidebarProvider,
 	});
 	commandRegistry.registerAll();
 }
 
 export function deactivate() {
-	StateManager.flush();
+	// Unit of Work handles persistence, just close DB connection
 	closeDatabase();
 }
 

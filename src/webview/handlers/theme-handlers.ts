@@ -1,10 +1,17 @@
-import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 import { defineVscodeTheme } from '@/shared/lib/theme-colors';
 
 export function createThemeHandlers() {
-	const handleThemeData = (message: any) => {
-		defineVscodeTheme(message.tokenColors);
-		monaco.editor.setTheme('vscode-theme');
+	const handleThemeData = async (message: any) => {
+		// Dynamically import Monaco only if it's being used
+		// This prevents Monaco from bundling in the main chunk
+		try {
+			const monaco = await import('monaco-editor/esm/vs/editor/editor.api');
+			defineVscodeTheme({ tokenColors: message.themeContent.tokenColors, themeColors: message.themeContent.colors, monaco });
+			monaco.editor.setTheme('vscode-theme');
+		} catch (error) {
+			// Monaco not loaded yet or not needed - theme will apply when Monaco loads
+			console.debug('Monaco not available for theme application:', error);
+		}
 	};
 
 	return {

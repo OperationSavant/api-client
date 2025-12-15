@@ -1,26 +1,7 @@
 import React, { useState } from 'react';
-import ApiClientButton from '../custom/api-client-button';
-import MonacoEditor from './monaco-editor';
 import { cn } from '@/shared/lib/utils';
-import Markdown from 'react-markdown';
-import rehypeRaw from 'rehype-raw';
-import rehypeSanitize from 'rehype-sanitize';
-import rehypeHighlight from 'rehype-highlight';
-import remarkGfm from 'remark-gfm';
-import { Bold, Code, Heading, Italic, Link, List, ListOrdered, ListTodo, TextQuote } from 'lucide-react';
-import { Separator } from '../ui/separator';
-import {
-	handleBoldClick,
-	handleCodeClick,
-	handleHeadingClick,
-	handleItalicClick,
-	handleLinkClick,
-	handleNumberedListClick,
-	handleQuoteClick,
-	handleTaskListClick,
-	handleUnOrderedListClick,
-} from '@/shared/lib/toolbar-helpers';
 import { MonacoEditorHandle } from '@/shared/types/monaco';
+import { SimpleEditor } from '../tiptap-templates/simple/simple-editor';
 
 interface MarkdownEditorProps {
 	value: string;
@@ -35,7 +16,7 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ value, onChange,
 
 	return (
 		<div className={cn('flex flex-col border border-input rounded-md h-40', className)}>
-			<div className='flex border-b border-input'>
+			{/* <div className='flex border-b border-input'>
 				<div className='flex shrink-0'>
 					<ApiClientButton
 						variant={activeTab === 'markdown' ? 'secondary' : 'ghost'}
@@ -79,18 +60,19 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ value, onChange,
 						<ListTodo />
 					</ApiClientButton>
 				</div>
-			</div>
-			<div className='flex flex-col flex-1 relative border border-input rounded-none overflow-y-auto pr-2 [scrollbar-gutter:stable] min-h-0'>
-				{activeTab === 'markdown' && (
-					<MonacoEditor ref={editorRef} value={value} onContentChange={onChange} language={'markdown'} height={'100%'} lineNumbers={false} />
-				)}
-				{activeTab === 'preview' && (
+			</div> */}
+			<div className='flex flex-col flex-1 relative border border-input rounded-none overflow-y-auto min-h-0'>
+				{/* {activeTab === 'markdown' && ( */}
+				{/* <MonacoEditor ref={editorRef} value={value} onContentChange={onChange} language={'markdown'} height={'100%'} lineNumbers={false} /> */}
+				<SimpleEditor />
+				{/* )} */}
+				{/* {activeTab === 'preview' && (
 					<div className='flex flex-col prose dark:prose-invert bg-background! text-foreground! max-w-full!'>
 						<Markdown rehypePlugins={[rehypeRaw, rehypeHighlight, rehypeSanitize]} remarkPlugins={[remarkGfm]}>
 							{value}
 						</Markdown>
 					</div>
-				)}
+				)} */}
 			</div>
 		</div>
 	);

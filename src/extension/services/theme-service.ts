@@ -3,8 +3,25 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as jsonc from 'jsonc-parser';
 
+interface IVSCodeTheme {
+	$schema: 'vscode://schemas/color-theme';
+	type: 'dark' | 'light';
+	colors: { [name: string]: string };
+	tokenColors: {
+		name?: string;
+		scope: string[] | string;
+		settings: IRule;
+	}[];
+}
+
+interface IRule {
+	foreground?: string;
+	background?: string;
+	fontStyle?: string;
+}
+
 export class ThemeService {
-	private static themeCache = new Map<string, any>();
+	private static themeCache = new Map<string, IVSCodeTheme>();
 	/**
 	 * Send current VSCode theme token colors to webview
 	 * Used for Monaco Editor syntax highlighting synchronization
@@ -13,10 +30,15 @@ export class ThemeService {
 		try {
 			const themeName = workspace.getConfiguration('workbench').get<string>('colorTheme');
 
+			if (!themeName) {
+				console.warn('ThemeService: No theme name found in configuration.');
+				return;
+			}
+
 			if (this.themeCache.has(themeName!)) {
 				panel.webview.postMessage({
 					command: 'themeData',
-					tokenColors: this.themeCache.get(themeName!),
+					themeContent: this.themeCache.get(themeName!),
 				});
 				return;
 			}
@@ -38,13 +60,12 @@ export class ThemeService {
 			const themePath = path.join(themeExtension.extensionPath, themeInfo.path);
 
 			const fileContent = fs.readFileSync(themePath, 'utf-8');
-			const themeContent = jsonc.parse(fileContent);
-			const tokenColors = themeContent.tokenColors || [];
+			const themeContent = jsonc.parse(fileContent) as IVSCodeTheme;
 
-			this.themeCache.set(themeName!, tokenColors);
+			this.themeCache.set(themeName!, themeContent);
 			panel.webview.postMessage({
 				command: 'themeData',
-				tokenColors,
+				themeContent,
 			});
 		} catch (e) {
 			console.error('ThemeService: Error reading theme file:', e);

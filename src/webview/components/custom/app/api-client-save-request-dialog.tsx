@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { RootState } from '@/store';
+import { RootState } from '@/store/main-store';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { ApiClientInput } from '../api-client-input';
 import ApiClientButton from '../api-client-button';
 import { ApiClientSelect } from '../api-client-select';
 import ApiClientFieldRow from '../api-client-field-row';
-import { CollectionRequest, CollectionFolder, SaveRequestPayload } from '@/shared/types/collection';
+import { CollectionRequest, CollectionFolder, SaveRequestPayload, Collection } from '@/shared/types/collection';
 import { arrayToRecord } from '@/shared/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { FileText, Folder, ListFilter } from 'lucide-react';
@@ -37,11 +37,12 @@ const CollectionTreeView: React.FC<{ items: (CollectionRequest | CollectionFolde
 };
 
 export const ApiClientSaveRequestDialog: React.FC<SaveRequestDialogProps> = ({ isOpen, onClose, onSave, onCreateCollection }) => {
-	const { collections } = useSelector((state: RootState) => state.collections);
-	const requestState = useSelector((state: RootState) => state.request);
-	const paramsState = useSelector((state: RootState) => state.requestParams);
-	const headersState = useSelector((state: RootState) => state.requestHeaders);
-	const bodyState = useSelector((state: RootState) => state.requestBody);
+	// const { collections } = useSelector((state: RootState) => state.collection); // TODO: Will need to add collectionState as well
+	const {
+		collection: { collections },
+		request,
+	} = useSelector((state: RootState) => state);
+	// const collections: Collection[] = Object.values(collection.collections ?? []); // Placeholder until collections state is implemented
 
 	const [requestName, setRequestName] = useState('');
 	const [description, setDescription] = useState('');
@@ -57,10 +58,10 @@ export const ApiClientSaveRequestDialog: React.FC<SaveRequestDialogProps> = ({ i
 
 	useEffect(() => {
 		if (isOpen) {
-			setRequestName(requestState.name || 'New Request');
-			setDescription(requestState.description || '');
-			if (requestState.collectionId && collections.some(c => c.id === requestState.collectionId)) {
-				setSelectedCollectionId(requestState.collectionId);
+			setRequestName(request.name || 'New Request');
+			setDescription(request.description || '');
+			if (request.collectionId && collections.some(c => c.id === request.collectionId)) {
+				setSelectedCollectionId(request.collectionId);
 			} else if (collections.length > 0) {
 				setSelectedCollectionId(collections[0].id);
 			} else {
@@ -71,7 +72,7 @@ export const ApiClientSaveRequestDialog: React.FC<SaveRequestDialogProps> = ({ i
 			setNewCollectionName('');
 			setFilterText('');
 		}
-	}, [isOpen, requestState, collections]);
+	}, [isOpen]);
 
 	const handleCreateCollection = () => {
 		if (!newCollectionName.trim()) return;
@@ -84,17 +85,17 @@ export const ApiClientSaveRequestDialog: React.FC<SaveRequestDialogProps> = ({ i
 		if (!selectedCollectionId) return;
 		onSave({
 			collectionId: selectedCollectionId,
-			requestId: requestState.id,
+			requestId: request.id,
 			request: {
 				name: requestName,
 				description: description,
-				method: requestState.method,
-				url: requestState.url,
-				auth: requestState.auth,
-				body: bodyState.config,
-				headers: arrayToRecord(headersState.headers),
-				params: arrayToRecord(paramsState.params),
-				...(bodyState.config.type === 'graphql' && { operationName: bodyState.config.graphql.operationName }),
+				method: request.method,
+				url: request.url,
+				auth: request.auth,
+				body: request.body,
+				headers: arrayToRecord(request.headers),
+				params: arrayToRecord(request.params),
+				...(request.body.type === 'graphql' && { operationName: request.body.graphql.operationName }),
 			},
 		});
 	};
@@ -107,8 +108,8 @@ export const ApiClientSaveRequestDialog: React.FC<SaveRequestDialogProps> = ({ i
 	};
 
 	const renderCreateCollection = () => (
-		<div className='p-4 border border-dashed rounded-md'>
-			{isCreatingCollection ? (
+		<div className='p-4'>
+			{/* {isCreatingCollection ? (
 				<div className='space-y-2'>
 					<p className='text-sm text-muted-foreground'>Create a new collection to save this request.</p>
 					<ApiClientInput placeholder='New collection name...' value={newCollectionName} onChange={e => setNewCollectionName(e.target.value)} autoFocus />
@@ -121,14 +122,14 @@ export const ApiClientSaveRequestDialog: React.FC<SaveRequestDialogProps> = ({ i
 						</ApiClientButton>
 					</div>
 				</div>
-			) : (
-				<div className='text-center'>
-					<p className='text-sm text-muted-foreground'>No collections found.</p>
-					<ApiClientButton variant='link' size='sm' onClick={() => setIsCreatingCollection(true)}>
-						Create a new Collection
-					</ApiClientButton>
-				</div>
-			)}
+			) : ( */}
+			<div className='text-center'>
+				{/* <p className='text-sm text-muted-foreground'>No collections found.</p> */}
+				<ApiClientButton variant='link' size='sm' onClick={() => setIsCreatingCollection(true)}>
+					Create a new Collection
+				</ApiClientButton>
+			</div>
+			{/* )} */}
 		</div>
 	);
 
@@ -164,33 +165,56 @@ export const ApiClientSaveRequestDialog: React.FC<SaveRequestDialogProps> = ({ i
 								options={collections.map(c => ({ label: c.name, value: c.id }))}
 								onValueChange={value => setSelectedCollectionId(value)}
 								classNameTrigger={`w-full bg-muted-foreground/10 border rounded-md`}
-								classNameContent={`w-full`}
+								classNameContent={`w-full max-h-50 overflow-y-auto`}
 							/>
-							{/* {renderCreateCollection()} */}
 						</ApiClientFieldRow>
-						{selectedCollection && (
-							<div className='space-y-2 border border-input rounded-md'>
-								<div className='border-none relative w-full'>
-									<ListFilter className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
-									<ApiClientInput
-										placeholder='Search for collection or folder'
-										value={filterText}
-										onChange={e => setFilterText(e.target.value)}
-										className='border-0 border-b border-b-input pl-10 bg-muted-foreground/10'
-									/>
-								</div>
-								<ScrollArea className='min-h-3/4 h-52 border-none rounded-md border'>
-									<div className='p-4 border-none'>
-										<CollectionTreeView items={[...selectedCollection.folders, ...selectedCollection.requests]} filter={filterText} />
-									</div>
-								</ScrollArea>
+						{/* {selectedCollection && ( */}
+						<div className='space-y-2 border border-input rounded-md'>
+							<div className='border-none relative w-full'>
+								<ListFilter className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
+								<ApiClientInput
+									placeholder='Search for collection or folder'
+									value={filterText}
+									onChange={e => setFilterText(e.target.value)}
+									className='border-0 border-b border-b-input pl-10 bg-muted-foreground/10'
+								/>
 							</div>
-						)}
+							<ScrollArea className='min-h-3/4 h-52 border-none rounded-md border'>
+								<div className='p-4 border-none'>
+									{isCreatingCollection ? (
+										<div className='space-y-2 flex'>
+											<p className='text-sm text-muted-foreground'>Create a new collection to save this request.</p>
+											<ApiClientInput
+												placeholder='New collection name...'
+												value={newCollectionName}
+												onChange={e => setNewCollectionName(e.target.value)}
+												autoFocus
+											/>
+											<div className='flex justify-end gap-2'>
+												<ApiClientButton variant='ghost' size='sm' onClick={() => setIsCreatingCollection(false)}>
+													Cancel
+												</ApiClientButton>
+												<ApiClientButton size='sm' onClick={handleCreateCollection} disabled={!newCollectionName.trim()}>
+													Create
+												</ApiClientButton>
+											</div>
+										</div>
+									) : null}
+									{/* <CollectionTreeView items={[...selectedCollection.folders, ...selectedCollection.requests]} filter={filterText} /> */}
+								</div>
+							</ScrollArea>
+						</div>
+						{/* )} */}
 					</div>
 				</div>
-				<DialogFooter>
-					<ApiClientButton variant='ghost' onClick={onClose} content='Cancel' />
-					<ApiClientButton onClick={handleSave} disabled={!requestName || !selectedCollectionId} content='Save' />
+				<DialogFooter className='w-full! justify-between! sm:justify-between!'>
+					<div className='flex justify-between items-center w-full'>
+						<div className='flex flex-1'>{renderCreateCollection()}</div>
+						<div className='flex justify-between items-center shrink'>
+							<ApiClientButton variant='ghost' onClick={onClose} content='Cancel' />
+							<ApiClientButton onClick={handleSave} disabled={!requestName || !selectedCollectionId} content='Save' />
+						</div>
+					</div>
 				</DialogFooter>
 			</DialogContent>
 		</Dialog>

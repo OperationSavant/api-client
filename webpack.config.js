@@ -5,8 +5,10 @@
 const webpack = require('webpack');
 const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
 
 /**@type {import('webpack').Configuration}*/
 const config = {
@@ -24,6 +26,16 @@ const config = {
 		vscode: 'commonjs vscode', // the vscode-module is created on-the-fly and must be excluded. Add other modules that cannot be webpack'ed, 📖 -> https://webpack.js.org/configuration/externals/
 		// modules added here also need to be added in the .vscodeignore file
 		'@vscode/sqlite': 'commonjs2 @vscode/sqlite',
+		'mime-types': 'commonjs2 mime-types',
+		'mime-db': 'commonjs2 mime-db',
+		path: 'commonjs path',
+		fs: 'commonjs fs', //
+		crypto: 'commonjs crypto', //
+		util: 'commonjs util', //
+		// os: 'commonjs os', // Prevention: if used
+		// stream: 'commonjs stream', // Prevention: if used
+		// events: 'commonjs events', // Prevention: if used
+		// zlib: 'commonjs zlib',
 	},
 	resolve: {
 		// support reading TypeScript and JavaScript files, 📖 -> https://github.com/TypeStrong/ts-loader
@@ -32,6 +44,31 @@ const config = {
 			{ name: '@/shared', alias: path.resolve(__dirname, 'src/shared') },
 			{ name: '@/domain', alias: path.resolve(__dirname, 'src/domain') },
 			{ name: '@/extension', alias: path.resolve(__dirname, 'src/extension') },
+		],
+		fallback: {
+			// Keep these FALSE for modules we don't want bundled
+			path: false,
+			fs: false,
+			crypto: false,
+			util: false,
+		},
+	},
+	optimization: {
+		concatenateModules: true,
+		mergeDuplicateChunks: true,
+		sideEffects: true,
+		minimize: true,
+		minimizer: [
+			new TerserPlugin({
+				terserOptions: {
+					format: { comments: false },
+				},
+				extractComments: {
+					condition: /^\**!|@preserve|@license|@cc_on/i,
+					filename: 'LICENSES-extension.txt',
+					banner: licenseFile => `License info: ${licenseFile}`,
+				},
+			}),
 		],
 	},
 	module: {
@@ -42,6 +79,9 @@ const config = {
 				use: [
 					{
 						loader: 'ts-loader',
+						options: {
+							configFile: path.resolve(__dirname, 'tsconfig.json'),
+						},
 					},
 				],
 			},
@@ -86,6 +126,27 @@ const mainWebviewConfig = {
 			buffer: require.resolve('buffer/'),
 		},
 	},
+	optimization: {
+		concatenateModules: true,
+		mergeDuplicateChunks: true,
+		sideEffects: true,
+		minimize: true,
+		minimizer: [
+			new TerserPlugin({
+				terserOptions: {
+					format: { comments: false },
+				},
+				extractComments: {
+					condition: /^\**!|@preserve|@license|@cc_on/i,
+					filename: fileData =>
+						// The "fileData" argument contains object with "filename", "basename", "query" and "hash"
+						`${fileData.filename}.LICENSE.txt${fileData.query}`,
+					banner: licenseFile => `License information can be found in ${licenseFile}`,
+				},
+			}),
+			new CssMinimizerPlugin(), // ✅ CSS minification
+		],
+	},
 	module: {
 		rules: [
 			{
@@ -116,8 +177,16 @@ const mainWebviewConfig = {
 				],
 			},
 			{
+				test: /\.s[ac]ss$/i,
+				use: ['style-loader', 'css-loader', 'sass-loader'],
+			},
+			{
 				test: /\.ttf$/,
 				type: 'asset/resource',
+			},
+			{
+				test: /\.svg$/,
+				use: ['@svgr/webpack'],
 			},
 		],
 	},
@@ -132,7 +201,32 @@ const mainWebviewConfig = {
 		new MiniCssExtractPlugin({
 			filename: 'main.css',
 		}),
-		new MonacoWebpackPlugin(),
+		new MonacoWebpackPlugin({
+			// languages: ['javascript', 'typescript', 'json', 'html', 'xml', 'css', 'yaml', 'graphql', 'markdown', 'shell'],
+			// features: [
+			// 	'bracketMatching',
+			// 	'clipboard',
+			// 	'codeEditor',
+			// 	'comment',
+			// 	'!contextmenu',
+			// 	'documentSymbols',
+			// 	'find',
+			// 	'folding',
+			// 	'format',
+			// 	'gotoError',
+			// 	'hover',
+			// 	'links',
+			// 	'multicursor',
+			// 	'parameterHints',
+			// 	'wordHighlighter',
+			// 	'inPlaceReplace',
+			// 	'smartSelect',
+			// 	'lineSelection',
+			// 	'linesOperations',
+			// ],
+			languages: ['json', 'xml', 'html', 'javascript', 'css', 'typescript'],
+			features: ['bracketMatching', 'clipboard', 'find', 'folding', 'format', 'wordHighlighter'],
+		}),
 		new CopyPlugin({
 			patterns: [
 				{
@@ -180,6 +274,26 @@ const sidebarWebviewConfig = {
 			buffer: require.resolve('buffer/'),
 		},
 	},
+	optimization: {
+		concatenateModules: true,
+		mergeDuplicateChunks: true,
+		sideEffects: true,
+		minimize: true,
+		minimizer: [
+			new TerserPlugin({
+				terserOptions: {
+					format: { comments: false },
+				},
+				extractComments: {
+					condition: /^\**!|@preserve|@license|@cc_on/i,
+					filename: fileData =>
+						// The "fileData" argument contains object with "filename", "basename", "query" and "hash"
+						`${fileData.filename}.LICENSE.txt${fileData.query}`,
+					banner: licenseFile => `License information can be found in ${licenseFile}`,
+				},
+			}),
+		],
+	},
 	module: {
 		rules: [
 			{
@@ -189,25 +303,14 @@ const sidebarWebviewConfig = {
 					{
 						loader: 'ts-loader',
 						options: {
-							configFile: path.resolve(__dirname, 'tsconfig.webview.json'), // <– use webview tsconfig
+							configFile: path.resolve(__dirname, 'tsconfig.webview.json'),
 						},
 					},
 				],
 			},
 			{
-				test: /\.css$/,
-				use: [
-					MiniCssExtractPlugin.loader,
-					'css-loader',
-					{
-						loader: 'postcss-loader',
-						options: {
-							postcssOptions: {
-								config: path.resolve(__dirname, 'postcss.config.mjs'),
-							},
-						},
-					},
-				],
+				test: /\.svg$/,
+				use: ['@svgr/webpack'],
 			},
 		],
 	},
@@ -219,7 +322,6 @@ const sidebarWebviewConfig = {
 			process: 'process/browser',
 			Buffer: ['buffer', 'Buffer'],
 		}),
-		new MiniCssExtractPlugin(),
 	],
 };
 

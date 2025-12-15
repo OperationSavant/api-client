@@ -1,0 +1,12 @@
+export { default as HttpIcon } from './http.svg';
+export { default as GraphQLIcon } from './graphql.svg';
+export { default as GrpcIcon } from './grpc.svg';
+export { default as WebSocketIcon } from './websocket.svg';
+export { default as SocketIOIcon } from './socket-io.svg';
+export { default as GetIcon } from './get.svg';
+export { default as PostIcon } from './post.svg';
+export { default as PutIcon } from './put.svg';
+export { default as PatchIcon } from './patch.svg';
+export { default as DeleteIcon } from './delete.svg';
+export { default as HeadIcon } from './head.svg';
+export { default as OptionsIcon } from './options.svg';

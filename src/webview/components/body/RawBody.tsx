@@ -1,29 +1,29 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Code } from 'lucide-react';
-import { RawBodyConfig } from '@/shared/types/body';
+import { RawBody } from '@/shared/types/body';
 import { useSelector } from 'react-redux';
-import { RootState, useAppDispatch } from '@/store';
-import { setRawBody } from '@/features/requestBody/requestBodySlice';
-import MonacoEditor from '@/components/editor/monaco-editor';
+import { RootState, useAppDispatch } from '@/store/main-store';
 import { ApiClientSelect } from '@/components/custom/api-client-select';
 import ApiClientFieldRow from '@/components/custom/api-client-field-row';
 import { BODY_TYPE_OPTIONS } from '@/shared/constants/select-options';
 import { MonacoEditorHandle } from '@/shared/types/monaco';
+import { setRawBody } from '@/features/request/requestSlice';
+import { MonacoEditor } from '@/components/editor/lazy-monaco-editor';
 
 const RawBody: React.FC = () => {
 	const editorRef = React.useRef<MonacoEditorHandle>(null);
 
 	const dispatch = useAppDispatch();
-	const bodyConfig = useSelector((state: RootState) => state.requestBody.config);
+	const bodyConfig = useSelector((state: RootState) => state.request.body);
 
 	if (bodyConfig.type !== 'raw' || !bodyConfig.raw) {
 		return null;
 	}
-	const rawConfig = bodyConfig.raw;
+	const rawBody = bodyConfig.raw;
 
-	const updateRawConfig = (newValues: Partial<RawBodyConfig>) => {
-		dispatch(setRawBody({ ...rawConfig, ...newValues }));
+	const updateRawConfig = (newValues: Partial<RawBody>) => {
+		dispatch(setRawBody({ ...rawBody, ...newValues }));
 	};
 
 	const formatContent = async () => {
@@ -40,7 +40,7 @@ const RawBody: React.FC = () => {
 	};
 
 	const getContentType = () => {
-		switch (rawConfig.language) {
+		switch (rawBody.language) {
 			case 'json':
 				return 'application/json';
 			case 'xml':
@@ -61,8 +61,8 @@ const RawBody: React.FC = () => {
 			<div className='flex items-center justify-between'>
 				<ApiClientFieldRow label='Language' htmlFor='language'>
 					<ApiClientSelect
-						value={rawConfig.language || 'json'}
-						onValueChange={value => updateRawConfig({ language: value as RawBodyConfig['language'] })}
+						value={rawBody.language || 'json'}
+						onValueChange={value => updateRawConfig({ language: value as RawBody['language'] })}
 						placeholder='Select Body Type'
 						options={BODY_TYPE_OPTIONS}
 						classNameTrigger={`w-[230px] bg-muted-foreground/10 border rounded-md`}
@@ -70,7 +70,7 @@ const RawBody: React.FC = () => {
 					/>
 				</ApiClientFieldRow>
 				<div className='flex items-center gap-4'>
-					<Button onClick={formatContent} size='sm' variant='outline' className='flex items-center gap-2' disabled={!rawConfig.content?.trim()}>
+					<Button onClick={formatContent} size='sm' variant='outline' className='flex items-center gap-2' disabled={!rawBody.content?.trim()}>
 						<Code className='w-4 h-4' />
 						Format
 					</Button>
@@ -80,8 +80,8 @@ const RawBody: React.FC = () => {
 			<div className='flex-1 relative border border-input rounded-md'>
 				<MonacoEditor
 					ref={editorRef}
-					value={rawConfig.content || ''}
-					language={rawConfig.language ?? ''}
+					value={rawBody.content || ''}
+					language={rawBody.language ?? ''}
 					onContentChange={value => updateRawConfig({ content: value })}
 					height='100%'
 				/>

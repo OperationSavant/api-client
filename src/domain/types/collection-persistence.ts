@@ -7,61 +7,72 @@ import { Collection, CollectionFolder, CollectionRequest } from '@/shared/types/
 export interface ICollectionPersistence {
 	/**
 	 * Initialize storage (create tables, etc.)
+	 * Returns Promise to support async initialization
 	 */
-	init(): void;
+	init(): Promise<void>;
 
 	/**
 	 * Load all collections with nested folders and requests
 	 */
-	loadAll(): Collection[];
+	loadAll(): Promise<Collection[]>;
 
 	/**
 	 * Create a new collection
+	 * Returns Promise to ensure write completes before proceeding
 	 */
-	createCollection(collection: Collection): void;
+	createCollection(collection: Collection): Promise<void>;
 
 	/**
 	 * Update collection metadata (name, description)
+	 * Returns Promise to ensure write completes before proceeding
 	 */
-	updateCollection(id: string, updates: Partial<Collection>): void;
+	updateCollection(id: string, updates: Partial<Collection>): Promise<void>;
 
 	/**
 	 * Delete collection and all nested data (CASCADE)
+	 * Returns Promise to ensure deletion completes before proceeding
 	 */
-	deleteCollection(id: string): void;
+	deleteCollection(id: string): Promise<void>;
 
 	/**
 	 * Create a new folder within a collection
+	 * Returns Promise to ensure write completes before proceeding
 	 */
-	createFolder(collectionId: string, folder: any): void;
+	createFolder(collectionId: string, folder: any): Promise<void>;
 
 	/**
 	 * Update folder metadata
+	 * Returns Promise to ensure write completes before proceeding
 	 */
-	updateFolder(folderId: string, updates: Partial<CollectionFolder>): void;
+	updateFolder(folderId: string, updates: Partial<CollectionFolder>): Promise<void>;
 
 	/**
 	 * Delete folder and all nested requests (CASCADE)
+	 * Returns Promise to ensure deletion completes before proceeding
 	 */
-	deleteFolder(folderId: string): void;
+	deleteFolder(folderId: string): Promise<void>;
 
 	/**
 	 * Create a new request
+	 * Returns Promise to ensure write completes before proceeding
 	 */
-	createRequest(request: CollectionRequest, collectionId: string): void;
+	createRequest(request: CollectionRequest, collectionId: string): Promise<void>;
 
 	/**
 	 * Update request data
+	 * Returns Promise to ensure write completes before proceeding
 	 */
-	updateRequest(requestId: string, updates: Partial<CollectionRequest>): void;
+	updateRequest(requestId: string, updates: Partial<CollectionRequest>): Promise<void>;
 
 	/**
 	 * Delete request
+	 * Returns Promise to ensure deletion completes before proceeding
 	 */
-	deleteRequest(requestId: string): void;
+	deleteRequest(requestId: string): Promise<void>;
 
 	/**
 	 * Clear all collections (for reset scenarios)
+	 * Returns Promise to ensure all data is cleared before proceeding
 	 */
-	clearAll(): void;
+	clearAll(): Promise<void>;
 }

@@ -1,13 +1,13 @@
 // cURL Integration utilities for VS Code API Client
 // Handles parsing cURL commands to requests and generating cURL from requests
 
-import { RequestBodyConfig } from '@/shared/types/body';
+import { RequestBody } from '@/shared/types/body';
 
 export interface CurlParseResult {
 	url: string;
 	method: string;
 	headers: Record<string, string>;
-	body?: RequestBodyConfig;
+	body?: RequestBody;
 	auth?: {
 		type: 'basic' | 'bearer' | 'api-key';
 		credentials: Record<string, string>;
@@ -20,7 +20,7 @@ export interface CurlGenerateOptions {
 	url: string;
 	method: string;
 	headers?: Record<string, string>;
-	body?: RequestBodyConfig;
+	body?: RequestBody;
 	auth?: {
 		type: 'basic' | 'bearer' | 'api-key';
 		credentials: Record<string, string>;
@@ -333,7 +333,7 @@ function extractAuth(args: string[], headers: Record<string, string>): CurlParse
 /**
  * Extract body data from arguments
  */
-function extractBody(args: string[], headers: Record<string, string>): RequestBodyConfig | null {
+function extractBody(args: string[], headers: Record<string, string>): RequestBody | null {
 	let bodyData: string | null = null;
 
 	// Find data arguments
@@ -356,56 +356,40 @@ function extractBody(args: string[], headers: Record<string, string>): RequestBo
 	if (contentType.includes('application/json')) {
 		return {
 			type: 'raw',
-			formData: [],
-			urlEncoded: [],
 			raw: {
 				content: bodyData,
 				language: 'json',
 				autoFormat: true,
 			},
-			binary: {},
-			graphql: { query: '', variables: '' },
 		};
 	}
 
 	if (contentType.includes('application/x-www-form-urlencoded')) {
 		return {
 			type: 'x-www-form-urlencoded',
-			formData: [],
 			urlEncoded: parseUrlEncodedData(bodyData),
-			raw: { content: '', language: 'text', autoFormat: false },
-			binary: {},
-			graphql: { query: '', variables: '' },
 		};
 	}
 
 	if (contentType.includes('application/xml') || contentType.includes('text/xml')) {
 		return {
 			type: 'raw',
-			formData: [],
-			urlEncoded: [],
 			raw: {
 				content: bodyData,
 				language: 'xml',
 				autoFormat: true,
 			},
-			binary: {},
-			graphql: { query: '', variables: '' },
 		};
 	}
 
 	// Default to raw text
 	return {
 		type: 'raw',
-		formData: [],
-		urlEncoded: [],
 		raw: {
 			content: bodyData,
 			language: 'text',
 			autoFormat: false,
 		},
-		binary: {},
-		graphql: { query: '', variables: '' },
 	};
 }
 
@@ -430,7 +414,7 @@ function parseUrlEncodedData(data: string): Array<{ key: string; value: string; 
 /**
  * Generate body data string for cURL command
  */
-function generateBodyData(body: RequestBodyConfig): string | null {
+function generateBodyData(body: RequestBody): string | null {
 	switch (body.type) {
 		case 'raw': {
 			return `"${body.raw.content!.replace(/"/g, '\\"')}"`;

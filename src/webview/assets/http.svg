@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" role="img">
+  <title>HTTP request</title>
+
+  <!-- Browser/request frame -->
+  <rect x="2" y="3" width="20" height="18" rx="2" fill="none"
+        stroke="#22C55E" stroke-width="1.4" stroke-linejoin="round"/>
+
+  <!-- Tiny top bar dots (browser-like UI) -->
+  <circle cx="6" cy="7" r="1" fill="#22C55E"/>
+  <circle cx="10" cy="7" r="1" fill="#22C55E"/>
+  <circle cx="14" cy="7" r="1" fill="#22C55E"/>
+
+  <!-- Horizontal address bar (URL line) -->
+  <path d="M5 11h14" stroke="#22C55E" stroke-width="1.4"
+        stroke-linecap="round" fill="none"/>
+
+  <!-- Arrow indicating request being sent -->
+  <path d="M13 14h6" stroke="#22C55E" stroke-width="1.6"
+        stroke-linecap="round" fill="none"/>
+
+  <!-- Arrow head -->
+  <path d="M17.5 12.5 19.5 14l-2 1.5" stroke="#22C55E"
+        stroke-width="1.6" stroke-linecap="round"
+        stroke-linejoin="round" fill="none"/>
+
+  <!-- 'HTTP' protocol hint (minimalist bars) -->
+  <path d="M5.5 14v3M7 14h1.5v3M10 14h1.5M10.75 14v3"
+        stroke="#22C55E" stroke-width="1.4"
+        stroke-linecap="round" fill="none"/>
+</svg>

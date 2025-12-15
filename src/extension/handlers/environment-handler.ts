@@ -1,13 +1,9 @@
 import { WebviewPanel, window } from 'vscode';
 import { environmentService } from '@/domain/services/environment-service';
-import { StateManager } from '../services/state-manager';
-
-interface EnvironmentHandlerDependencies {
-	environmentService: typeof environmentService;
-}
+import { unitOfWork } from '@/domain/services/unit-of-work';
 
 export class EnvironmentHandler {
-	constructor(private deps: EnvironmentHandlerDependencies) {}
+	constructor() {}
 
 	/**
 	 * Create environment/scope
@@ -16,11 +12,16 @@ export class EnvironmentHandler {
 	async handleCreateEnvironment(message: any, panel: WebviewPanel): Promise<void> {
 		const { name, scopeType } = message;
 
-		this.deps.environmentService.createScope(name, scopeType);
-
-		StateManager.saveState();
-
-		window.showInformationMessage(`Environment '${name}' created.`);
+		try {
+			environmentService.createScope(name, scopeType);
+			await unitOfWork.commit();
+			window.showInformationMessage(`Environment '${name}' created.`);
+		} catch (error) {
+			console.error('[EnvironmentHandler] Failed to create environment:', error);
+			unitOfWork.rollback();
+			window.showErrorMessage(`Failed to create environment: ${error instanceof Error ? error.message : 'Unknown error'}`);
+			throw error;
+		}
 	}
 
 	/**
@@ -33,11 +34,16 @@ export class EnvironmentHandler {
 		const confirmation = await window.showWarningMessage(`Delete environment "${scopeName}"?`, { modal: true }, 'Delete');
 
 		if (confirmation === 'Delete') {
-			this.deps.environmentService.deleteScope(scopeId);
-
-			StateManager.saveState();
-
-			window.showInformationMessage(`Environment '${scopeName}' deleted.`);
+			try {
+				environmentService.deleteScope(scopeId);
+				await unitOfWork.commit();
+				window.showInformationMessage(`Environment '${scopeName}' deleted.`);
+			} catch (error) {
+				console.error('[EnvironmentHandler] Failed to delete environment:', error);
+				unitOfWork.rollback();
+				window.showErrorMessage(`Failed to delete environment: ${error instanceof Error ? error.message : 'Unknown error'}`);
+				throw error;
+			}
 		}
 	}
 
@@ -48,10 +54,15 @@ export class EnvironmentHandler {
 	async handleSetActiveEnvironment(message: any, panel: WebviewPanel): Promise<void> {
 		const { scopeId } = message;
 
-		this.deps.environmentService.setActiveScope(scopeId);
-
-		StateManager.saveState();
-
-		window.showInformationMessage(`Active environment set.`);
+		try {
+			environmentService.setActiveScope(scopeId);
+			await unitOfWork.commit();
+			window.showInformationMessage(`Active environment set.`);
+		} catch (error) {
+			console.error('[EnvironmentHandler] Failed to set active environment:', error);
+			unitOfWork.rollback();
+			window.showErrorMessage(`Failed to set active environment: ${error instanceof Error ? error.message : 'Unknown error'}`);
+			throw error;
+		}
 	}
 }

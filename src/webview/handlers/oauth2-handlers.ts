@@ -1,12 +1,12 @@
-import { AppDispatch, RootState } from '@/store';
+import { AppDispatch, RootState } from '@/store/main-store';
 import { setAuth } from '@/features/request/requestSlice';
+import { useSelector } from 'react-redux';
 
 interface OAuth2HandlerDeps {
 	dispatch: AppDispatch;
-	getState: () => RootState;
 }
 
-export function createOAuth2Handlers({ dispatch, getState }: OAuth2HandlerDeps) {
+export function createOAuth2Handlers({ dispatch }: OAuth2HandlerDeps) {
 	const handleOAuth2TokenResponse = (message: any) => {
 		const { token, error } = message;
 
@@ -17,8 +17,7 @@ export function createOAuth2Handlers({ dispatch, getState }: OAuth2HandlerDeps) 
 		}
 
 		if (token) {
-			const currentState = getState();
-			const currentAuth = currentState.request.auth;
+			const currentAuth = useSelector((state: RootState) => state.request.auth);
 
 			if (currentAuth.type === 'oauth2' && currentAuth.oauth2) {
 				dispatch(

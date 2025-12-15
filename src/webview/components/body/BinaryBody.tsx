@@ -4,10 +4,10 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { Upload, File, X, FileImage, FileText, Music, Video } from 'lucide-react';
-import { BinaryBodyConfig } from '@/shared/types/body';
-import { RootState, useAppDispatch } from '@/store';
+import { BinaryBody } from '@/shared/types/body';
+import { RootState, useAppDispatch } from '@/store/main-store';
 import { useSelector } from 'react-redux';
-import { setBinaryBody } from '@/features/requestBody/requestBodySlice';
+import { setBinaryBody } from '@/features/request/requestSlice';
 
 interface BinaryBodyProps {
 	onSelectFile: () => void;
@@ -19,15 +19,15 @@ const BinaryBody: React.FC<BinaryBodyProps> = ({ onSelectFile }) => {
 	const [uploadProgress, setUploadProgress] = useState(0);
 
 	const dispatch = useAppDispatch();
-	const bodyConfig = useSelector((state: RootState) => state.requestBody.config);
+	const body = useSelector((state: RootState) => state.request.body);
 
-	if (bodyConfig.type !== 'binary') {
+	if (body.type !== 'binary') {
 		return null;
 	}
 
-	const binaryConfig = bodyConfig.binary;
+	const binaryConfig = body.binary;
 
-	const updateBinaryConfig = (newValues: Partial<BinaryBodyConfig>) => {
+	const updateBinaryConfig = (newValues: Partial<BinaryBody>) => {
 		dispatch(setBinaryBody({ ...binaryConfig, ...newValues }));
 	};
 

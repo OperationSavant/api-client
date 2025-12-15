@@ -1,8 +1,9 @@
 // hooks/useRequestExecution.ts
 import { useSelector } from 'react-redux';
 import { useCallback } from 'react';
-import { RootState } from '@/store';
+import { RootState } from '@/store/main-store';
 import { arrayToRecord } from '@/shared/lib/utils';
+import { assembleBodyForExecution, mergeContentTypeHeader } from '@/shared/lib/body-assembler';
 
 export const useRequestExecution = ({
 	onLoadingChange,
@@ -13,16 +14,13 @@ export const useRequestExecution = ({
 	onResponseClear: () => void;
 	sendToBackend: (message: any) => void;
 }) => {
-	const { url, protocol, method, auth } = useSelector((state: RootState) => state.request);
-	const { params } = useSelector((state: RootState) => state.requestParams);
-	const { headers } = useSelector((state: RootState) => state.requestHeaders);
-	const { config: bodyConfig } = useSelector((state: RootState) => state.requestBody);
+	const request = useSelector((state: RootState) => state.request);
 
 	const executeRequest = useCallback(async () => {
 		onLoadingChange(true);
 		onResponseClear();
 
-		const requestUrl = url.trim();
+		const requestUrl = request.url.trim();
 		if (!requestUrl) {
 			onLoadingChange(false);
 			return;
@@ -30,20 +28,23 @@ export const useRequestExecution = ({
 
 		let fullUrl = requestUrl;
 		if (!requestUrl.includes('://')) {
-			fullUrl = `${protocol}://${requestUrl}`;
+			fullUrl = `${request.protocol}://${requestUrl}`;
 		}
+
+		const assemblyResult = assembleBodyForExecution(request.body, request.headers);
+		const finalHeaders = mergeContentTypeHeader(request.headers, assemblyResult);
 
 		sendToBackend({
 			source: 'webview',
 			command: 'sendRequest',
 			url: fullUrl,
-			method,
-			bodyConfig,
-			headers: arrayToRecord(headers),
-			params: arrayToRecord(params),
-			auth,
+			method: request.method,
+			bodyConfig: assemblyResult.body,
+			headers: arrayToRecord(finalHeaders),
+			params: arrayToRecord(request.params),
+			auth: request.auth,
 		});
-	}, [url, method, headers, params, auth, bodyConfig, onLoadingChange, onResponseClear, sendToBackend]);
+	}, [request, onLoadingChange, onResponseClear, sendToBackend]);
 
 	return { executeRequest };
 };

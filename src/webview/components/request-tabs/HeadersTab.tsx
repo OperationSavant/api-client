@@ -1,13 +1,13 @@
 import { ApiClientTable } from '@/components/custom/api-client-kvp';
 import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '@/store';
-import { setHeaders } from '@/features/requestHeaders/requestHeadersSlice';
+import { RootState } from '@/store/main-store';
 import ApiClientHeader from '../custom/api-client-header';
 import { useKeyValueTable } from '@/hooks/useKeyValueTable';
+import { setHeaders } from '@/features/request/requestSlice';
 
 const HeadersTab: React.FC = () => {
 	const dispatch = useDispatch();
-	const headers = useSelector((state: RootState) => state.requestHeaders.headers);
+	const headers = useSelector((state: RootState) => state.request.headers);
 
 	const { handleChange, handleCheck, handleDelete } = useKeyValueTable(headers, newHeaders => dispatch(setHeaders(newHeaders)), {
 		key: '',

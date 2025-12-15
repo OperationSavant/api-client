@@ -1,46 +1,62 @@
-import React, { useRef, useState } from 'react';
-import { ImperativePanelGroupHandle } from 'react-resizable-panels';
+import React, { useCallback } from 'react';
 import { Button } from '../ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import { Switch } from '../ui/switch';
 import { Label } from '../ui/label';
-import { Download, ExpandIcon, ShrinkIcon, Copy, Maximize2, Minimize2, ChevronsUpDown, ExternalLink, Send, WrapText, Filter, Search, Play } from 'lucide-react';
-import { MonacoEditor } from '../editor/monaco-editor';
-import { PanelState, Response } from '@/shared/types/response';
+import { Maximize2, Minimize2, ChevronsUpDown, ExternalLink, Send, AlignStartVertical, TextSelect, TestTube, Cookie } from 'lucide-react';
+import { Response } from '@/shared/types/response';
 import { Separator } from '../ui/separator';
 import { Badge } from '../ui/badge';
 import { LoadingFallback } from '../custom/states/loading-fallback';
 import { EmptyState } from '../custom/states/empty-state';
-import ApiClientButton from '../custom/api-client-button';
-import { ApiClientSelect } from '../custom/api-client-select';
-import { RESPONSE_CONTENT_TYPE_OPTIONS } from '@/shared/constants/select-options';
-import ResponseImageViewer from './response-image-viewer';
-import ResponsePDFViewer from './response-pdf-viewer';
-import ResponseStringViewer from './reposen-string-viewer';
 import { ApiClientTable } from '../custom/api-client-kvp';
-import { recordToArray } from '@/shared/lib/utils';
+import { cn, recordToArray } from '@/shared/lib/utils';
+import ApiClientTabs from '../custom/api-client-tabs';
+import { ResponseTabContext, TabConfig } from '@/shared/types/tabs';
+import { RootState, useAppDispatch } from '@/store/main-store';
+import { useSelector } from 'react-redux';
+import { setActiveResponseTab, setResponsePanelSize } from '@/features/editor/editorUISlice';
+import ResponseBodyTab from './response-body-tab';
+import ResponseHeaderTab from './response-header-tab';
 
 interface ResponseViewerProps {
-	response: Response | null;
-	isLoading: boolean;
-	onOpenFileInEditor?: (filePath: string) => void;
-	onTogglePanelSize?: () => void;
-	panelState?: PanelState;
+	sendToExtension: (message: any) => void;
+	panelGroupRef: React.RefObject<any>;
 	className?: string;
 }
 
-export const ResponseViewer: React.FC<ResponseViewerProps> = ({
-	response,
-	isLoading,
-	onOpenFileInEditor,
-	onTogglePanelSize,
-	panelState = 'default',
-	className = '',
-}) => {
-	const [viewMode, setViewMode] = useState<'raw' | 'formatted'>('formatted');
-	const [headersTab, setHeadersTab] = useState<'body' | 'cookies' | 'headers' | 'tests'>('body');
-	const [wordWrap, setWordWrap] = useState(false);
-	const [isFullscreen, setIsFullscreen] = useState(false);
+export const ResponseViewer: React.FC<ResponseViewerProps> = ({ sendToExtension, panelGroupRef, className = '' }) => {
+	const dispatch = useAppDispatch();
+	const {
+		ui: { isExecuting, responsePanelSize, activeResponseTab },
+		response,
+	} = useSelector((state: RootState) => state);
+
+	const handleOpenFileInEditor = useCallback(
+		(filePath: string) => {
+			sendToExtension({ source: 'webview', command: 'openFileInEditor', filePath });
+		},
+		[sendToExtension]
+	);
+
+	const handleToggleResponsePanel = useCallback(() => {
+		const panelGroup = panelGroupRef.current;
+		if (!panelGroup) return;
+
+		switch (responsePanelSize) {
+			case 'default':
+				panelGroup.setLayout([10, 90]);
+				setResponsePanelSize('maximized');
+				break;
+			case 'maximized':
+				panelGroup.setLayout([95, 5]);
+				setResponsePanelSize('minimized');
+				break;
+			case 'minimized':
+				panelGroup.setLayout([60, 40]);
+				setResponsePanelSize('default');
+				break;
+		}
+	}, [responsePanelSize]);
 
 	const formatBytes = (bytes: number): string => {
 		if (bytes === 0) return '0 Bytes';
@@ -118,8 +134,8 @@ export const ResponseViewer: React.FC<ResponseViewerProps> = ({
 	};
 
 	const handleOpenInEditor = () => {
-		if (response?.bodyFilePath && onOpenFileInEditor) {
-			onOpenFileInEditor(response.bodyFilePath);
+		if (response?.bodyFilePath && handleOpenFileInEditor) {
+			handleOpenFileInEditor(response.bodyFilePath);
 		}
 	};
 
@@ -142,7 +158,7 @@ export const ResponseViewer: React.FC<ResponseViewerProps> = ({
 
 	const ResponseViewerHeader = () => {
 		if (!response) return null;
-		const PanelIcon = panelState === 'default' ? Maximize2 : panelState === 'maximized' ? Minimize2 : ChevronsUpDown;
+		const PanelIcon = responsePanelSize === 'default' ? Maximize2 : responsePanelSize === 'maximized' ? Minimize2 : ChevronsUpDown;
 
 		return (
 			<div className='flex items-center w-full h-full'>
@@ -163,12 +179,15 @@ export const ResponseViewer: React.FC<ResponseViewerProps> = ({
 					<span className='text-sm text-muted-foreground'>{formatBytes(response.size)}</span>
 				</div>
 				<div className='grow' />
-				{onTogglePanelSize && (
-					<Button variant='ghost' size='icon' onClick={onTogglePanelSize}>
+				{handleToggleResponsePanel && (
+					<Button variant='ghost' size='icon' onClick={handleToggleResponsePanel}>
 						<PanelIcon className='w-4 h-4' />
 					</Button>
 				)}
-				<Tabs value={headersTab} onValueChange={value => setHeadersTab(value as 'body' | 'cookies' | 'headers' | 'tests')} className='h-full w-full px-4'>
+				<Tabs
+					value={activeResponseTab}
+					onValueChange={value => setActiveResponseTab(value as 'body' | 'cookies' | 'headers' | 'tests')}
+					className='h-full w-full px-4'>
 					<TabsList>
 						<TabsTrigger value='body'>BODY</TabsTrigger>
 						<TabsTrigger value='cookies'>COOKIES</TabsTrigger>
@@ -178,7 +197,7 @@ export const ResponseViewer: React.FC<ResponseViewerProps> = ({
 
 					<TabsContent value='body' className='flex-1 overflow-hidden h-full'>
 						<div className='flex items-center justify-center h-full'>
-							{isLoading ? (
+							{isExecuting ? (
 								<LoadingFallback message='Sending request...' description='Please wait while we process your API request' />
 							) : (
 								<EmptyState icon={Send} title='No response yet' description='Send a request to see the response here' />
@@ -205,7 +224,7 @@ export const ResponseViewer: React.FC<ResponseViewerProps> = ({
 	const renderResponseControls = () => {
 		return (
 			<div className='flex items-center gap-4 p-3 border-b'>
-				<div className='flex items-center gap-2'>
+				{/* <div className='flex items-center gap-2'>
 					<Switch id='word-wrap' checked={wordWrap} onCheckedChange={setWordWrap} />
 					<Label htmlFor='word-wrap' className='text-sm'>
 						Word Wrap
@@ -224,7 +243,7 @@ export const ResponseViewer: React.FC<ResponseViewerProps> = ({
 					<Button variant='outline' size='sm' onClick={() => setIsFullscreen(!isFullscreen)} data-testid='fullscreen-button'>
 						{isFullscreen ? <ShrinkIcon className='w-4 h-4' /> : <ExpandIcon className='w-4 h-4' />}
 					</Button>
-				</div>
+				</div> */}
 			</div>
 		);
 	};
@@ -271,47 +290,39 @@ export const ResponseViewer: React.FC<ResponseViewerProps> = ({
 		);
 	};
 
-	const renderResponseBody = (mode: 'raw' | 'formatted') => {
-		if (!response?.body) return null;
+	// const renderResponseBody = (mode: 'raw' | 'formatted') => {
+	// 	if (!response?.body) return null;
 
-		// The content is ALWAYS the raw response body.
-		const content = response.body;
-		let language = 'plaintext';
+	// 	// The content is ALWAYS the raw response body.
+	// 	const content = response.body;
+	// 	let language = 'plaintext';
 
-		// Detect language from content type
-		const contentType = response.contentType || '';
-		if (contentType.includes('json')) {
-			language = 'json';
-		} else if (contentType.includes('xml')) {
-			language = 'xml';
-		} else if (contentType.includes('html')) {
-			language = 'html';
-		} else if (contentType.includes('css')) {
-			language = 'css';
-		} else if (contentType.includes('javascript')) {
-			language = 'javascript';
-		}
+	// 	// Detect language from content type
+	// 	const contentType = response.contentType || '';
+	// 	if (contentType.includes('json')) {
+	// 		language = 'json';
+	// 	} else if (contentType.includes('xml')) {
+	// 		language = 'xml';
+	// 	} else if (contentType.includes('html')) {
+	// 		language = 'html';
+	// 	} else if (contentType.includes('css')) {
+	// 		language = 'css';
+	// 	} else if (contentType.includes('javascript')) {
+	// 		language = 'javascript';
+	// 	}
 
-		// In 'raw' mode, we don't format. In 'formatted' mode, we tell Monaco to format.
-		const shouldFormat = mode === 'formatted';
+	// 	// In 'raw' mode, we don't format. In 'formatted' mode, we tell Monaco to format.
+	// 	const shouldFormat = mode === 'formatted';
 
-		return (
-			<div className='relative h-full overflow-hidden border border-border rounded-md'>
-				<MonacoEditor
-					value={content}
-					language={language}
-					formatOnMount={shouldFormat}
-					wordWrap={wordWrap}
-					height='100%'
-					copyButtonVisible={false}
-					readOnly={true}
-				/>
-			</div>
-		);
-	};
+	// 	return (
+	// 		<div className='relative h-full overflow-hidden border border-border rounded-md'>
+	// 			<MonacoEditor value={content} language={language} formatOnMount={true} wordWrap={true} height='100%' copyButtonVisible={false} readOnly={true} />
+	// 		</div>
+	// 	);
+	// };
 
 	const renderContent = () => {
-		if (isLoading) return renderLoadingState();
+		if (isExecuting) return renderLoadingState();
 		// if (!response) return renderEmptyState();
 		if (response?.isError) return renderErrorState();
 		if (response?.isLargeBody) {
@@ -320,7 +331,7 @@ export const ResponseViewer: React.FC<ResponseViewerProps> = ({
 
 		return (
 			<div className='h-full flex flex-col'>
-				<Tabs value={viewMode} onValueChange={value => setViewMode(value as 'raw' | 'formatted')} className='h-full'>
+				{/* <Tabs value={viewMode} onValueChange={value => setViewMode(value as 'raw' | 'formatted')} className='h-full'>
 					<TabsList className='grid w-full grid-cols-2 shrink-0'>
 						<TabsTrigger value='formatted'>Formatted</TabsTrigger>
 						<TabsTrigger value='raw'>Raw</TabsTrigger>
@@ -333,7 +344,7 @@ export const ResponseViewer: React.FC<ResponseViewerProps> = ({
 					<TabsContent value='raw' className='flex-1 overflow-hidden'>
 						<div className='h-full overflow-hidden'>{renderResponseBody('raw')}</div>
 					</TabsContent>
-				</Tabs>
+				</Tabs> */}
 			</div>
 		);
 	};
@@ -342,159 +353,47 @@ export const ResponseViewer: React.FC<ResponseViewerProps> = ({
 		if (!response?.body) return '';
 	};
 
-	const formatResponseBody = (response: Response) => {
-		if (!response?.body) return '';
-		if (typeof response.body === 'string') return response.body;
-		return JSON.stringify(response.body);
+	const responseBodyTabComponent = () => {};
+
+	const responseHeaderTabComponent = (headers: Record<string, string>) => {};
+
+	// const responseComponent = () => {
+	// 	const PanelIcon = responsePanelSize === 'default' ? Maximize2 : responsePanelSize === 'maximized' ? Minimize2 : ChevronsUpDown;
+	// 	const headers = response?.headers || {};
+
+	// 	return (
+	// 		<div className='h-full flex flex-col bg-background'>
+	// 			<div className='flex flex-row justify-between items-center h-full w-full'>
+	// 				<div className='flex h-full w-full'></div>
+	// 			</div>
+	// 		</div>
+	// 	);
+	// };
+
+	const tabContext: ResponseTabContext = {
+		responseBody: response?.body || '',
+		contentType: response?.contentType || '',
+		headers: response?.headers || {},
+		handleCopy,
 	};
 
-	const responseBodySelector = (contentType: string) => {
-		if (contentType.includes('json')) {
-			return <ResponseStringViewer value={formatResponseBody(response!)} language='json' wordWrap={true} copyButtonVisible={false} formatOnMount={true} />;
-		} else if (contentType.includes('html')) {
-			return <ResponseStringViewer value={formatResponseBody(response!)} language='html' wordWrap={true} copyButtonVisible={false} formatOnMount={true} />;
-		} else if (contentType.includes('image')) {
-			return <ResponseImageViewer dataUri={response?.body!} altText={response?.headers['content-description']} />;
-		} else if (contentType.includes('pdf')) {
-			return <ResponsePDFViewer pdfData={response?.body!} />;
-		}
-		// else {
-		// 	return <ResponsePlainTextViewer data={response.body} />;
-		// }
-	};
-
-	const responseBodyTabComponent = () => {
-		if (!response) return <EmptyState icon={Send} title='No response yet' description='Send a request to see the response here' />;
-		const { headers } = response;
-		const contentType = response.contentType?.split(';')[0]?.toLowerCase() || 'text/plain';
-		return (
-			<div className='flex flex-col h-full'>
-				<div className='flex items-center justify-between bg-background py-1.5'>
-					<div className='flex items-center justify-between gap-2 h-full'>
-						<ApiClientSelect
-							options={RESPONSE_CONTENT_TYPE_OPTIONS}
-							classNameTrigger={`w-[150px] bg-muted-foreground/10 border rounded-md`}
-							classNameContent={`w-[150px]`}
-							classNameDiv='flex items-center'
-							selectItemClassName='text-left! justify-start! pl-2!'
-							value={contentType}
-							onValueChange={() => {}}
-						/>
-						<Separator orientation='vertical' className='h-4! bg-muted-foreground' />
-						<ApiClientButton
-							variant='ghost'
-							size={'sm'}
-							onClick={handleCopy}
-							disabled={!response?.body}
-							data-testid='copy-button'
-							className='border border-input bg-secondary hover:bg-secondary/60 hover:text-foreground transition duration-150'>
-							<Play className='w-4! h-4!' /> Preview
-						</ApiClientButton>
-					</div>
-					<div className='flex items-center justify-between gap-2 h-full'>
-						<ApiClientButton variant='ghost' size={'icon'} onClick={handleCopy} disabled={!response?.body} data-testid='copy-button' className='border-none'>
-							<WrapText className='w-4! h-4!' />
-						</ApiClientButton>
-						<Separator orientation='vertical' className='h-4! bg-muted-foreground' />
-						<ApiClientButton variant='ghost' size={'icon'} onClick={handleCopy} disabled={!response?.body} data-testid='copy-button' className='border-none'>
-							<Copy className='w-4! h-4!' />
-						</ApiClientButton>
-						<Separator orientation='vertical' className='h-4! bg-muted-foreground' />
-						<ApiClientButton variant='ghost' size={'icon'} onClick={handleCopy} disabled={!response?.body} data-testid='copy-button' className='border-none'>
-							<Filter className='w-4! h-4!' />
-						</ApiClientButton>
-						<Separator orientation='vertical' className='h-4! bg-muted-foreground' />
-						<ApiClientButton variant='ghost' size={'icon'} onClick={handleCopy} disabled={!response?.body} data-testid='copy-button' className='border-none'>
-							<Search className='w-4! h-4!' />
-						</ApiClientButton>
-					</div>
-				</div>
-				<div className='relative h-full w-full overflow-hidden border border-border rounded-none bg-secondary'>{responseBodySelector(contentType)}</div>
-			</div>
-		);
-	};
-
-	const responseHeaderTabComponent = (headers: Record<string, string>) => {
-		if (!response) return <EmptyState icon={Send} title='No headers yet' description='Send a request to see the headers here' />;
-		return (
-			<div className='flex flex-col bg-transparent w-full h-full justify-center items-center overflow-auto'>
-				<div className='flex-1 w-full min-h-0 overflow-y-auto [scrollbar-gutter:stable] pr-1 '>
-					<ApiClientTable rows={recordToArray(headers).filter(header => header.key && header.value)} isReadOnly />
-				</div>
-			</div>
-		);
-	};
-
-	const responseComponent = () => {
-		const PanelIcon = panelState === 'default' ? Maximize2 : panelState === 'maximized' ? Minimize2 : ChevronsUpDown;
-		const headers = response?.headers || {};
-
-		return (
-			<div className='h-full flex flex-col bg-secondary'>
-				<div className='flex flex-row justify-between items-center h-full w-full'>
-					<div className='flex h-full w-full'>
-						<Tabs
-							value={headersTab}
-							onValueChange={value => setHeadersTab(value as 'body' | 'cookies' | 'headers' | 'tests')}
-							className='h-full w-full px-2 gap-0!'>
-							<div className='flex items-center justify-between py-1.5'>
-								<TabsList className='rounded-none p-0'>
-									<TabsTrigger className='rounded-none h-full!' value='body'>
-										BODY
-									</TabsTrigger>
-									<TabsTrigger className='rounded-none h-full!' value='cookies'>
-										COOKIES
-									</TabsTrigger>
-									<TabsTrigger className='rounded-none h-full!' value='headers'>
-										HEADERS
-									</TabsTrigger>
-									<TabsTrigger className='rounded-none h-full!' value='tests'>
-										TESTS
-									</TabsTrigger>
-								</TabsList>
-							</div>
-
-							<TabsContent value='body' className='flex-1 overflow-hidden h-full'>
-								<div className='h-full overflow-hidden'>{responseBodyTabComponent()}</div>
-							</TabsContent>
-
-							<TabsContent value='cookies' className='flex-1 overflow-hidden h-full'>
-								<div className='h-full overflow-hidden'>COOKIES</div>
-							</TabsContent>
-
-							<TabsContent value='headers' className='flex-1 overflow-hidden h-full'>
-								<div className='h-full overflow-hidden'>{responseHeaderTabComponent(headers)}</div>
-							</TabsContent>
-
-							<TabsContent value='tests' className='flex-1 overflow-hidden h-full'>
-								<div className='h-full overflow-hidden'>TESTS</div>
-							</TabsContent>
-						</Tabs>
-					</div>
-					{/* <div className='flex'>
-						<Button variant='outline' size='sm' onClick={handleDownload} disabled={!response?.body} data-testid='download-button'>
-							<Download className='w-4 h-4 mr-2' />
-							Download
-						</Button>
-						<Button variant='outline' size='sm' onClick={() => setIsFullscreen(!isFullscreen)} data-testid='fullscreen-button'>
-							<PanelIcon className='w-4 h-4' />
-						</Button>
-					</div> */}
-				</div>
-			</div>
-		);
-	};
+	const RESPONSE_TABS_CONFIG: TabConfig[] = [
+		{ id: 'body', label: 'Body', component: ResponseBodyTab, testId: 'response-body-tab', icon: TextSelect },
+		{ id: 'headers', label: 'Headers', component: ResponseHeaderTab, testId: 'response-headers-tab', icon: AlignStartVertical },
+		{ id: 'cookies', label: 'Cookies', component: undefined, testId: 'response-cookies-tab', icon: Cookie },
+		{ id: 'tests', label: 'Tests', component: undefined, testId: 'response-tests-tab', icon: TestTube },
+	];
 
 	return (
-		<div className={`flex flex-col h-full ${className} ${isFullscreen ? 'fixed inset-0 z-50 bg-background' : ''}`} data-testid='response-viewer-container'>
-			{/* Response Metrics */}
-			{responseComponent()}
-
-			{/* Response Controls */}
-			{/* {renderResponseControls()} */}
-
-			{/* Response Content */}
-			{/* <div className='flex-1 overflow-hidden'>{renderContent()}</div> */}
+		<div className={cn(`flex flex-col h-full`, className)} data-testid='response-viewer-container'>
+			<ApiClientTabs
+				tabs={RESPONSE_TABS_CONFIG}
+				context={tabContext}
+				value={activeResponseTab}
+				onChange={value => dispatch(setActiveResponseTab(value))}
+				className='flex-1 flex flex-col min-h-0'
+				contentClassName='flex-1 min-h-0'
+			/>
 		</div>
 	);
 };

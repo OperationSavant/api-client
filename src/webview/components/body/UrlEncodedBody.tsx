@@ -1,13 +1,13 @@
 import { ApiClientTable } from '../custom/api-client-kvp';
 import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '@/store';
+import { RootState } from '@/store/main-store';
 import { useKeyValueTable } from '@/hooks/useKeyValueTable';
-import { setUrlEncoded } from '@/features/requestBody/requestBodySlice';
+import { setUrlEncoded } from '@/features/request/requestSlice';
 
 const UrlEncodedBody: React.FC = () => {
 	const dispatch = useDispatch();
-	const fields = useSelector((state: RootState) => state.requestBody.config.urlEncoded);
-
+	const body = useSelector((state: RootState) => state.request.body);
+	const fields = body.type === 'x-www-form-urlencoded' ? body.urlEncoded : [];
 	const { handleChange, handleCheck, handleDelete } = useKeyValueTable(fields, newFields => dispatch(setUrlEncoded(newFields)), {
 		key: '',
 		value: '',

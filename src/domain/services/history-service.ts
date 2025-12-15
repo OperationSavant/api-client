@@ -1,8 +1,11 @@
 import { HistoryItem, HistoryFilter, HistorySort, HistoryExport, HistoryStatistics, HistoryConfiguration } from '@/shared/types/history';
+import type { IHistoryPersistence } from '@/domain/types/history-persistence';
+import { unitOfWork } from './unit-of-work';
 
 class HistoryService {
 	private static instance: HistoryService;
 	private history: Map<string, HistoryItem> = new Map();
+	private persistence: IHistoryPersistence | null = null;
 
 	static getInstance(): HistoryService {
 		if (!HistoryService.instance) {
@@ -20,12 +23,29 @@ class HistoryService {
 		saveResponseData: false,
 	};
 
+	setPersistence(adapter: IHistoryPersistence): void {
+		this.persistence = adapter;
+	}
+
+	async loadFromPersistence(): Promise<void> {
+		if (!this.persistence) {
+			console.warn('No history persistence adapter set');
+			return;
+		}
+
+		const items = await this.persistence.loadAll(this.config.maxItems);
+		this.history.clear();
+		items.forEach(item => {
+			this.history.set(item.historyId, item);
+		});
+	}
+
 	// constructor() {
 	// 	this.loadFromStorage();
 	// 	this.setupAutoCleanup();
 	// }
 
-	// // CRUD Operations
+	// CRUD Operations
 	addToHistory(request: Omit<HistoryItem, 'id' | 'timestamp'>): HistoryItem {
 		const historyItem: HistoryItem = {
 			...request,
@@ -35,10 +55,13 @@ class HistoryService {
 
 		this.history.set(historyItem.historyId, historyItem);
 
+		// Register with Unit of Work for persistence
+		unitOfWork.registerNew(historyItem, 'history');
+
 		return historyItem;
 	}
 
-	getHistory(): HistoryItem[] {
+	getAllHistory(): HistoryItem[] {
 		return Array.from(this.history.values());
 	}
 
@@ -67,11 +90,23 @@ class HistoryService {
 	// }
 
 	clearHistory(): void {
+		// Register all items for removal
+		const items = Array.from(this.history.values());
+		items.forEach(item => {
+			unitOfWork.registerRemoved(item, 'history');
+		});
+
 		this.history.clear();
 	}
 
 	deleteHistoryItem(historyId: string): void {
+		const item = this.history.get(historyId);
+		if (!item) return;
+
 		this.history.delete(historyId);
+
+		// Register with Unit of Work for persistence
+		unitOfWork.registerRemoved(item, 'history');
 	}
 
 	// clearHistoryByFilter(filter: HistoryFilter): number {

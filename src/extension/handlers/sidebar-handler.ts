@@ -1,43 +1,47 @@
+import { collectionService } from '@/domain/services/collectionService';
 import { WebviewViewMessage } from '@/shared/types/webview-messages';
 import { commands, WebviewView } from 'vscode';
-import { SQLiteCollectionPersistence } from '../services/collection-persistence';
-
-interface SidebarHandlerDependencies {
-	collectionPersistence: SQLiteCollectionPersistence;
-}
 
 export class SidebarHandler {
-	constructor(private deps: SidebarHandlerDependencies) {}
+	constructor() {}
 
 	async handle(message: WebviewViewMessage, webviewView: WebviewView): Promise<void> {
 		switch (message.command) {
-			case 'executeCommand':
+			case 'createNewRequest':
 				await commands.executeCommand(message.commandId, ...(message.args || []));
 				break;
 
 			case 'sidebarReady':
 			case 'refreshSidebar':
-				this.sendInitialData(webviewView);
+				await this.sendInitialData(webviewView);
+				break;
+			case 'openRequest':
+				await commands.executeCommand(message.commandId, ...(message.args || []));
 				break;
 		}
 	}
 
-	private sendInitialData(webviewView: WebviewView): void {
+	private async sendInitialData(webviewView: WebviewView): Promise<void> {
 		try {
-			const collections = this.deps!.collectionPersistence.loadAll();
-			// TODO: Add methods for environments and history
+			await collectionService.loadFromPersistence();
+			const collections = collectionService.getAllCollections();
+
+			// Load history from persistence
+			const historyService = await import('@/domain/services/history-service').then(m => m.historyService);
+			await historyService.loadFromPersistence();
+			const history = historyService.getAllHistory();
 
 			webviewView.webview.postMessage({
-				command: 'initializeData',
+				command: 'initializeDataFromExtension',
 				collections,
 				environments: [],
-				history: [],
+				history,
 			});
 		} catch (error) {
 			console.error('Error sending initial data to sidebar:', error);
 
 			webviewView.webview.postMessage({
-				command: 'initializeData',
+				command: 'initializeDataFromExtension',
 				collections: [],
 				environments: [],
 				history: [],

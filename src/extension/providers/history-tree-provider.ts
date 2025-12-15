@@ -27,10 +27,10 @@ export class HistoryTreeProvider implements vscode.TreeDataProvider<HistoryTreeI
 	}
 
 	private getHistoryItems(): HistoryTreeItem[] {
-		const history = historyService.getHistory(); // Get all history items
+		const history = historyService.getAllHistory(); // Get all history items
 		const recentHistory = history.slice(0, 50); // Limit to recent 50 items
 
-		return recentHistory.map(item => {
+		return recentHistory.map((item: HistoryItem) => {
 			const date = new Date(item.timestamp).toLocaleString();
 			const statusBadge = item.response?.status ? `[${item.response.status}]` : '';
 			const label = `${item.request.method} ${item.request.url} ${statusBadge}`;

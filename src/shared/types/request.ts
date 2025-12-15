@@ -2,7 +2,7 @@
 
 import { HttpVerb } from '.';
 import { AuthConfig } from './auth';
-import { RequestBodyConfig } from './body';
+import { createDefaultRequestBody, RequestBody } from './body';
 
 export type Param = { key: string; value: string; checked: boolean };
 
@@ -29,7 +29,7 @@ export interface Request {
 	params: Record<string, string>;
 	headers: Record<string, string>;
 	auth: AuthConfig;
-	body: RequestBodyConfig;
+	body: RequestBody;
 	options?: RequestOptions;
 }
 
@@ -38,32 +38,18 @@ export interface CurlParseResult {
 	method: HttpVerb;
 	headers: Record<string, string>;
 	auth: AuthConfig;
-	body: RequestBodyConfig;
+	body: RequestBody;
 	success: boolean;
 	errors: string[];
 }
 
 export const createDefaultRequest = (): Request => ({
-	url: '',
+	url: 'https://jsonplaceholder.typicode.com/posts',
 	method: 'GET',
 	params: {},
 	headers: {},
 	auth: { type: 'none' },
-	body: {
-		type: 'none',
-		formData: [],
-		urlEncoded: [],
-		raw: {
-			content: '',
-			language: 'json',
-			autoFormat: true,
-		},
-		binary: {},
-		graphql: {
-			query: '',
-			variables: '',
-		},
-	},
+	body: createDefaultRequestBody(),
 	options: {
 		followRedirects: true,
 		maxRedirects: 5,
@@ -71,5 +57,7 @@ export const createDefaultRequest = (): Request => ({
 		compressed: false,
 		insecure: false,
 		includeHeaders: false,
+		userAgent: '',
+		cookies: '',
 	},
 });

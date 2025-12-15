@@ -3,26 +3,27 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Trash2, Upload } from 'lucide-react';
-import { FormDataField } from '@/shared/types/body';
+import { FormDataBody } from '@/shared/types/body';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { ApiClientSelect } from '../custom/api-client-select';
 import { cn } from '@/shared/lib/utils';
 import { useKeyValueTable } from '@/hooks/useKeyValueTable';
 import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '@/store';
-import { setFormData } from '@/features/requestBody/requestBodySlice';
+import { RootState } from '@/store/main-store';
 import { FORM_DATA_FIELD_TYPE_OPTIONS } from '@/shared/constants/select-options';
+import { setFormData } from '@/features/request/requestSlice';
 
 interface FormDataBodyProps {
 	onSelectFile: (index: number) => void;
 }
 
-const defaultRow: FormDataField = { key: '', value: '', checked: false, type: 'text' };
+const defaultRow: FormDataBody = { key: '', value: '', checked: false, type: 'text' };
 
 const FormDataBody: React.FC<FormDataBodyProps> = ({ onSelectFile }) => {
 	const dispatch = useDispatch();
-	const formData = useSelector((state: RootState) => state.requestBody.config.formData);
-	const { updateRow, handleDelete } = useKeyValueTable<FormDataField>(formData, newFormData => dispatch(setFormData(newFormData)), defaultRow);
+	const body = useSelector((state: RootState) => state.request.body);
+	const formData = body.type === 'form-data' ? body.formData : [];
+	const { updateRow, handleDelete } = useKeyValueTable<FormDataBody>(formData, newFormData => dispatch(setFormData(newFormData)), defaultRow);
 
 	return (
 		<Table className='text-xs border border-muted-foreground table-fixed'>

@@ -1,5 +1,5 @@
-import { updateFormDataWithFiles, setBinaryBody } from '@/features/requestBody/requestBodySlice';
-import { AppDispatch } from '@/store';
+import { setBinaryBody, updateFormDataWithFiles } from '@/features/request/requestSlice';
+import { AppDispatch } from '@/store/main-store';
 
 interface FileHandlerDependencies {
 	dispatch: AppDispatch;

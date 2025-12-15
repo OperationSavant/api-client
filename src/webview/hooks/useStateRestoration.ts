@@ -1,30 +1,23 @@
-import { setRequestState } from '@/features/request/requestSlice';
-import { setCurrentTab } from '@/features/request/requestUISlice';
-import { setBodyConfig } from '@/features/requestBody/requestBodySlice';
-import { setHeaders } from '@/features/requestHeaders/requestHeadersSlice';
-import { setParams } from '@/features/requestParams/requestParamsSlice';
-import { useAppDispatch, RootState } from '@/store';
-import { WebviewState } from '@/shared/types/state';
+import { useAppDispatch, RootState } from '@/store/main-store';
+import { MainViewState } from '@/types/mainview-state';
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
+import { setRequestState } from '@/features/request/requestSlice';
+import { setEditorUIState } from '@/features/editor/editorUISlice';
 
 export const useStateRestoration = ({
 	initialState,
 	onStatePersist,
 }: {
-	initialState: WebviewState | undefined;
-	onStatePersist: (state: WebviewState) => void;
+	initialState: MainViewState | undefined;
+	onStatePersist: (state: MainViewState) => void;
 }) => {
 	const dispatch = useAppDispatch();
 	const [isRestored, setIsRestored] = useState(false);
 
 	// Redux state selectors
-	const requestState = useSelector((state: RootState) => state.request);
-	const paramsState = useSelector((state: RootState) => state.requestParams);
-	const headersState = useSelector((state: RootState) => state.requestHeaders);
-	const bodyState = useSelector((state: RootState) => state.requestBody);
-	const requestUIState = useSelector((state: RootState) => state.requestUI);
-	const collectionsState = useSelector((state: RootState) => state.collections);
+	const request = useSelector((state: RootState) => state.request);
+	const ui = useSelector((state: RootState) => state.ui);
 
 	// ============================================================================
 	// RESTORATION (On Mount)
@@ -36,24 +29,12 @@ export const useStateRestoration = ({
 			return;
 		}
 		// Restore each slice
-		if (initialState.requestUI) {
-			dispatch(setCurrentTab(initialState.requestUI.currentTab));
+		if (initialState.ui) {
+			dispatch(setEditorUIState(initialState.ui));
 		}
 		if (initialState.request) {
 			dispatch(setRequestState(initialState.request));
 		}
-		if (initialState.requestParams?.params) {
-			dispatch(setParams(initialState.requestParams.params));
-		}
-		if (initialState.requestHeaders?.headers) {
-			dispatch(setHeaders(initialState.requestHeaders.headers));
-		}
-		if (initialState.requestBody?.config) {
-			dispatch(setBodyConfig(initialState.requestBody.config));
-		}
-		// if (initialState.collections && Array.isArray(initialState.collections)) {
-		// 	dispatch(setCollections(initialState.collections));
-		// }
 		setIsRestored(true);
 	}, [dispatch, initialState]);
 
@@ -65,18 +46,13 @@ export const useStateRestoration = ({
 		// Don't save until initial restoration is complete
 		if (!isRestored) return;
 
-		const currentState: WebviewState = {
-			requestUI: requestUIState,
-			request: requestState,
-			requestParams: paramsState,
-			requestHeaders: headersState,
-			requestBody: bodyState,
-			collections: collectionsState,
+		const currentState: MainViewState = {
+			request,
+			ui,
 		};
-		console.log('🚀 ~ useStateRestoration ~ currentState:', currentState);
 
 		onStatePersist(currentState);
-	}, [isRestored, onStatePersist, requestUIState, requestState, paramsState, headersState, bodyState, collectionsState]);
+	}, [isRestored, onStatePersist, request, ui]);
 
 	// ============================================================================
 	// RETURN API

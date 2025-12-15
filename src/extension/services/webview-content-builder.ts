@@ -1,6 +1,6 @@
 import { Webview, Uri } from 'vscode';
 
-export class WebviewContentBuilder {
+export class ContentBuilder {
 	/**
 	 * Generate HTML content for webview panel
 	 * Includes CSP nonce for security and dynamic URI resolution
@@ -10,6 +10,7 @@ export class WebviewContentBuilder {
 
 		const styleUri = webview.asWebviewUri(Uri.joinPath(webviewUri, '..', 'main.css'));
 		const scriptUri = webview.asWebviewUri(webviewUri);
+		const pdfJsUri = webview.asWebviewUri(Uri.joinPath(webviewUri, '..', 'build', 'pdf.worker.min.mjs'));
 
 		return `<!DOCTYPE html>
       <html lang="en">
@@ -30,6 +31,7 @@ export class WebviewContentBuilder {
         <noscript>You need to enable JavaScript to run this app.</noscript>
         <div id="${rootId}"></div>
         <script nonce="${nonce}" type="module" src="${scriptUri}"></script>
+        <script nonce="${nonce}" type="module" src="${pdfJsUri}"></script>
       </body>
       </html>`;
 	}

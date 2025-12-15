@@ -1,64 +1,35 @@
-import { vscode } from '../vscode';
-import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
+import { useRef, useEffect, useMemo, useCallback } from 'react';
+import { vscode } from '@/vscode';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { ImperativePanelGroupHandle } from 'react-resizable-panels';
 import { ResponseViewer } from '@/components/response/response-viewer';
-import { ApiClientRequestBar } from '@/components/custom/app/api-client-request-bar';
-import { useSelector } from 'react-redux';
-import { RootState, store, useAppDispatch } from '@/store';
-import { setAuth, setMethod, setUrl } from '@/features/request/requestSlice';
-import { setCurrentTab } from '@/features/request/requestUISlice';
-import { SaveRequestPayload } from '@/shared/types/collection';
-import { ApiClientSaveRequestDialog } from '@/components/custom/app/api-client-save-request-dialog';
-import { AuthConfig, OAuth2Auth } from '@/shared/types/auth';
-import ApiClientTabs from '@/components/custom/api-client-tabs';
-import { REQUEST_TABS_CONFIG } from '@/config/tabs/tabs-config';
-import { PanelState, Response } from '@/shared/types/response';
+import { useAppDispatch } from '@/store/main-store';
 import {
+	createInitializeHandlers,
 	createResponseHandlers,
 	createCollectionHandlers,
 	createRequestHandlers,
 	createFileHandlers,
-	createThemeHandlers,
 	createOAuth2Handlers,
 } from '@/handlers';
 import { useWebviewMessaging } from '@/hooks/useWebviewMessaging';
-import { WebviewState } from '@/shared/types/state';
+import { MainViewState } from '@/types/mainview-state';
 import { useStateRestoration } from '@/hooks/useStateRestoration';
-import { useRequestExecution } from '@/hooks/useRequestExecution';
-import { RequestTabContext } from '@/shared/types/tabs';
 import { LoadingFallback } from '@/components/custom/states/loading-fallback';
-import { createInitializeHandlers } from '@/handlers/initialize-handlers';
+import { RequestViewer } from '@/components/request/request-viewer';
+import { createThemeHandlers } from '@/handlers/theme-handlers';
 
 const App = () => {
 	const dispatch = useAppDispatch();
 	const messaging = useWebviewMessaging();
-	const [loading, setLoading] = useState(false);
-	const [responseData, setResponseData] = useState<Response | null>(null);
-	const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
-
-	const [responsePanelState, setResponsePanelState] = useState<PanelState>('default');
 	const panelGroupRef = useRef<ImperativePanelGroupHandle>(null);
-
-	const {
-		requestUI: { currentTab },
-		request: { url, method, auth },
-	} = useSelector((state: RootState) => state);
-
-	const initialState = useMemo(() => vscode.getState<WebviewState>(), []);
-	const getReduxState = useCallback(() => store.getState(), []);
+	const initialState = useMemo(() => vscode.getState<MainViewState>(), []);
 
 	const sendToExtension = useCallback((message: any) => {
 		vscode.postMessage(message);
 	}, []);
 
-	const { executeRequest } = useRequestExecution({
-		onLoadingChange: setLoading,
-		onResponseClear: () => setResponseData(null),
-		sendToBackend: sendToExtension,
-	});
-
-	const persistState = useCallback((state: WebviewState) => {
+	const persistState = useCallback((state: MainViewState) => {
 		vscode.setState(state);
 	}, []);
 
@@ -67,73 +38,9 @@ const App = () => {
 		onStatePersist: persistState,
 	});
 
-	const handleGenerateOAuth2Token = useCallback(
-		async (oauth2Config: OAuth2Auth) => {
-			sendToExtension({
-				source: 'webview',
-				command: 'generateOAuth2Token',
-				oauth2Config,
-			});
-		},
-		[sendToExtension]
-	);
-
-	const handleSelectFile = useCallback(
-		(index: number) => {
-			sendToExtension({ source: 'webview', command: 'formDataFileRequest', index });
-		},
-		[sendToExtension]
-	);
-
-	const handleSelectBinaryFile = useCallback(() => {
-		sendToExtension({ source: 'webview', command: 'binaryFileRequest' });
-	}, [sendToExtension]);
-
-	const handleOpenFileInEditor = useCallback(
-		(filePath: string) => {
-			sendToExtension({ source: 'webview', command: 'openFileInEditor', filePath });
-		},
-		[sendToExtension]
-	);
-
-	const handleCreateCollection = useCallback(
-		(name: string) => {
-			sendToExtension({ command: 'createCollection', name });
-		},
-		[sendToExtension]
-	);
-
-	const handleToggleResponsePanel = useCallback(() => {
-		const panelGroup = panelGroupRef.current;
-		if (!panelGroup) return;
-
-		switch (responsePanelState) {
-			case 'default':
-				panelGroup.setLayout([10, 90]);
-				setResponsePanelState('maximized');
-				break;
-			case 'maximized':
-				panelGroup.setLayout([95, 5]);
-				setResponsePanelState('minimized');
-				break;
-			case 'minimized':
-				panelGroup.setLayout([60, 40]);
-				setResponsePanelState('default');
-				break;
-		}
-	}, [responsePanelState]);
-
 	const initializeHandlers = useMemo(() => createInitializeHandlers({ dispatch }), [dispatch]);
 
-	const responseHandlers = useMemo(
-		() =>
-			createResponseHandlers({
-				setResponseData,
-				setLoading,
-				getState: getReduxState,
-			}),
-		[getReduxState]
-	);
+	const responseHandlers = useMemo(() => createResponseHandlers({ dispatch }), [dispatch]);
 
 	const collectionHandlers = useMemo(() => createCollectionHandlers({ dispatch }), [dispatch]);
 
@@ -142,15 +49,7 @@ const App = () => {
 	const fileHandlers = useMemo(() => createFileHandlers({ dispatch }), [dispatch]);
 
 	const themeHandlers = useMemo(() => createThemeHandlers(), []);
-	const oauth2Handlers = useMemo(() => createOAuth2Handlers({ dispatch, getState: getReduxState }), [dispatch, getReduxState]);
-
-	const tabContext: RequestTabContext = {
-		auth,
-		onAuthChange: (auth: AuthConfig) => dispatch(setAuth(auth)),
-		onGenerateOAuth2Token: handleGenerateOAuth2Token,
-		onSelectFile: handleSelectFile,
-		onSelectBinaryFile: handleSelectBinaryFile,
-	};
+	const oauth2Handlers = useMemo(() => createOAuth2Handlers({ dispatch }), [dispatch]);
 
 	useEffect(() => {
 		if (isRestored) {
@@ -184,65 +83,25 @@ const App = () => {
 		};
 	}, [messaging, responseHandlers, collectionHandlers, requestHandlers, fileHandlers, themeHandlers, oauth2Handlers]);
 
-	const handleSaveRequest = useCallback(
-		(payload: SaveRequestPayload) => {
-			sendToExtension({ source: 'webview', command: 'saveRequest', payload });
-			setIsSaveDialogOpen(false);
-		},
-		[sendToExtension]
-	);
-
 	if (!isRestored) {
 		return <LoadingFallback message='Restoring session...' description='Please wait while we restore your previous workspace state' />;
 	}
 
 	return (
-		<div className='flex flex-col h-screen bg-secondary text-foreground'>
+		<div className='flex flex-col h-screen bg-background text-foreground py-2'>
 			<ResizablePanelGroup direction='vertical' ref={panelGroupRef}>
 				<ResizablePanel defaultSize={60} minSize={10}>
 					<div className='flex flex-col h-full px-2 gap-4'>
-						<div className='shrink-0'>
-							<ApiClientRequestBar
-								method={method}
-								url={url}
-								onMethodChange={newMethod => dispatch(setMethod(newMethod))}
-								onUrlChange={newUrl => dispatch(setUrl(newUrl))}
-								onSend={executeRequest}
-								onSaveClick={() => setIsSaveDialogOpen(true)}
-								loading={loading}
-								placeholder='Enter URL or paste text'
-								onDownloadClick={() => {}}
-							/>
-						</div>
-						<ApiClientTabs
-							tabs={REQUEST_TABS_CONFIG}
-							context={tabContext}
-							value={currentTab}
-							onChange={tab => dispatch(setCurrentTab(tab))}
-							className='flex-1 flex flex-col min-h-0'
-							contentClassName='flex-1 min-h-0'
-						/>
+						<RequestViewer sendToExtension={sendToExtension} />
 					</div>
 				</ResizablePanel>
-				<ResizableHandle withHandle />
+				<ResizableHandle withHandle className='bg-primary h-0.5 hover:bg-primary hover:h-1' />
 				<ResizablePanel defaultSize={40} minSize={5}>
-					<div className='h-full w-full'>
-						<ResponseViewer
-							response={responseData}
-							isLoading={loading}
-							onOpenFileInEditor={handleOpenFileInEditor}
-							onTogglePanelSize={handleToggleResponsePanel}
-							panelState={responsePanelState}
-						/>
+					<div className='h-full w-full py-2 px-2'>
+						<ResponseViewer sendToExtension={sendToExtension} panelGroupRef={panelGroupRef} />
 					</div>
 				</ResizablePanel>
 			</ResizablePanelGroup>
-			<ApiClientSaveRequestDialog
-				isOpen={isSaveDialogOpen}
-				onClose={() => setIsSaveDialogOpen(false)}
-				onSave={handleSaveRequest}
-				onCreateCollection={handleCreateCollection}
-			/>
 		</div>
 	);
 };
