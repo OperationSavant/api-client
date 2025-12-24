@@ -1,5 +1,5 @@
-/* eslint-disable no-mixed-spaces-and-tabs */
 import { AuthConfig } from './auth';
+import { Collection } from './collection';
 export type WebviewMessage =
 	| { source: 'webview'; command: 'webviewReady' }
 	| {
@@ -15,6 +15,7 @@ export type WebviewMessage =
 	| { source: 'webview'; command: 'createCollection'; name: string }
 	| { source: 'webview'; command: 'saveRequest'; payload: { collectionId: string; requestId?: string; request: any } }
 	| { source: 'webview'; command: 'updateCollection'; collectionId: string; name: string; description?: string }
+	| { source: 'webview'; command: 'deleteCollection'; collectionId: string }
 	| { source: 'webview'; command: 'deleteCollection'; collectionId: string }
 	| { source: 'webview'; command: 'deleteRequest'; collectionId: string; requestId: string }
 	| { source: 'webview'; command: 'updateRequest'; collectionId: string; requestId: string; request: any }
@@ -33,8 +34,12 @@ export type WebviewMessage =
 	| { source: 'webview'; command: 'requestDeviceCode'; oauth2Config: any };
 
 export type WebviewViewMessage =
+	| { source: 'webviewView'; command: 'createCollection'; name: string }
+	| { source: 'webviewView'; command: 'openCollectionView'; commandId: string; args?: Collection }
 	| { source: 'webviewView'; command: 'createNewRequest'; commandId: string; args?: any[] }
+	| { source: 'webviewView'; command: 'createFolder'; payload: { collectionId: string; name: string; parentId?: string; description?: string } }
 	| { source: 'webviewView'; command: 'openRequest'; commandId: string; args?: any[] }
+	| { source: 'webviewView'; command: 'saveRequest'; payload: { collectionId: string; folderId?: string; request: any } }
 	| { source: 'webviewView'; command: 'sidebarReady' }
 	| { source: 'webviewView'; command: 'refreshSidebar' }
 	| { source: 'webviewView'; command: 'searchCollections'; query: string }

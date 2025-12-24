@@ -40,12 +40,6 @@ class HistoryService {
 		});
 	}
 
-	// constructor() {
-	// 	this.loadFromStorage();
-	// 	this.setupAutoCleanup();
-	// }
-
-	// CRUD Operations
 	addToHistory(request: Omit<HistoryItem, 'id' | 'timestamp'>): HistoryItem {
 		const historyItem: HistoryItem = {
 			...request,
@@ -55,7 +49,6 @@ class HistoryService {
 
 		this.history.set(historyItem.historyId, historyItem);
 
-		// Register with Unit of Work for persistence
 		unitOfWork.registerNew(historyItem, 'history');
 
 		return historyItem;
@@ -65,9 +58,9 @@ class HistoryService {
 		return Array.from(this.history.values());
 	}
 
-	// getHistoryItem(id: string): HistoryItem | undefined {
-	// 	return this.history.find(item => item.id === id);
-	// }
+	getHistoryItem(id: string): HistoryItem | undefined {
+		return this.history.get(id);
+	}
 
 	// deleteHistoryItem(id: string): boolean {
 	// 	const index = this.history.findIndex(item => item.id === id);
@@ -132,21 +125,21 @@ class HistoryService {
 	// }
 
 	// Export Operations
-	// exportHistory(filter?: HistoryFilter, format: 'json' | 'csv' | 'har' = 'json'): HistoryExport {
-	// 	const items = this.getHistory(filter);
+	exportHistory(filter?: HistoryFilter, format: 'json' | 'csv' | 'har' = 'json'): HistoryExport {
+		const items = this.getAllHistory();
 
-	// 	const exportData: HistoryExport = {
-	// 		format,
-	// 		items,
-	// 		metadata: {
-	// 			exportedAt: new Date(),
-	// 			totalItems: items.length,
-	// 			dateRange: filter?.dateRange,
-	// 		},
-	// 	};
+		const exportData: HistoryExport = {
+			format,
+			items,
+			metadata: {
+				exportedAt: new Date(),
+				totalItems: items.length,
+				dateRange: filter?.dateRange,
+			},
+		};
 
-	// 	return exportData;
-	// }
+		return exportData;
+	}
 
 	// exportToFile(filter?: HistoryFilter, format: 'json' | 'csv' | 'har' = 'json'): string {
 	// 	const exportData = this.exportHistory(filter, format);

@@ -1,5 +1,5 @@
 import { WebviewPanel } from 'vscode';
-import { RequestExecutorService } from '../services/request-executor';
+import { RequestExecutionConfig, RequestExecutorService } from '../services/request-executor';
 import { historyService } from '@/domain/services/history-service';
 import { unitOfWork } from '@/domain/services/unit-of-work';
 import { StateManager } from '../services/state-manager';
@@ -15,7 +15,7 @@ export class RequestHandler {
 
 	async handle(message: any, panel: WebviewPanel): Promise<void> {
 		try {
-			const config = {
+			const config: RequestExecutionConfig = {
 				url: message.url,
 				method: message.method,
 				headers: message.headers || {},
@@ -66,7 +66,7 @@ export class RequestHandler {
 				historyItem: savedHistoryItem,
 			});
 
-			panel.webview.postMessage({
+			broadcasterHub.broadcast({
 				command: 'apiResponse',
 				data: {
 					status: result.status,
@@ -88,12 +88,9 @@ export class RequestHandler {
 			unitOfWork.rollback();
 
 			// Broadcast error to webview
-			panel.webview.postMessage({
-				command: 'error',
-				message: `Failed to execute request: ${error instanceof Error ? error.message : 'Unknown error'}`,
-			});
+			broadcasterHub.broadcast({ command: 'error' });
 
-			throw error;
+			broadcasterHub.broadcastException(`Request execution failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
 		}
 	}
 }

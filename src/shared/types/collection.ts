@@ -20,6 +20,7 @@ export interface Collection {
 }
 
 export interface CollectionFolder {
+	collectionId: string;
 	id: string;
 	name: string;
 	description?: string;
@@ -32,6 +33,7 @@ export interface CollectionFolder {
 }
 
 export interface CollectionRequest {
+	collectionId: string;
 	id: string;
 	name: string;
 	description?: string;

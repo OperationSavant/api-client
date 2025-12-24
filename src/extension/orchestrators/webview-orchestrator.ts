@@ -2,6 +2,7 @@ import { ExtensionContext, Uri, ViewColumn, WebviewPanel, window } from 'vscode'
 import { MessageRouter } from './message-router';
 import { ThemeService } from '../services/theme-service';
 import { ContentBuilder } from '../services/webview-content-builder';
+import { broadcasterHub } from './broadcaster-hub';
 
 interface WebviewOrchestratorDependencies {
 	context: ExtensionContext;
@@ -40,7 +41,16 @@ export class WebviewOrchestrator {
 
 		panel.webview.onDidReceiveMessage(
 			async message => {
-				await messageRouter.route(message, panel);
+				try {
+					await messageRouter.route(message, panel);
+				} catch (error) {
+					console.error('[WebviewOrchestrator] Message handling error:', error);
+					// Send error to webview for user feedback
+					broadcasterHub.broadcast({
+						command: 'error',
+						message: error instanceof Error ? error.message : 'An unexpected error occurred',
+					});
+				}
 			},
 			undefined,
 			context.subscriptions

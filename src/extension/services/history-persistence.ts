@@ -1,8 +1,9 @@
 import { Database } from '@vscode/sqlite3';
 import { HistoryItem } from '@/shared/types/history';
 import { queryAll, queryOne, runQuery, PreparedStatement, safeJsonParse, safeJsonStringify, PersistenceError } from './db-helpers';
+import { IHistoryPersistence } from '@/domain/types/history-persistence';
 
-export class SQLiteHistoryPersistence {
+export class SQLiteHistoryPersistence implements IHistoryPersistence {
 	constructor(private db: Database) {
 		// Note: init() is now async, called separately during initialization
 	}
@@ -18,6 +19,7 @@ export class SQLiteHistoryPersistence {
         request_headers TEXT,
         request_body TEXT,
         response_status INTEGER,
+				response_statusText TEXT,
         response_headers TEXT,
         response_body TEXT,
         timestamp INTEGER NOT NULL,
@@ -73,11 +75,11 @@ export class SQLiteHistoryPersistence {
 			this.db,
 			`INSERT INTO history (
         id, method, url, request_headers, request_body,
-        response_status, response_headers, response_body,
+        response_status, response_statusText, response_headers, response_body,
         timestamp, success, duration, error,
         collection_id, folder_id, request_size
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 		);
 
 		try {
@@ -89,6 +91,7 @@ export class SQLiteHistoryPersistence {
 					safeJsonStringify(item.request.headers),
 					safeJsonStringify(item.request.body),
 					item.response?.status || null,
+					item.response?.statusText || null,
 					safeJsonStringify(item.response?.headers),
 					safeJsonStringify(item.response?.body),
 					item.timestamp.getTime(),
@@ -196,13 +199,15 @@ export class SQLiteHistoryPersistence {
 			response: row.response_status
 				? {
 						status: row.response_status,
-						statusText: '', // Not stored currently
+						statusText: row.response_statusText, // Not stored currently
 						headers: safeJsonParse(row.response_headers) || {},
 						body: safeJsonParse(row.response_body),
-						contentType: '',
-						size: 0,
+						contentType: row.response_headers
+							? safeJsonParse(row.response_headers)?.['Content-Type'] || (safeJsonParse(row.response_headers)?.['content-type'] as string)
+							: '',
+						size: row.size,
 						duration: row.duration || 0,
-						isError: false,
+						isError: row.error ? true : false,
 					}
 				: undefined,
 			collectionId: row.collection_id || undefined,

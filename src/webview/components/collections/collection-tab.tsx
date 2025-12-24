@@ -14,10 +14,6 @@ export const CollectionTab: React.FC<CollectionTabProps> = ({ sendToExtension })
 	const dispatch = useAppDispatch();
 	const dbCollections = useSelector((state: RootState) => state.sidebarCollections.collections);
 	const treeData = useTreeData(dbCollections);
-	const [collections, setCollections] = useState<TreeNode[]>(treeData);
-	useEffect(() => {
-		setCollections(treeData);
-	}, [treeData]);
 
 	function updateNodeLabel(nodes: TreeNode[], nodeId: string, newLabel: string): TreeNode[] {
 		return nodes.map(node => {
@@ -42,20 +38,58 @@ export const CollectionTab: React.FC<CollectionTabProps> = ({ sendToExtension })
 			});
 	}
 
-	function addChildToNode(nodes: TreeNode[], parentId: string, newChild: TreeNode): TreeNode[] {
+	function addChildToNode(nodes: TreeNode[], parentNode: TreeNode, newChild: TreeNode): TreeNode[] {
 		return nodes.map(node => {
-			if (node.id === parentId && node.type === 'folder') {
-				return {
-					...node,
-					children: [...(node.children || []), newChild],
-				};
+			if (node.id === parentNode.id && node.type === 'folder') {
+				// return {
+				// 	...node,
+				// 	children: [...(node.children || []), newChild],
+				// };
+				// sendToExtension({
+				// 	command: node?.type === 'folder' ? 'createFolder' : 'createNewRequest',
+				// 	payload: {
+				// 		collectionId: parentNode.metadata?.collection?.id,
+				// 		name: newChild.label,
+				// 	},
+				// 	source: 'webviewView',
+				// });
+				console.log('Adding child to node:', node.label, 'Child:', JSON.stringify(newChild));
 			}
 			if (node.type === 'folder' && node.children) {
-				return { ...node, children: addChildToNode(node.children, parentId, newChild) };
+				console.log('Recursing into folder:', JSON.stringify(node));
+				// return { ...node, children: addChildToNode(node.children, parentNode, newChild) };
 			}
 			return node;
 		});
 	}
+
+	const addFolder = (parentNode: TreeNode, type: 'File' | 'Folder') => {
+		if (type === 'Folder') {
+			sendToExtension({
+				command: 'createFolder',
+				payload: {
+					collectionId: parentNode.collectionId,
+					name: 'New Folder',
+					parentId: parentNode.type === 'folder' && parentNode.id !== parentNode.collectionId ? parentNode.id : undefined,
+				},
+				source: 'webviewView',
+			});
+		} else {
+			sendToExtension({
+				command: 'saveRequest',
+				payload: {
+					collectionId: parentNode.collectionId,
+					request: { ...createDefaultRequest(), name: 'New Request' },
+					folderId: parentNode.type === 'folder' && parentNode.id !== parentNode.collectionId ? parentNode.id : undefined,
+				},
+				source: 'webviewView',
+			});
+		}
+	};
+
+	const createCollection = () => {
+		sendToExtension({ source: 'webviewView', command: 'createCollection', name: 'New Collection' });
+	};
 
 	function generateId(): string {
 		return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -64,9 +98,10 @@ export const CollectionTab: React.FC<CollectionTabProps> = ({ sendToExtension })
 	return (
 		<div className='flex flex-col gap-4 h-full'>
 			<TreeView
-				data={collections}
+				data={treeData}
+				onCreateCollection={createCollection}
 				searchable={true}
-				onChange={setCollections}
+				// onChange={setCollections}
 				expandOnRowClick={true}
 				onSelect={node => {
 					if (node.type === 'file') {
@@ -81,34 +116,36 @@ export const CollectionTab: React.FC<CollectionTabProps> = ({ sendToExtension })
 				}}
 				onRename={(node, newLabel) => {
 					// Handle rename
-					const updated = updateNodeLabel(collections, node.id, newLabel);
-					setCollections(updated);
+					// const updated = updateNodeLabel(collections, node.id, newLabel);
+					// setCollections(updated);
 				}}
 				onDelete={node => {
 					// Handle delete
-					const updated = removeNodeById(collections, node.id);
-					setCollections(updated);
+					// const updated = removeNodeById(collections, node.id);
+					// setCollections(updated);
 				}}
 				onNewFile={parentNode => {
-					const id = generateId();
-					// Handle new file
-					const updated = addChildToNode(collections, parentNode.id, {
-						type: 'file',
-						id,
-						label: 'New Request',
-						metadata: { id, ...createDefaultRequest() },
-					});
-					setCollections(updated);
+					// const id = generateId();
+					// // Handle new file
+					// const updated = addChildToNode(collections, parentNode, {
+					// 	type: 'file',
+					// 	id,
+					// 	label: 'New Request',
+					// 	metadata: { id, ...createDefaultRequest() },
+					// });
+					// setCollections(updated);
+					addFolder(parentNode, 'File');
 				}}
 				onNewFolder={parentNode => {
 					// Handle new folder
-					const updated = addChildToNode(collections, parentNode.id, {
-						type: 'folder',
-						id: generateId(),
-						label: 'New Folder',
-						children: [],
-					});
-					setCollections(updated);
+					// const updated = addChildToNode(collections, parentNode, {
+					// 	type: 'folder',
+					// 	id: generateId(),
+					// 	label: 'New Folder',
+					// 	children: [],
+					// });
+					// setCollections(updated);
+					addFolder(parentNode, 'Folder');
 				}}
 			/>
 		</div>

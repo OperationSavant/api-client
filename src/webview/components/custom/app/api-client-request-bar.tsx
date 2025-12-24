@@ -4,10 +4,11 @@ import { ApiClientSelect } from '../api-client-select';
 import ApiClientButton from '../api-client-button';
 import { ApiClientInput } from '../api-client-input';
 import { HTTP_VERBS_OPTIONS } from '@/shared/constants/select-options';
-import { LucideIcon } from 'lucide-react';
+import { Download, LucideIcon, Save, Send } from 'lucide-react';
 import { HttpIcon, GraphQLIcon, GrpcIcon, SocketIOIcon, WebSocketIcon } from '../../../assets';
 import { useState } from 'react';
 import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
 
 interface ApiClientRequestBarProps {
 	method: string;
@@ -47,9 +48,8 @@ export function ApiClientRequestBar({
 	};
 
 	const handleRegion1Click = () => {
-		// Pre-populate the input with current display value when clicking label
 		if (!requestName) {
-			setRequestName(url || 'Un Named Request');
+			setRequestName(url || 'New Request');
 		}
 		setShowInput(true);
 	};
@@ -74,40 +74,34 @@ export function ApiClientRequestBar({
 
 	return (
 		<div className='flex flex-col gap-2'>
-			<div className='flex items-center gap-2 w-full'>
-				<div className={`flex items-center bg-background border border-muted-foreground overflow-hidden flex-1 rounded-md`}>
+			<div className='flex items-center w-full justify-between'>
+				<div className={`flex items-center gap-2 overflow-hidden rounded-[1px]`}>
 					<div className='shrink-0'>
 						<ApiClientSelect
 							options={saveRequestOptions}
 							showIconOnly={true}
 							classNameDiv='flex justify-center items-center uppercase'
-							classNameTrigger={`w-[60px] border-r! h-4!`}
+							classNameTrigger={`w-[60px] h-4 bg-transparent`}
 							classNameContent={`w-[160px] justify-start`}
 							value={requestType}
-							onValueChange={requestType => {
-								setRequestType(requestType);
-							}}
+							onValueChange={requestType => setRequestType(requestType)}
 							disabled={loading}
 						/>
 					</div>
-					<div className='flex-1 h-10'>
+					<div className='flex h-9'>
 						{/** Region 1 */}
 						{!showInput && (
-							<Label className='h-10 flex items-center px-2 cursor-pointer' onClick={handleRegion1Click}>
-								{requestName || url || 'Un Saved Request'}
+							<Label className='h-9 flex items-center px-2 cursor-pointer w-fit' onClick={handleRegion1Click}>
+								{requestName || url || 'New Request'}
 							</Label>
 						)}
 						{showInput && (
 							<ApiClientInput
-								type='text'
 								value={requestName}
 								onChange={e => handleRegion1InputChange(e.target.value)}
 								onBlur={handleRegion1InputBlur}
 								placeholder='Enter request name'
-								className={cn(
-									`border-0 rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 h-10 bg-transparent! px-2 disabled:cursor-not-allowed text-xs!`,
-									loading ? 'cursor-not-allowed' : ''
-								)}
+								className={cn(loading ? 'cursor-not-allowed' : '')}
 								disabled={loading}
 								autoFocus
 							/>
@@ -115,16 +109,19 @@ export function ApiClientRequestBar({
 						{/** End Region 1 */}
 					</div>
 				</div>
-				<div className={cn(`flex items-center gap-2 shrink-0`)}>
-					<ApiClientButton onClick={onSaveClick} disabled={loading} size={'lg'} variant={'outline'} content='Save' />
+				<div className={cn(`flex items-center gap-2`)}>
+					<ApiClientButton onClick={onSaveClick} disabled={loading} size={'lg'} variant={'default'} content='Save'>
+						<Save className='w-4 h-4' />
+					</ApiClientButton>
 				</div>
 			</div>
-			<div className='flex items-center gap-2 w-full'>
-				<div className={`flex items-center bg-background border border-muted-foreground overflow-hidden flex-1 rounded-md`}>
+			<Separator className='bg-primary h-2' />
+			<div className='flex items-center gap-2 w-full '>
+				<div className={`flex items-center border border-primary overflow-hidden flex-1 rounded-[1px]`}>
 					<div className='shrink-0'>
 						<ApiClientSelect
 							options={HTTP_VERBS_OPTIONS}
-							classNameTrigger={`w-[130px] border-r! h-4!`}
+							classNameTrigger={`w-[130px] h-4`}
 							classNameContent={`w-[130px] justify-start`}
 							classNameDiv='flex justify-center items-center uppercase'
 							value={method}
@@ -135,22 +132,26 @@ export function ApiClientRequestBar({
 					<div className='flex-1'>
 						{/** Region 2 */}
 						<ApiClientInput
-							type='text'
 							value={url}
 							onChange={e => handleUrlChange(e.target.value)}
 							onKeyDown={handleUrlKeyDown}
 							placeholder={placeholder}
-							className={cn(
-								`border-0 rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 h-10 bg-transparent! px-2 disabled:cursor-not-allowed text-xs!`,
-								loading ? 'cursor-not-allowed' : ''
-							)}
+							className={cn(loading ? 'cursor-not-allowed' : '')}
 							disabled={loading}
 						/>
 						{/** End Region 2 */}
 					</div>
 				</div>
 				<div className={cn(`flex items-center gap-2 shrink-0`)}>
-					<ApiClientButtonGroup onClick={onSend} disabled={loading} size={'lg'} downloadClick={onDownloadClick} loading={loading} buttonText='Send' />
+					<ApiClientButtonGroup
+						onClick={onSend}
+						disabled={loading}
+						size={'lg'}
+						icon={Send}
+						loading={loading}
+						label='Send'
+						actions={[{ label: 'Send & Download', icon: Download, onClick: onDownloadClick }]}
+					/>
 				</div>
 			</div>
 		</div>

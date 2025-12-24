@@ -1,6 +1,7 @@
 import { commands, ExtensionContext, WebviewPanel } from 'vscode';
 import { v4 as uuidv4 } from 'uuid';
 import { broadcasterHub } from '../orchestrators/broadcaster-hub';
+import { Collection } from '@/shared/types/collection';
 
 interface CommandRegistryDependencies {
 	context: ExtensionContext;
@@ -31,10 +32,18 @@ export class CommandRegistry {
 					panelName = args?.[0]?.request?.name || 'API Client';
 					panel = this.deps.createWebview(panelName);
 					broadcasterHub.registerPanel(tabId, panel, [args[0]]);
+					broadcasterHub.setPendingmessages(tabId, [args[0]]);
 				} else {
 					panel = this.deps.createWebview(panelName);
 					broadcasterHub.registerPanel(tabId, panel);
+					broadcasterHub.setPendingmessages(tabId);
 				}
+			}),
+			commands.registerCommand('apiClient.openCollectionView', (args: Collection) => {
+				const tabId = uuidv4();
+				const panelName = args.name || 'API Client';
+				const panel = this.deps.createWebview(panelName);
+				broadcasterHub.registerPanel(tabId, panel, [args]);
 			})
 		);
 	}

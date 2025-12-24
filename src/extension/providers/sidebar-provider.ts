@@ -16,8 +16,16 @@ export class SidebarProvider implements WebviewViewProvider {
 			localResourceRoots: [Uri.joinPath(this.extensionUri, 'dist')],
 		};
 		webviewView.webview.onDidReceiveMessage(async message => {
-			await this.messageRouter.route(message, webviewView);
-			return;
+			try {
+				await this.messageRouter.route(message, webviewView);
+			} catch (error) {
+				console.error('[SidebarProvider] Message handling error:', error);
+				// Send error to webview for user feedback
+				broadcasterHub.broadcast({
+					command: 'error',
+					message: error instanceof Error ? error.message : 'An unexpected error occurred',
+				});
+			}
 		});
 		const webviewUri = Uri.joinPath(this.extensionUri, 'dist', 'sidebar.js');
 		webviewView.webview.html = ContentBuilder.buildHtml(webviewView.webview, webviewUri, 'sidebar-root');

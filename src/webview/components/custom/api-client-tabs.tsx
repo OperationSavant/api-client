@@ -3,6 +3,7 @@ import { Tabs, TabsList, TabsContent, TabsTrigger } from '../ui/tabs';
 import { cn } from '@/shared/lib/utils';
 import { TabConfig } from '@/shared/types/tabs';
 import { ChevronDown } from 'lucide-react'; // or your icon library
+import { useContainerBreakpoint } from '@/hooks/use-container-breakpoint';
 
 interface TabSelectOption {
 	value: string;
@@ -71,9 +72,9 @@ const TabSelectTrigger: React.FC<TabSelectTriggerProps> = ({
 		return (
 			<div className='flex items-center gap-2'>
 				{Icon && <Icon className='w-4 h-4' />}
-				<span>{tabLabel}</span>
+				{<span>{displayLabel}</span>}
 				{badge !== undefined && badge !== null && badge !== '' && (
-					<span className='ml-1 px-1.5 py-0.5 text-xs rounded-full bg-primary/10 text-primary'>{badge}</span>
+					<span className='ml-1 px-1.5 py-0.5 text-xs rounded-[2px] bg-badge text-badge-foreground'>{badge}</span>
 				)}
 			</div>
 		);
@@ -88,21 +89,25 @@ const TabSelectTrigger: React.FC<TabSelectTriggerProps> = ({
 				type='button'
 				onClick={handleSelectClick}
 				className={cn(
-					'flex items-center gap-1.5 px-2 py-1 rounded',
-					'bg-background border border-border',
-					'hover:bg-muted transition-colors',
+					'flex items-center gap-1.5 px-2 py-1',
+					'rounded-[1px] shadow-none',
+					'bg-dropdown border border-dropdown-border',
+					'hover:bg-toolbar-hover transition-colors',
 					'text-sm font-medium',
+					'focus:outline focus:outline-focus-border',
 					className
 				)}>
 				{SelectedIcon && <SelectedIcon className='w-3.5 h-3.5' />}
-				<span>{displayLabel}</span>
+				{<span>{displayLabel}</span>}
 				<ChevronDown className={cn('w-3.5 h-3.5 transition-transform', isOpen && 'rotate-180')} />
 			</button>
 
-			{badge !== undefined && badge !== null && badge !== '' && <span className='px-1.5 py-0.5 text-xs rounded-full bg-primary/10 text-primary'>{badge}</span>}
+			{badge !== undefined && badge !== null && badge !== '' && (
+				<span className='px-1.5 py-0.5 text-xs rounded-[2px] bg-badge text-badge-foreground'>{badge}</span>
+			)}
 
 			{isOpen && (
-				<div className={cn('absolute top-full left-0 mt-1 z-50', 'min-w-40 bg-popover border border-border rounded-md shadow-lg', 'overflow-hidden')}>
+				<div className={cn('absolute top-full left-0 mt-1 z-50', 'min-w-40 bg-menu border border-menu-border rounded-[1px] shadow-none', 'overflow-hidden')}>
 					<div className='py-1'>
 						{options.map(option => {
 							const OptionIcon = option.icon;
@@ -115,9 +120,9 @@ const TabSelectTrigger: React.FC<TabSelectTriggerProps> = ({
 									onClick={() => handleOptionClick(option.value)}
 									className={cn(
 										'w-full px-3 py-2 text-left text-sm',
-										'hover:bg-muted transition-colors',
+										'hover:bg-menu-selection hover:text-menu-selection-foreground transition-colors',
 										'flex items-center gap-2',
-										isSelected && 'bg-primary/10 text-primary'
+										isSelected && 'bg-menu-selection text-menu-selection-foreground'
 									)}>
 									{OptionIcon && <OptionIcon className='w-4 h-4' />}
 									<span>{option.label}</span>
@@ -158,26 +163,32 @@ const TabTriggerWithIcon: React.FC<
 		isActive?: boolean;
 	}
 > = ({ value, icon: Icon, badge, disabled, children, className, selectMode, isActive = false }) => {
+	const { isCompact, ref } = useContainerBreakpoint();
 	return (
 		<TabsTrigger
+			ref={ref}
 			value={value}
 			disabled={disabled}
 			className={cn(
+				// VS Code compliant styles
 				'relative border-0 justify-center items-center rounded-none p-4',
-				'data-[state=active]:bg-primary/20 data-[state=active]:border-primary data-[state=active]:border-b',
-				'data-[state=inactive]:text-muted-foreground data-[state=inactive]:border-b data-[state=inactive]:border-transparent',
-				'hover:bg-muted',
-				'data-[state=inactive]:hover:text-foreground',
+				'shadow-none ring-0 ring-offset-0',
+				'bg-transparent text-tab-inactive-foreground',
+				'data-[state=active]:text-tab-active-foreground',
+				'data-[state=active]:bg-transparent',
+				'data-[state=active]:shadow-none',
+				// Active indicator (bottom border)
+				'after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5',
+				'after:bg-transparent data-[state=active]:after:bg-tab-active-border',
+				// Hover state
+				'hover:text-foreground',
+				// Focus state
+				'focus-visible:ring-0 focus-visible:ring-offset-0',
+				'focus-visible:outline',
+				'focus-visible:-outline-offset-1 focus-visible:outline-focus-border',
 				'transition-all duration-200',
 				className
 			)}>
-			{/* <div className='flex items-center gap-2'>
-				{Icon && <Icon />}
-				<span>{children}</span>
-				{badge !== undefined && badge !== null && badge !== '' && (
-					<span className='ml-1 px-1.5 py-0.5 text-xs rounded-full bg-primary/10 text-primary'>{badge}</span>
-				)}
-			</div> */}
 			{selectMode?.enabled ? (
 				<TabSelectTrigger
 					tabValue={value}
@@ -193,9 +204,9 @@ const TabTriggerWithIcon: React.FC<
 			) : (
 				<div className='flex items-center gap-2'>
 					{Icon && <Icon />}
-					<span>{children}</span>
+					{<span>{children}</span>}
 					{badge !== undefined && badge !== null && badge !== '' && (
-						<span className='ml-1 px-1.5 py-0.5 text-xs rounded-full bg-primary/10 text-primary'>{badge}</span>
+						<span className='ml-1 px-1.5 py-0.5 text-xs rounded-[2px] bg-badge text-badge-foreground'>{badge}</span>
 					)}
 				</div>
 			)}
@@ -247,12 +258,7 @@ const ApiClientTabs = <T extends string = string>({
 	};
 	return (
 		<Tabs value={value} onValueChange={handleValueChange} orientation={orientation} className={className}>
-			<TabsList className={cn(`bg-transparent gap-2 p-1`, listClassName)}>
-				{/* {visibleTabs.map(tab => (
-					<TabTriggerWithIcon key={tab.id} value={tab.id} icon={tab.icon} badge={tab.badge} disabled={tab.disabled} data-testid={tab.testId}>
-						{tab.label}
-					</TabTriggerWithIcon>
-				))} */}
+			<TabsList className={cn('bg-transparent gap-0 p-0 border-panel-border rounded-none h-auto', listClassName)}>
 				{visibleTabs.map(tab => (
 					<TabTriggerWithIcon
 						key={tab.id}
@@ -261,9 +267,8 @@ const ApiClientTabs = <T extends string = string>({
 						badge={tab.badge}
 						disabled={tab.disabled}
 						data-testid={tab.testId}
-						selectMode={tab.selectMode} // NEW PROP
-						isActive={value === tab.id} // NEW PROP
-					>
+						selectMode={tab.selectMode}
+						isActive={value === tab.id}>
 						{tab.label}
 					</TabTriggerWithIcon>
 				))}

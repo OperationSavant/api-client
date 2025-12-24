@@ -44,7 +44,7 @@ export interface CurlParseResult {
 }
 
 export const createDefaultRequest = (): Request => ({
-	url: 'https://jsonplaceholder.typicode.com/posts',
+	url: '',
 	method: 'GET',
 	params: {},
 	headers: {},

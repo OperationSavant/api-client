@@ -1,4 +1,4 @@
-import { WebviewPanel, WebviewView } from 'vscode';
+import { WebviewPanel, WebviewView, window } from 'vscode';
 
 export class BroadcasterHub {
 	private static instance: BroadcasterHub;
@@ -17,17 +17,6 @@ export class BroadcasterHub {
 
 	registerPanel(id: string, panel: WebviewPanel, args?: any[]) {
 		this.webviewPanels.set(id, panel);
-		if (args && args.length > 0) {
-			this.pendingMessages.set(id, [
-				{
-					command: 'loadRequest',
-					data: {
-						tabId: id,
-						request: args[0],
-					},
-				},
-			]);
-		}
 		panel.onDidDispose(() => {
 			this.webviewPanels.delete(id);
 			this.pendingMessages.delete(id);
@@ -36,6 +25,20 @@ export class BroadcasterHub {
 
 	registerWebviewView(view: WebviewView) {
 		this.webviewView = view;
+	}
+
+	setPendingmessages(panelId: string, args?: any[]) {
+		if (args && args.length > 0) {
+			this.pendingMessages.set(panelId, [
+				{
+					command: 'loadRequest',
+					data: {
+						tabId: panelId,
+						request: args[0],
+					},
+				},
+			]);
+		}
 	}
 
 	flushPendingMessages(panelId?: string) {
@@ -64,6 +67,10 @@ export class BroadcasterHub {
 			panel[1]?.webview.postMessage({ ...message });
 		}
 		this.webviewView?.webview.postMessage({ ...message });
+	}
+
+	broadcastException(message: any) {
+		window.showErrorMessage(message || 'An unexpected error occurred');
 	}
 }
 

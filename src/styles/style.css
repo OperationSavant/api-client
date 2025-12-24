@@ -1,157 +1,319 @@
-@import 'highlight.js/styles/github-dark.css'; /* Importing a highlight.js theme for code syntax highlighting */
+@import 'highlight.js/styles/github-dark.css';
 @import './_variables.scss';
 @import './_keyframe-animations.scss';
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @plugin "@tailwindcss/typography";
 
-@custom-variant dark (&:is(.dark *));
+/* =============================================================================
+   VS CODE THEME → SHADCN/TAILWIND v4 MAPPING
+
+   16 Categories for Postman-like API Client Webview
+   Reference: https://code.visualstudio.com/api/references/theme-color
+   ============================================================================= */
+
+/* =============================================================================
+   STEP 1: RUNTIME CSS VARIABLES (:root)
+   Maps VS Code theme tokens → intermediate CSS variables
+   ============================================================================= */
 
 :root {
-	/* ---------- Surfaces ---------- */
+	/* ---------------------------------------------------------------------------
+     1. CONTRAST COLORS (High contrast theme support)
+     --------------------------------------------------------------------------- */
+	--contrast-border: var(--vscode-contrastBorder);
+	--contrast-active-border: var(--vscode-contrastActiveBorder);
+
+	/* ---------------------------------------------------------------------------
+     2. BASE COLORS (Foundation)
+     --------------------------------------------------------------------------- */
 	--background: var(--vscode-editor-background);
-	--foreground: var(--vscode-editor-foreground);
-	--muted: var(--vscode-sideBar-background);
-	--muted-foreground: var(--vscode-descriptionForeground);
-	--border: var(--vscode-panel-border);
-	--card: var(--vscode-editorWidget-background);
-	--card-foreground: var(--vscode-editorWidget-foreground);
+	--foreground: var(--vscode-foreground);
+	--focus-border: var(--vscode-focusBorder);
+	--disabled-foreground: var(--vscode-disabledForeground);
+	--widget-border: var(--vscode-widget-border, var(--vscode-editorWidget-border));
+	--widget-shadow: var(--vscode-widget-shadow);
+	--selection-background: var(--vscode-selection-background);
+	--description-foreground: var(--vscode-descriptionForeground);
+	--error-foreground: var(--vscode-errorForeground);
+	--icon-foreground: var(--vscode-icon-foreground, var(--vscode-foreground));
+	--sash-hover-border: var(--vscode-sash-hoverBorder);
 
-	/* ---------- Tooltip / Popover specificity ---------- */
-	--tooltip: var(--vscode-editorHoverWidget-background);
-	--tooltip-foreground: var(--vscode-editorHoverWidget-foreground);
-	--popover: var(--vscode-editorWidget-background);
-	--popover-foreground: var(--vscode-editorWidget-foreground);
+	/* ---------------------------------------------------------------------------
+     3. TEXT COLORS
+     --------------------------------------------------------------------------- */
+	--text-block-quote-background: var(--vscode-textBlockQuote-background);
+	--text-block-quote-border: var(--vscode-textBlockQuote-border);
+	--text-code-block-background: var(--vscode-textCodeBlock-background, var(--vscode-editor-background));
+	--text-link-foreground: var(--vscode-textLink-foreground);
+	--text-link-active-foreground: var(--vscode-textLink-activeForeground, var(--vscode-textLink-foreground));
+	--text-preformat-foreground: var(--vscode-textPreformat-foreground);
+	--text-preformat-background: var(--vscode-textPreformat-background);
+	--text-separator-foreground: var(--vscode-textSeparator-foreground);
 
-	/* ---------- Selection / Highlight ---------- */
-	--selection: var(--vscode-editor-selectionBackground);
-	--selection-foreground: var(--vscode-editor-selectionForeground);
+	/* ---------------------------------------------------------------------------
+     4. ACTION COLORS (Toolbar interactions)
+     --------------------------------------------------------------------------- */
+	--toolbar-hover-background: var(--vscode-toolbar-hoverBackground);
+	--toolbar-hover-outline: var(--vscode-toolbar-hoverOutline);
+	--toolbar-active-background: var(--vscode-toolbar-activeBackground);
 
-	/* ---------- Primary (Buttons) ---------- */
-	--primary: var(--vscode-button-background);
-	--primary-foreground: var(--vscode-button-foreground);
-	--primary-hover: var(--vscode-button-hoverBackground);
-	--primary-disabled: var(--vscode-disabledForeground);
-	--primary-disabled-background: var(--vscode-button-secondaryBackground);
-
-	/* ---------- Secondary ---------- */
-	--button-secondary: var(--vscode-button-secondaryBackground);
-	--button-secondary-hover: var(--vscode-button-secondaryHoverBackground);
+	/* ---------------------------------------------------------------------------
+     5. BUTTON CONTROL
+     --------------------------------------------------------------------------- */
+	--button-background: var(--vscode-button-background);
+	--button-foreground: var(--vscode-button-foreground);
+	--button-border: var(--vscode-button-border);
+	--button-separator: var(--vscode-button-separator);
+	--button-hover-background: var(--vscode-button-hoverBackground);
+	--button-secondary-background: var(--vscode-button-secondaryBackground);
 	--button-secondary-foreground: var(--vscode-button-secondaryForeground);
+	--button-secondary-hover-background: var(--vscode-button-secondaryHoverBackground);
 
-	/* ---------- Inputs ---------- */
-	--input: var(--vscode-input-background);
+	/* Checkbox */
+	--checkbox-background: var(--vscode-checkbox-background);
+	--checkbox-foreground: var(--vscode-checkbox-foreground);
+	--checkbox-border: var(--vscode-checkbox-border);
+	--checkbox-select-background: var(--vscode-checkbox-selectBackground);
+	--checkbox-select-border: var(--vscode-checkbox-selectBorder);
+
+	/* ---------------------------------------------------------------------------
+     6. DROPDOWN CONTROL
+     --------------------------------------------------------------------------- */
+	--dropdown-background: var(--vscode-dropdown-background);
+	--dropdown-foreground: var(--vscode-dropdown-foreground);
+	--dropdown-border: var(--vscode-dropdown-border);
+	--dropdown-list-background: var(--vscode-dropdown-listBackground, var(--vscode-dropdown-background));
+
+	/* ---------------------------------------------------------------------------
+     7. INPUT CONTROL
+     --------------------------------------------------------------------------- */
+	--input-background: var(--vscode-input-background);
+	--input-foreground: var(--vscode-input-foreground, var(--vscode-foreground));
 	--input-border: var(--vscode-input-border);
-	--input-placeholder: var(--vscode-input-placeholderForeground);
-	--ring: var(--vscode-focusBorder);
+	--input-placeholder-foreground: var(--vscode-input-placeholderForeground);
 
-	/* ---------- Accent ---------- */
-	--accent: var(--vscode-textLink-foreground);
-	--accent-foreground: var(--vscode-editor-background);
-	--accent-hover: var(--vscode-textLink-activeForeground);
+	/* Input option (toggle buttons inside inputs) */
+	--input-option-active-background: var(--vscode-inputOption-activeBackground);
+	--input-option-active-border: var(--vscode-inputOption-activeBorder);
+	--input-option-active-foreground: var(--vscode-inputOption-activeForeground);
+	--input-option-hover-background: var(--vscode-inputOption-hoverBackground);
 
-	/* ---------- Destructive ---------- */
-	--destructive: var(--vscode-inputValidation-errorBorder);
-	--destructive-foreground: var(--vscode-editor-background);
-	--destructive-background: var(--vscode-inputValidation-errorBackground);
+	/* Input validation */
+	--input-validation-error-background: var(--vscode-inputValidation-errorBackground);
+	--input-validation-error-foreground: var(--vscode-inputValidation-errorForeground);
+	--input-validation-error-border: var(--vscode-inputValidation-errorBorder);
+	--input-validation-info-background: var(--vscode-inputValidation-infoBackground);
+	--input-validation-info-foreground: var(--vscode-inputValidation-infoForeground);
+	--input-validation-info-border: var(--vscode-inputValidation-infoBorder);
+	--input-validation-warning-background: var(--vscode-inputValidation-warningBackground);
+	--input-validation-warning-foreground: var(--vscode-inputValidation-warningForeground);
+	--input-validation-warning-border: var(--vscode-inputValidation-warningBorder);
 
-	/* ---------- Shadows / Radius ---------- */
-	--shadow: var(--vscode-widget-shadow);
-	--radius: 0.375rem;
+	/* ---------------------------------------------------------------------------
+     8. SCROLLBAR CONTROL
+     --------------------------------------------------------------------------- */
+	--scrollbar-shadow: var(--vscode-scrollbar-shadow);
+	--scrollbar-slider-background: var(--vscode-scrollbarSlider-background);
+	--scrollbar-slider-hover-background: var(--vscode-scrollbarSlider-hoverBackground);
+	--scrollbar-slider-active-background: var(--vscode-scrollbarSlider-activeBackground);
 
-	/* ---------- States (Info/Warning/Success) ---------- */
-	--info: var(--vscode-editorInfo-foreground);
-	--info-foreground: var(--vscode-editor-background);
-	--info-background: var(--vscode-inputValidation-infoBackground);
-	--info-border: var(--vscode-inputValidation-infoBorder);
-	--warning: var(--vscode-editorWarning-foreground);
-	--warning-foreground: var(--vscode-editor-background);
-	--warning-background: var(--vscode-inputValidation-warningBackground);
-	--warning-border: var(--vscode-inputValidation-warningBorder);
-	--success: var(--vscode-testing-iconPassed);
-	--success-foreground: var(--vscode-editor-background);
-	--success-background: var(--vscode-terminal-ansiGreen);
-	--surface-elevated: var(--vscode-panel-background);
-	--surface-elevated-border: var(--vscode-panel-border);
-
-	/* ---------- Lists (for treeviews) ---------- */
-	--list-hover: var(--vscode-list-hoverBackground);
-	--list-active: var(--vscode-list-activeSelectionBackground);
-	--list-active-foreground: var(--vscode-list-activeSelectionForeground);
-	--list-inactive: var(--vscode-list-inactiveSelectionBackground);
-
-	/* ---------- Badges / Pills ---------- */
-	--badge: var(--vscode-badge-background);
+	/* ---------------------------------------------------------------------------
+     9. BADGE
+     --------------------------------------------------------------------------- */
+	--badge-background: var(--vscode-badge-background);
 	--badge-foreground: var(--vscode-badge-foreground);
 
-	/* ---------- Notifications / Toasts ---------- */
-	--toast: var(--vscode-notifications-background);
-	--toast-foreground: var(--vscode-notifications-foreground);
-	--toast-border: var(--vscode-notifications-border);
+	/* ---------------------------------------------------------------------------
+     10. PROGRESS BAR
+     --------------------------------------------------------------------------- */
+	--progress-bar-background: var(--vscode-progressBar-background);
 
-	/* ---------- Scrollbar ---------- */
-	--scrollbar-thumb: var(--vscode-scrollbarSlider-background);
-	--scrollbar-thumb-hover: var(--vscode-scrollbarSlider-hoverBackground);
-	--scrollbar-thumb-active: var(--vscode-scrollbarSlider-activeBackground);
-
-	/* ---------- Code / Markdown helpers ---------- */
-	--codeblock: var(--vscode-textCodeBlock-background);
-	--blockquote: var(--vscode-textBlockQuote-background);
-	--blockquote-border: var(--vscode-textBlockQuote-border);
-
-	/* ---------- Subtle borders ---------- */
-	--subtle-border: var(--vscode-widget-border);
-
-	/* ---------- Charts ---------- */
-	--chart-1: var(--vscode-charts-blue);
-	--chart-2: var(--vscode-charts-green);
-	--chart-3: var(--vscode-charts-yellow);
-	--chart-4: var(--vscode-charts-red);
-	--chart-5: var(--vscode-charts-purple);
-
-	/* ---------- Overlays ------------ */
-	--overlay: rgba(0, 0, 0, 0.35);
-
-	/* ---------- Sidebars ------------ */
-	--sidebar: var(--vscode-sideBar-background);
-	--sidebar-foreground: var(--vscode-sideBar-foreground);
-	--sidebar-primary: var(--vscode-button-secondaryBackground);
-	--sidebar-primary-foreground: var(--vscode-button-secondaryForeground);
-	--sidebar-accent: var(--vscode-textLink-foreground);
-	--sidebar-accent-foreground: var(--vscode-sideBar-background);
+	/* ---------------------------------------------------------------------------
+     11. SIDE BAR
+     --------------------------------------------------------------------------- */
+	--sidebar-background: var(--vscode-sideBar-background);
+	--sidebar-foreground: var(--vscode-sideBar-foreground, var(--vscode-foreground));
 	--sidebar-border: var(--vscode-sideBar-border);
-	--sidebar-ring: var(--vscode-focusBorder);
+	--sidebar-drop-background: var(--vscode-sideBar-dropBackground);
+	--sidebar-title-foreground: var(--vscode-sideBarTitle-foreground);
+	--sidebar-section-header-background: var(--vscode-sideBarSectionHeader-background);
+	--sidebar-section-header-foreground: var(--vscode-sideBarSectionHeader-foreground);
+	--sidebar-section-header-border: var(--vscode-sideBarSectionHeader-border);
+
+	/* ---------------------------------------------------------------------------
+     12. PANEL COLORS
+     --------------------------------------------------------------------------- */
+	--panel-background: var(--vscode-panel-background, var(--vscode-editor-background));
+	--panel-border: var(--vscode-panel-border);
+	--panel-drop-border: var(--vscode-panel-dropBorder);
+	--panel-title-active-foreground: var(--vscode-panelTitle-activeForeground);
+	--panel-title-active-border: var(--vscode-panelTitle-activeBorder);
+	--panel-title-inactive-foreground: var(--vscode-panelTitle-inactiveForeground);
+	--panel-input-border: var(--vscode-panelInput-border);
+	--panel-section-border: var(--vscode-panelSection-border);
+	--panel-section-header-background: var(--vscode-panelSectionHeader-background);
+	--panel-section-header-foreground: var(--vscode-panelSectionHeader-foreground);
+	--panel-section-header-border: var(--vscode-panelSectionHeader-border);
+
+	/* ---------------------------------------------------------------------------
+     13. NOTIFICATION COLORS
+     --------------------------------------------------------------------------- */
+	--notification-center-border: var(--vscode-notificationCenter-border);
+	--notification-center-header-foreground: var(--vscode-notificationCenterHeader-foreground);
+	--notification-center-header-background: var(--vscode-notificationCenterHeader-background);
+	--notification-toast-border: var(--vscode-notificationToast-border);
+	--notification-foreground: var(--vscode-notifications-foreground);
+	--notification-background: var(--vscode-notifications-background);
+	--notification-border: var(--vscode-notifications-border);
+	--notification-link-foreground: var(--vscode-notificationLink-foreground);
+	--notification-error-icon-foreground: var(--vscode-notificationsErrorIcon-foreground);
+	--notification-warning-icon-foreground: var(--vscode-notificationsWarningIcon-foreground);
+	--notification-info-icon-foreground: var(--vscode-notificationsInfoIcon-foreground);
+
+	/* ---------------------------------------------------------------------------
+     14. MENU BAR COLORS (Context menus, dropdowns)
+     --------------------------------------------------------------------------- */
+	--menu-foreground: var(--vscode-menu-foreground);
+	--menu-background: var(--vscode-menu-background);
+	--menu-selection-foreground: var(--vscode-menu-selectionForeground);
+	--menu-selection-background: var(--vscode-menu-selectionBackground);
+	--menu-selection-border: var(--vscode-menu-selectionBorder);
+	--menu-separator-background: var(--vscode-menu-separatorBackground);
+	--menu-border: var(--vscode-menu-border);
+
+	/* ---------------------------------------------------------------------------
+     15. EDITOR GROUPS & TABS
+     --------------------------------------------------------------------------- */
+	--editor-group-border: var(--vscode-editorGroup-border);
+	--editor-group-drop-background: var(--vscode-editorGroup-dropBackground);
+	--editor-group-header-tabs-background: var(--vscode-editorGroupHeader-tabsBackground);
+	--editor-group-header-tabs-border: var(--vscode-editorGroupHeader-tabsBorder);
+	--editor-group-header-border: var(--vscode-editorGroupHeader-border);
+
+	/* Tabs */
+	--tab-active-background: var(--vscode-tab-activeBackground);
+	--tab-active-foreground: var(--vscode-tab-activeForeground);
+	--tab-active-border: var(--vscode-tab-activeBorder);
+	--tab-active-border-top: var(--vscode-tab-activeBorderTop);
+	--tab-inactive-background: var(--vscode-tab-inactiveBackground);
+	--tab-inactive-foreground: var(--vscode-tab-inactiveForeground);
+	--tab-border: var(--vscode-tab-border);
+	--tab-hover-background: var(--vscode-tab-hoverBackground);
+	--tab-hover-foreground: var(--vscode-tab-hoverForeground);
+	--tab-hover-border: var(--vscode-tab-hoverBorder);
+
+	/* ---------------------------------------------------------------------------
+     16. EDITOR WIDGET COLORS (Cards, popovers, dialogs)
+     --------------------------------------------------------------------------- */
+	--editor-widget-background: var(--vscode-editorWidget-background);
+	--editor-widget-foreground: var(--vscode-editorWidget-foreground);
+	--editor-widget-border: var(--vscode-editorWidget-border);
+	--editor-widget-resize-border: var(--vscode-editorWidget-resizeBorder);
+	--editor-hover-background: var(--vscode-editorHoverWidget-background);
+	--editor-hover-foreground: var(--vscode-editorHoverWidget-foreground);
+	--editor-hover-border: var(--vscode-editorHoverWidget-border);
+	--editor-hover-status-bar-background: var(--vscode-editorHoverWidget-statusBarBackground);
+
+	/* ---------------------------------------------------------------------------
+     SHADCN SEMANTIC MAPPINGS
+     Maps intermediate tokens → Shadcn expected variable names
+     --------------------------------------------------------------------------- */
+
+	/* Core Shadcn tokens */
+	--card: var(--editor-widget-background, var(--background));
+	--card-foreground: var(--editor-widget-foreground, var(--foreground));
+	--popover: var(--menu-background, var(--editor-widget-background, var(--background)));
+	--popover-foreground: var(--menu-foreground, var(--foreground));
+	--primary: var(--button-background);
+	--primary-foreground: var(--button-foreground);
+	--secondary: var(--button-secondary-background, var(--input-background));
+	--secondary-foreground: var(--button-secondary-foreground, var(--foreground));
+	--muted: var(--input-background);
+	--muted-foreground: var(--description-foreground, var(--foreground));
+	--accent: var(--toolbar-hover-background, var(--input-background));
+	--accent-foreground: var(--foreground);
+	--destructive: var(--input-validation-error-background, var(--error-foreground));
+	--destructive-foreground: var(--input-validation-error-foreground, var(--button-foreground));
+	--border: var(--panel-border, var(--widget-border));
+	--input: var(--input-border, var(--panel-border));
+	--ring: var(--focus-border);
+
+	/* Sidebar Shadcn tokens */
+	--sidebar: var(--sidebar-background, var(--background));
+	--sidebar-foreground: var(--sidebar-foreground, var(--foreground));
+	--sidebar-primary: var(--sidebar-title-foreground, var(--foreground));
+	--sidebar-primary-foreground: var(--sidebar-foreground, var(--foreground));
+	--sidebar-accent: var(--toolbar-hover-background);
+	--sidebar-accent-foreground: var(--foreground);
+	--sidebar-border: var(--sidebar-border, var(--panel-border));
+	--sidebar-ring: var(--focus-border);
+
+	/* Status tokens */
+	--info: var(--notification-info-icon-foreground, var(--text-link-foreground));
+	--info-foreground: var(--input-validation-info-foreground, var(--button-foreground));
+	--success: var(--button-background);
+	--success-foreground: var(--button-foreground);
+	--warning: var(--notification-warning-icon-foreground, var(--input-validation-warning-background));
+	--warning-foreground: var(--input-validation-warning-foreground, var(--button-foreground));
+	--error: var(--error-foreground);
+	--error-foreground: var(--input-validation-error-foreground, var(--button-foreground));
+
+	/* Chart tokens */
+	--chart-1: var(--text-link-foreground);
+	--chart-2: var(--button-background);
+	--chart-3: var(--notification-warning-icon-foreground);
+	--chart-4: var(--notification-info-icon-foreground);
+	--chart-5: var(--error-foreground);
+
+	/* Radius */
+	--radius: 4px;
 }
 
-@theme inline {
+/* =============================================================================
+   STEP 2: TAILWIND THEME TOKENS (@theme)
+   Reference :root variables so Tailwind generates utilities
+   ============================================================================= */
+
+@theme {
+	/* Core */
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);
+
+	/* Card */
 	--color-card: var(--card);
 	--color-card-foreground: var(--card-foreground);
+
+	/* Popover */
 	--color-popover: var(--popover);
 	--color-popover-foreground: var(--popover-foreground);
+
+	/* Primary */
 	--color-primary: var(--primary);
 	--color-primary-foreground: var(--primary-foreground);
-	--color-secondary: var(--button-secondary);
-	--color-secondary-foreground: var(--button-secondary-foreground);
+
+	/* Secondary */
+	--color-secondary: var(--secondary);
+	--color-secondary-foreground: var(--secondary-foreground);
+
+	/* Muted */
 	--color-muted: var(--muted);
 	--color-muted-foreground: var(--muted-foreground);
+
+	/* Accent */
 	--color-accent: var(--accent);
 	--color-accent-foreground: var(--accent-foreground);
+
+	/* Destructive */
 	--color-destructive: var(--destructive);
 	--color-destructive-foreground: var(--destructive-foreground);
+
+	/* Border, Input, Ring */
 	--color-border: var(--border);
 	--color-input: var(--input);
 	--color-ring: var(--ring);
-	--color-chart-1: var(--chart-1);
-	--color-chart-2: var(--chart-2);
-	--color-chart-3: var(--chart-3);
-	--color-chart-4: var(--chart-4);
-	--color-chart-5: var(--chart-5);
-	--radius-sm: calc(var(--radius) - 4px);
-	--radius-md: calc(var(--radius) - 2px);
-	--radius-lg: var(--radius);
-	--radius-xl: calc(var(--radius) + 4px);
+
+	/* Sidebar */
 	--color-sidebar: var(--sidebar);
 	--color-sidebar-foreground: var(--sidebar-foreground);
 	--color-sidebar-primary: var(--sidebar-primary);
@@ -160,10 +322,142 @@
 	--color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
 	--color-sidebar-border: var(--sidebar-border);
 	--color-sidebar-ring: var(--sidebar-ring);
-	--color-warning: var(--vscode-editorWarning-foreground);
-	--color-warning-foreground: var(--vscode-editor-background);
-	--color-info: var(--vscode-editorInfo-foreground);
-	--color-info-foreground: var(--vscode-editor-background);
+
+	/* Chart */
+	--color-chart-1: var(--chart-1);
+	--color-chart-2: var(--chart-2);
+	--color-chart-3: var(--chart-3);
+	--color-chart-4: var(--chart-4);
+	--color-chart-5: var(--chart-5);
+
+	/* Status */
+	--color-info: var(--info);
+	--color-info-foreground: var(--info-foreground);
+	--color-success: var(--success);
+	--color-success-foreground: var(--success-foreground);
+	--color-warning: var(--warning);
+	--color-warning-foreground: var(--warning-foreground);
+	--color-error: var(--error);
+	--color-error-foreground: var(--error-foreground);
+
+	/* Extended: Direct VS Code mappings for fine-grained control */
+
+	/* Focus */
+	--color-focus-border: var(--focus-border);
+
+	/* Disabled */
+	--color-disabled: var(--disabled-foreground);
+
+	/* Links */
+	--color-link: var(--text-link-foreground);
+	--color-link-active: var(--text-link-active-foreground);
+
+	/* Code blocks */
+	--color-code: var(--text-code-block-background);
+	--color-code-foreground: var(--foreground);
+
+	/* Separator */
+	--color-separator: var(--menu-separator-background, var(--panel-border));
+
+	/* Button */
+	--color-button: var(--button-background);
+	--color-button-foreground: var(--button-foreground);
+	--color-button-hover: var(--button-hover-background);
+	--color-button-secondary: var(--button-secondary-background);
+	--color-button-secondary-foreground: var(--button-secondary-foreground);
+	--color-button-secondary-hover: var(--button-secondary-hover-background);
+
+	/* Input */
+	--color-input-background: var(--input-background);
+	--color-input-foreground: var(--input-foreground);
+	--color-input-border: var(--input-border);
+	--color-input-placeholder: var(--input-placeholder-foreground);
+
+	/* Dropdown */
+	--color-dropdown: var(--dropdown-background);
+	--color-dropdown-foreground: var(--dropdown-foreground);
+	--color-dropdown-border: var(--dropdown-border);
+	--color-dropdown-list: var(--dropdown-list-background);
+
+	/* Checkbox */
+	--color-checkbox: var(--checkbox-background);
+	--color-checkbox-foreground: var(--checkbox-foreground);
+	--color-checkbox-border: var(--checkbox-border);
+
+	/* Scrollbar */
+	--color-scrollbar: var(--scrollbar-slider-background);
+	--color-scrollbar-hover: var(--scrollbar-slider-hover-background);
+	--color-scrollbar-active: var(--scrollbar-slider-active-background);
+
+	/* Badge */
+	--color-badge: var(--badge-background);
+	--color-badge-foreground: var(--badge-foreground);
+
+	/* Progress */
+	--color-progress: var(--progress-bar-background);
+
+	/* Toolbar */
+	--color-toolbar-hover: var(--toolbar-hover-background);
+	--color-toolbar-active: var(--toolbar-active-background);
+
+	/* Panel */
+	--color-panel: var(--panel-background);
+	--color-panel-border: var(--panel-border);
+	--color-panel-title: var(--panel-title-active-foreground);
+	--color-panel-title-inactive: var(--panel-title-inactive-foreground);
+	--color-panel-section-header: var(--panel-section-header-background);
+	--color-panel-section-header-foreground: var(--panel-section-header-foreground);
+
+	/* Menu */
+	--color-menu: var(--menu-background);
+	--color-menu-foreground: var(--menu-foreground);
+	--color-menu-selection: var(--menu-selection-background);
+	--color-menu-selection-foreground: var(--menu-selection-foreground);
+	--color-menu-border: var(--menu-border);
+
+	/* Tab */
+	--color-tab-active: var(--tab-active-background);
+	--color-tab-active-foreground: var(--tab-active-foreground);
+	--color-tab-active-border: var(--tab-active-border-top, var(--focus-border));
+	--color-tab-inactive: var(--tab-inactive-background);
+	--color-tab-inactive-foreground: var(--tab-inactive-foreground);
+	--color-tab-hover: var(--tab-hover-background);
+	--color-tab-border: var(--tab-border);
+
+	/* Widget (Card/Dialog) */
+	--color-widget: var(--editor-widget-background);
+	--color-widget-foreground: var(--editor-widget-foreground);
+	--color-widget-border: var(--editor-widget-border);
+
+	/* Notification */
+	--color-notification: var(--notification-background);
+	--color-notification-foreground: var(--notification-foreground);
+	--color-notification-border: var(--notification-border);
+
+	/* Validation */
+	--color-validation-error: var(--input-validation-error-background);
+	--color-validation-error-foreground: var(--input-validation-error-foreground);
+	--color-validation-error-border: var(--input-validation-error-border);
+	--color-validation-warning: var(--input-validation-warning-background);
+	--color-validation-warning-foreground: var(--input-validation-warning-foreground);
+	--color-validation-warning-border: var(--input-validation-warning-border);
+	--color-validation-info: var(--input-validation-info-background);
+	--color-validation-info-foreground: var(--input-validation-info-foreground);
+	--color-validation-info-border: var(--input-validation-info-border);
+
+	/* Radius */
+	--radius-sm: 2px;
+	--radius-md: 4px;
+	--radius-lg: 6px;
+
+	/* HTTP VERB COLORS */
+	--color-get: #22c55e;
+	--color-post: #3b82f6;
+	--color-put: #f97316;
+	--color-patch: #8b5cf6;
+	--color-delete: #ef4444;
+	--color-head: #6b7280;
+	--color-options: #06b6d4;
 }
 
 @layer base {
@@ -180,134 +474,107 @@
 	}
 }
 
-@layer components {
-}
-
-/* Force stable scrollbar gutter to prevent layout shifts */
 @layer utilities {
+	/* GET */
 	.http-get {
-		color: #22c55e;
+		@apply text-get;
 	}
-	.border-get {
-		border-color: #22c55e;
+	.http-get-bg {
+		background-color: color-mix(in srgb, var(--color-get) 12%, transparent);
 	}
+	.http-get-bg-hover:hover {
+		background-color: color-mix(in srgb, var(--color-get) 18%, transparent);
+	}
+	.http-get-bg-selected {
+		background-color: color-mix(in srgb, var(--color-get) 28%, transparent);
+	}
+
+	/* POST */
 	.http-post {
-		color: #3b82f6;
+		@apply text-post;
 	}
-	.border-post {
-		border-color: #3b82f6;
+	.http-post-bg {
+		background-color: color-mix(in srgb, var(--color-post) 12%, transparent);
 	}
+	.http-post-bg-hover:hover {
+		background-color: color-mix(in srgb, var(--color-post) 18%, transparent);
+	}
+	.http-post-bg-selected {
+		background-color: color-mix(in srgb, var(--color-post) 28%, transparent);
+	}
+
+	/* PUT */
 	.http-put {
-		color: #f97316;
+		@apply text-put;
 	}
-	.border-put {
-		border-color: #f97316;
+	.http-put-bg {
+		background-color: color-mix(in srgb, var(--color-put) 12%, transparent);
 	}
+	.http-put-bg-hover:hover {
+		background-color: color-mix(in srgb, var(--color-put) 18%, transparent);
+	}
+	.http-put-bg-selected {
+		background-color: color-mix(in srgb, var(--color-put) 28%, transparent);
+	}
+
+	/* PATCH */
 	.http-patch {
-		color: #8b5cf6;
+		@apply text-patch;
 	}
-	.border-patch {
-		border-color: #8b5cf6;
+	.http-patch-bg {
+		background-color: color-mix(in srgb, var(--color-patch) 12%, transparent);
 	}
+	.http-patch-bg-hover:hover {
+		background-color: color-mix(in srgb, var(--color-patch) 18%, transparent);
+	}
+	.http-patch-bg-selected {
+		background-color: color-mix(in srgb, var(--color-patch) 28%, transparent);
+	}
+
+	/* DELETE */
 	.http-delete {
-		color: #ef4444;
+		@apply text-delete;
 	}
-	.border-delete {
-		border-color: #ef4444;
+	.http-delete-bg {
+		background-color: color-mix(in srgb, var(--color-delete) 12%, transparent);
 	}
+	.http-delete-bg-hover:hover {
+		background-color: color-mix(in srgb, var(--color-delete) 18%, transparent);
+	}
+	.http-delete-bg-selected {
+		background-color: color-mix(in srgb, var(--color-delete) 28%, transparent);
+	}
+
+	/* HEAD */
 	.http-head {
-		color: #6b7280;
+		@apply text-head;
 	}
-	.border-head {
-		border-color: #6b7280;
+	.http-head-bg {
+		background-color: color-mix(in srgb, var(--color-head) 12%, transparent);
 	}
+	.http-head-bg-hover:hover {
+		background-color: color-mix(in srgb, var(--color-head) 18%, transparent);
+	}
+	.http-head-bg-selected {
+		background-color: color-mix(in srgb, var(--color-head) 28%, transparent);
+	}
+
+	/* OPTIONS */
 	.http-options {
-		color: #06b6d4;
+		@apply text-options;
 	}
-	.border-options {
-		border-color: #06b6d4;
+	.http-options-bg {
+		background-color: color-mix(in srgb, var(--color-options) 12%, transparent);
+	}
+	.http-options-bg-hover:hover {
+		background-color: color-mix(in srgb, var(--color-options) 18%, transparent);
+	}
+	.http-options-bg-selected {
+		background-color: color-mix(in srgb, var(--color-options) 28%, transparent);
+	}
+
+	[data-highlighted]:not([data-state='checked']) {
+		outline: 1px solid var(--vscode-focusBorder);
+		outline-offset: -1px;
 	}
 }
-
-/* .tiptap {
-	position: relative;
-}
-
-.tiptap .ProseMirror {
-	min-height: 80px;
-	outline: none;
-	padding: 0.5rem 0.75rem;
-	line-height: 1.5;
-	color: var(--vscode-editor-foreground);
-	background-color: var(--vscode-editor-background);
-	border: 1px solid var(--vscode-input-border);
-	border-radius: 0 0 0.375rem 0.375rem;
-	box-shadow: var(--vscode-widget-shadow);
-}
-
-
-.tiptap .ProseMirror:focus-visible {
-	border-color: var(--vscode-focusBorder);
-	outline: 1px solid var(--vscode-focusBorder);
-}
-
-
-.tiptap .ProseMirror p.is-editor-empty:first-child::before {
-	content: attr(data-placeholder);
-	float: left;
-	color: var(--vscode-input-placeholderForeground);
-	pointer-events: none;
-	height: 0;
-}
-
-
-.tiptap .ProseMirror p {
-	margin-bottom: 0.5rem;
-}
-
-.tiptap .ProseMirror ul,
-.tiptap .ProseMirror ol {
-	margin-left: 1.25rem;
-	margin-bottom: 0.5rem;
-	padding: 0;
-}
-
-.tiptap .ProseMirror ul li,
-.tiptap .ProseMirror ol li {
-	margin-bottom: 0.25rem;
-}
-
-
-.tiptap-toolbar {
-	border: 1px solid var(--vscode-input-border);
-	border-bottom: none;
-	border-radius: 0.375rem 0.375rem 0 0;
-	background-color: var(--vscode-editorGroupHeader-tabsBackground);
-	padding: 0.25rem;
-	display: flex;
-	gap: 0.25rem;
-}
-
-.tiptap-toolbar button {
-
-	color: var(--vscode-button-foreground);
-	background-color: var(--vscode-button-background);
-	border: 1px solid transparent;
-	padding: 0.25rem 0.5rem;
-	border-radius: 0.25rem;
-	cursor: pointer;
-}
-
-.tiptap-toolbar button:hover {
-	background-color: var(--vscode-button-hoverBackground);
-}
-
-.tiptap-toolbar button.is-active {
-	background-color: var(--vscode-button-secondaryBackground);
-	color: var(--vscode-button-secondaryForeground);
-}
-
-.tiptap-toolbar button:disabled {
-	opacity: 0.5;
-	cursor: not-allowed;
-} */

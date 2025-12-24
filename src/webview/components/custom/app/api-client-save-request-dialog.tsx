@@ -87,6 +87,7 @@ export const ApiClientSaveRequestDialog: React.FC<SaveRequestDialogProps> = ({ i
 			collectionId: selectedCollectionId,
 			requestId: request.id,
 			request: {
+				collectionId: selectedCollectionId,
 				name: requestName,
 				description: description,
 				method: request.method,
@@ -135,17 +136,17 @@ export const ApiClientSaveRequestDialog: React.FC<SaveRequestDialogProps> = ({ i
 
 	return (
 		<Dialog open={isOpen} onOpenChange={onClose}>
-			<DialogContent className='w-[80vw]! max-w-[80vw]! min-h-0! flex flex-col'>
+			<DialogContent className='flex flex-col'>
 				<DialogHeader>
 					<DialogTitle>Save Request</DialogTitle>
 					<DialogDescription>Save the current request to a collection to reuse it later.</DialogDescription>
 				</DialogHeader>
 				<div className='flex flex-col gap-y-4 py-2 h-full'>
 					<div className='flex flex-col gap-y-4 h-full'>
-						<ApiClientFieldRow label='Request Name' htmlFor='request-name'>
+						<ApiClientFieldRow label='Request Name' htmlFor='request-name' className='flex-col items-start' colMode={true}>
 							<ApiClientInput id='request-name' value={requestName} onChange={e => setRequestName(e.target.value)} placeholder='e.g., Get User Details' />
 						</ApiClientFieldRow>
-						<ApiClientFieldRow showLabel={false}>
+						{/* <ApiClientFieldRow showLabel={false}>
 							<ApiClientButton variant='link' onClick={renderDescription} className='p-0'>
 								{showDescription ? 'Remove' : 'Add'} Description
 							</ApiClientButton>
@@ -156,34 +157,33 @@ export const ApiClientSaveRequestDialog: React.FC<SaveRequestDialogProps> = ({ i
 									<MarkdownEditor value={description} onChange={setDescription} placeholder='A short description of what this request does.' />
 								</div>
 							</ApiClientFieldRow>
-						</div>
+						</div> */}
 					</div>
 					<div className='space-y-4'>
-						<ApiClientFieldRow label='Save to Collection' htmlFor='collection-select'>
+						<ApiClientFieldRow label='Save to Collection' htmlFor='collection-select' className='flex-col items-start' colMode={true}>
 							<ApiClientSelect
 								placeholder='Select a collection'
 								options={collections.map(c => ({ label: c.name, value: c.id }))}
 								onValueChange={value => setSelectedCollectionId(value)}
-								classNameTrigger={`w-full bg-muted-foreground/10 border rounded-md`}
+								classNameTrigger={`w-full rounded-[1px]`}
 								classNameContent={`w-full max-h-50 overflow-y-auto`}
 							/>
 						</ApiClientFieldRow>
 						{/* {selectedCollection && ( */}
-						<div className='space-y-2 border border-input rounded-md'>
+						<div className='space-y-2 border border-input rounded-[1px]'>
 							<div className='border-none relative w-full'>
 								<ListFilter className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
 								<ApiClientInput
 									placeholder='Search for collection or folder'
 									value={filterText}
 									onChange={e => setFilterText(e.target.value)}
-									className='border-0 border-b border-b-input pl-10 bg-muted-foreground/10'
+									className='pl-10'
 								/>
 							</div>
-							<ScrollArea className='min-h-3/4 h-52 border-none rounded-md border'>
+							<ScrollArea className='min-h-3/4 h-52 border-none rounded-[1px] border'>
 								<div className='p-4 border-none'>
 									{isCreatingCollection ? (
-										<div className='space-y-2 flex'>
-											<p className='text-sm text-muted-foreground'>Create a new collection to save this request.</p>
+										<div className='space-y-2 flex gap-2'>
 											<ApiClientInput
 												placeholder='New collection name...'
 												value={newCollectionName}
@@ -191,12 +191,8 @@ export const ApiClientSaveRequestDialog: React.FC<SaveRequestDialogProps> = ({ i
 												autoFocus
 											/>
 											<div className='flex justify-end gap-2'>
-												<ApiClientButton variant='ghost' size='sm' onClick={() => setIsCreatingCollection(false)}>
-													Cancel
-												</ApiClientButton>
-												<ApiClientButton size='sm' onClick={handleCreateCollection} disabled={!newCollectionName.trim()}>
-													Create
-												</ApiClientButton>
+												<ApiClientButton size='sm' onClick={() => setIsCreatingCollection(false)} content='Cancel' />
+												<ApiClientButton size='sm' onClick={handleCreateCollection} disabled={!newCollectionName.trim()} content='Create' />
 											</div>
 										</div>
 									) : null}
@@ -210,9 +206,9 @@ export const ApiClientSaveRequestDialog: React.FC<SaveRequestDialogProps> = ({ i
 				<DialogFooter className='w-full! justify-between! sm:justify-between!'>
 					<div className='flex justify-between items-center w-full'>
 						<div className='flex flex-1'>{renderCreateCollection()}</div>
-						<div className='flex justify-between items-center shrink'>
-							<ApiClientButton variant='ghost' onClick={onClose} content='Cancel' />
-							<ApiClientButton onClick={handleSave} disabled={!requestName || !selectedCollectionId} content='Save' />
+						<div className='flex justify-between gap-2 items-center shrink'>
+							<ApiClientButton size='sm' onClick={onClose} content='Cancel' />
+							<ApiClientButton size='sm' onClick={handleSave} disabled={!requestName || !selectedCollectionId} content='Save' />
 						</div>
 					</div>
 				</DialogFooter>
