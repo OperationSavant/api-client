@@ -10,18 +10,21 @@ interface ApiClientFieldRowProps {
 	optionalText?: string;
 	className?: string;
 	children: React.ReactNode;
+	colMode?: boolean;
 }
 
-const ApiClientFieldRow = ({ label, htmlFor, optional, showLabel = true, optionalText, className, children }: ApiClientFieldRowProps) => {
+const ApiClientFieldRow = ({ label, htmlFor, optional, showLabel = true, optionalText, className, children, colMode = false }: ApiClientFieldRowProps) => {
 	return (
 		<div className={cn(`flex flex-row items-center gap-4`, className)}>
 			{showLabel && (
-				<div className={`flex ${optional ? 'flex-col' : 'flex-wrap'} w-1/5`}>
-					<Label htmlFor={htmlFor}>{label}</Label>
+				<div className={`flex ${optional ? 'flex-col' : 'flex-wrap'} ${colMode ? 'w-full' : 'w-1/5'}`}>
+					<Label htmlFor={htmlFor} className={className}>
+						{label}
+					</Label>
 					{optional && <span className='text-muted-foreground text-xs italic'>{optionalText}</span>}
 				</div>
 			)}
-			<div className={cn('flex w-4/5 relative', className)}>{children}</div>
+			<div className={cn('flex relative', className, colMode ? 'w-full' : 'w-4/5')}>{children}</div>
 		</div>
 	);
 };

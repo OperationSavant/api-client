@@ -26,12 +26,14 @@ import {
 	DropdownMenuGroup,
 	DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Input } from '../ui/input';
 import { FolderNode, TreeNode } from '@/shared/types/tree-node';
 import ApiClientButton from './api-client-button';
 import { Tooltip, TooltipTrigger, TooltipContent } from '../ui/tooltip';
+import { useContainerBreakpoint } from '@/hooks/use-container-breakpoint';
+import { ApiClientInput } from './api-client-input';
+import { Badge } from '../ui/badge';
+import { HttpVerb } from '@/shared/types';
 
 /* ------------------------------------------------------
    TYPES
@@ -39,6 +41,7 @@ import { Tooltip, TooltipTrigger, TooltipContent } from '../ui/tooltip';
 
 export interface TreeViewProps {
 	data: TreeNode[];
+	onCreateCollection: () => void;
 	className?: string;
 	onSelect?: (node: TreeNode) => void;
 	onChange?: (data: TreeNode[]) => void;
@@ -162,6 +165,7 @@ function highlightText(text: string, query: string): React.ReactNode {
 
 export const TreeView: React.FC<TreeViewProps> = ({
 	data,
+	onCreateCollection,
 	className,
 	onSelect,
 	onChange,
@@ -185,6 +189,9 @@ export const TreeView: React.FC<TreeViewProps> = ({
 	const autoExpandTimeouts = React.useRef<Map<string, number>>(new Map());
 	const containerRef = React.useRef<HTMLDivElement | null>(null);
 	const nodeRefs = React.useRef<Map<string, HTMLElement>>(new Map());
+
+	const { isCompact, ref } = useContainerBreakpoint();
+	const size = isCompact ? 'icon' : 'sm';
 
 	React.useEffect(() => {
 		return () => {
@@ -377,10 +384,10 @@ export const TreeView: React.FC<TreeViewProps> = ({
 			{/* Search Input */}
 			{searchable && (
 				<div className='px-2 py-2'>
-					<div className='flex justify-between items-center mb-2'>
+					<div className='flex justify-between items-center mb-2 gap-2'>
 						<Tooltip>
 							<TooltipTrigger>
-								<ApiClientButton variant='ghost' size='icon' className='mr-2 p-0 border'>
+								<ApiClientButton size='icon' onClick={onCreateCollection}>
 									<UserRoundPlus className='h-4 w-4' />
 								</ApiClientButton>
 								<TooltipContent>Add New Collection</TooltipContent>
@@ -388,30 +395,24 @@ export const TreeView: React.FC<TreeViewProps> = ({
 						</Tooltip>
 						<div className='relative w-full'>
 							<Search className='absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground' />
-							<Input
-								type='text'
-								placeholder='Search...'
-								value={searchQuery}
-								onChange={e => setSearchQuery(e.target.value)}
-								className='pl-8 pr-8 text-sm border'
-							/>
+							<ApiClientInput placeholder='Search...' value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className='pl-8 pr-8' />
 							{searchQuery && (
-								<Button variant='ghost' size='icon' className='absolute right-0 top-1/2 -translate-y-1/2' onClick={handleClearSearch}>
+								<ApiClientButton variant='ghost' size='icon' className='absolute right-0 top-1/2 -translate-y-1/2' onClick={handleClearSearch}>
 									<X className='h-3 w-3' />
-								</Button>
+								</ApiClientButton>
 							)}
 						</div>
 					</div>
 					{/* Expand/Collapse All Buttons */}
-					<div className='flex gap-2'>
-						<Button variant='outline' size='sm' className='flex-1 h-7 text-xs' onClick={handleExpandAll}>
+					<div className='flex gap-2' ref={ref}>
+						<ApiClientButton size={size} className='flex-1 text-xs' onClick={handleExpandAll}>
 							<ChevronDown className='h-3 w-3 mr-1' />
-							Expand All
-						</Button>
-						<Button variant='outline' size='sm' className='flex-1 h-7 text-xs' onClick={handleCollapseAll}>
+							{isCompact ? '' : 'Expand All'}
+						</ApiClientButton>
+						<ApiClientButton size={size} className='flex-1 text-xs' onClick={handleCollapseAll}>
 							<ChevronRight className='h-3 w-3 mr-1' />
-							Collapse All
-						</Button>
+							{isCompact ? '' : 'Collapse All'}
+						</ApiClientButton>
 					</div>
 
 					{/* Match Count */}
@@ -651,6 +652,10 @@ const TreeNodeItem: React.FC<TreeNodeItemProps> = ({
 		autoExpandTimeouts.current?.clear();
 	};
 
+	const GetBadge = (method: HttpVerb) => {
+		return <Badge className={cn(`text-[8px]`, `http-${method} http-${method}-bg`, `border-${method}`, 'rounded-[1px]')}>{method.toUpperCase()}</Badge>;
+	};
+
 	const isDragging = draggingId === node.id;
 	const isDropTarget = dropIndicator?.targetId === node.id;
 
@@ -682,7 +687,7 @@ const TreeNodeItem: React.FC<TreeNodeItemProps> = ({
 					onClick={handleRowClick}
 					className={cn(
 						// Base styles
-						'group/item flex items-center justify-between h-9 py-1.5 pr-2',
+						'group/item flex items-center h-9 py-1.5 pr-2',
 						'cursor-pointer rounded-sm select-none transition-colors',
 						// Hover state
 						'hover:bg-primary/20',
@@ -703,24 +708,18 @@ const TreeNodeItem: React.FC<TreeNodeItemProps> = ({
 						paddingLeft: `calc(0.5rem + ${level} * 1rem)`,
 					}}>
 					{/* Content wrapper */}
-					<div className='flex items-center gap-1 flex-1 min-w-0'>
-						{/* Chevron */}
+					<div className='flex items-center gap-2 flex-1 min-w-0'>
+						{/* 1. Spacer / Chevron */}
 						{node.type === 'folder' ? (
-							<Button
-								variant='ghost'
-								size='icon'
-								className='h-5 w-5 p-0 hover:bg-transparent shrink-0'
-								onClick={handleChevronClick}
-								tabIndex={-1}
-								aria-label={isExpanded ? 'Collapse' : 'Expand'}>
+							<ApiClientButton variant='ghost' size='icon' className='h-5 w-5 p-0 hover:bg-transparent shrink-0' onClick={handleChevronClick} tabIndex={-1}>
 								{isExpanded ? <ChevronDown className='h-4 w-4' /> : <ChevronRight className='h-4 w-4' />}
-							</Button>
+							</ApiClientButton>
 						) : (
 							<span className='h-5 w-5 shrink-0' />
 						)}
 
-						{/* Icon */}
-						<span className='h-5 w-5 flex items-center justify-center shrink-0'>
+						{/* 2. Badge / Icon — THIS MUST GROW */}
+						<span className='flex items-center gap-1 min-w-0 w-fit'>
 							{node.icon ??
 								(node.type === 'folder' ? (
 									isExpanded ? (
@@ -729,17 +728,17 @@ const TreeNodeItem: React.FC<TreeNodeItemProps> = ({
 										<Folder className='h-4 w-4 text-(--vscode-symbolIcon-folderForeground)' />
 									)
 								) : (
-									<File className='h-4 w-4' />
+									GetBadge(node?.metadata?.request?.method?.toLowerCase())
 								))}
 						</span>
 
-						{/* Label */}
-						<span className='truncate'>{highlightText(node.label, searchQuery)}</span>
+						{/* 3. Label */}
+						<span className='truncate min-w-0 text-xs'>{highlightText(node.label, searchQuery)}</span>
 					</div>
 
 					{/* More Options Menu */}
 					<DropdownMenuTrigger asChild>
-						<Button
+						<ApiClientButton
 							variant='ghost'
 							size='icon'
 							className='h-5 w-5 p-0 rounded-sm shrink-0 opacity-0 group-hover/item:opacity-100 hover:bg-muted transition-opacity'
@@ -747,7 +746,7 @@ const TreeNodeItem: React.FC<TreeNodeItemProps> = ({
 							tabIndex={-1}
 							aria-label='More options'>
 							<MoreHorizontal className='h-4 w-4' />
-						</Button>
+						</ApiClientButton>
 					</DropdownMenuTrigger>
 				</div>
 

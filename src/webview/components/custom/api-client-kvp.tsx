@@ -1,12 +1,13 @@
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { Trash2 } from 'lucide-react';
 import { KeyValueEntry } from '@/shared/types/request';
 import { Autocomplete } from './api-client-autocomplete';
 import { COMMON_HEADER_NAMES } from '@/shared/constants/headers';
 import { HEADER_DEFAULT_VALUES } from '@/shared/constants/header-default-values';
+import { ApiClientInput } from './api-client-input';
+import ApiClientButton from './api-client-button';
+import { cn } from '@/shared/lib/utils';
 
 interface ApiClientTableProps<T extends KeyValueEntry> {
 	rows: T[];
@@ -17,14 +18,34 @@ interface ApiClientTableProps<T extends KeyValueEntry> {
 	isReadOnly?: boolean;
 }
 
+// VS Code compliant checkbox styles
+const vscodeCheckboxStyles = [
+	'rounded-[2px]',
+	'shadow-none',
+	'ring-0',
+	'ring-offset-0',
+	'bg-checkbox',
+	'border',
+	'border-checkbox-border',
+	'data-[state=checked]:bg-checkbox',
+	'data-[state=checked]:text-checkbox-foreground',
+	'data-[state=checked]:border-checkbox-border',
+	'focus-visible:ring-0',
+	'focus-visible:ring-offset-0',
+	'focus-visible:outline',
+	'focus-visible:outline-1',
+	'focus-visible:outline-offset-1',
+	'focus-visible:outline-focus-border',
+].join(' ');
+
 export const ApiClientTable = ({ rows, handleChange, handleCheck, handleDelete, isHeaderTable, isReadOnly }: ApiClientTableProps<KeyValueEntry>) => {
 	return (
 		<div className='flex'>
-			<Table className='text-xs border border-muted-foreground table-fixed'>
+			<Table className='text-xs border border-panel-border table-fixed'>
 				<TableHeader>
-					<TableRow className='border-b border-muted-foreground sticky top-0'>
-						{!isReadOnly && <TableHead className='border-r border-muted-foreground w-8 text-center p-0 align-middle' />}
-						<TableHead className='border-r border-muted-foreground w-1/2'>Key</TableHead>
+					<TableRow className='border-b border-panel-border sticky top-0'>
+						{!isReadOnly && <TableHead className='border-r border-panel-border w-8 text-center p-0 align-middle' />}
+						<TableHead className='border-r border-panel-border w-1/2'>Key</TableHead>
 						<TableHead className='w-1/2'>Value</TableHead>
 					</TableRow>
 				</TableHeader>
@@ -32,11 +53,12 @@ export const ApiClientTable = ({ rows, handleChange, handleCheck, handleDelete, 
 					{rows.map((param, idx) => {
 						const isEmpty = param.key === '' && param.value === '';
 						return (
-							<TableRow key={idx} className='group border-b border-muted-foreground justify'>
+							<TableRow key={idx} className='group border-b border-panel-border justify'>
 								{!isReadOnly && (
-									<TableCell className='border-r border-muted-foreground w-8 text-center p-0 align-middle'>
+									<TableCell className='border-r border-panel-border w-8 text-center p-0 align-middle'>
 										<div className='flex items-center justify-center h-full'>
 											<Checkbox
+												className={vscodeCheckboxStyles}
 												checked={!!param.checked}
 												disabled={isEmpty}
 												onCheckedChange={checked => {
@@ -46,7 +68,7 @@ export const ApiClientTable = ({ rows, handleChange, handleCheck, handleDelete, 
 										</div>
 									</TableCell>
 								)}
-								<TableCell className='border-r border-muted-foreground p-0'>
+								<TableCell className='border-r border-panel-border p-0'>
 									{isHeaderTable ? (
 										<Autocomplete
 											options={COMMON_HEADER_NAMES}
@@ -55,8 +77,7 @@ export const ApiClientTable = ({ rows, handleChange, handleCheck, handleDelete, 
 											placeholder=''
 										/>
 									) : !isReadOnly ? (
-										<Input
-											className='w-full h-10 font-medium border-none focus:ring-0 focus:border-none rounded-none bg-transparent px-2 text-xs!'
+										<ApiClientInput
 											placeholder='Key'
 											value={param.key}
 											onChange={e => (handleChange ? handleChange(idx, 'key', e.target.value) : undefined)}
@@ -77,8 +98,7 @@ export const ApiClientTable = ({ rows, handleChange, handleCheck, handleDelete, 
 											placeholder=''
 										/>
 									) : !isReadOnly ? (
-										<Input
-											className='w-full h-10 font-medium border-none focus:ring-0 focus:border-none rounded-none bg-transparent px-2 text-xs!'
+										<ApiClientInput
 											placeholder='Value'
 											value={param.value}
 											onChange={e => (handleChange ? handleChange(idx, 'value', e.target.value) : undefined)}
@@ -90,14 +110,14 @@ export const ApiClientTable = ({ rows, handleChange, handleCheck, handleDelete, 
 										</div>
 									)}
 									{!isEmpty && param.value && !isReadOnly && (
-										<Button
+										<ApiClientButton
 											variant='ghost'
 											size='icon'
-											className='absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-muted-foreground/20 hover:text-destructive text-xs'
+											className='absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity hover:text-destructive text-xs'
 											onClick={() => (handleDelete ? handleDelete(idx) : undefined)}
 											tabIndex={-1}>
 											<Trash2 className='w-4 h-4' />
-										</Button>
+										</ApiClientButton>
 									)}
 								</TableCell>
 							</TableRow>

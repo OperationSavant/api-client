@@ -102,7 +102,7 @@ export class CollectionHandler {
 	async handleCreateFolder(message: any): Promise<void> {
 		try {
 			// Domain operation (synchronous)
-			collectionService.createFolder(message.collectionId, message.name, message.parentId, message.description);
+			collectionService.createFolder(message?.payload?.collectionId, message?.payload?.name, message?.payload?.parentId, message?.payload?.description);
 
 			// Commit to database (async)
 			await unitOfWork.commit();

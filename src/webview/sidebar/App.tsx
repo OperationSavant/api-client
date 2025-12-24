@@ -13,12 +13,12 @@ import { createSidebarInitializeHandlers, createSidebarCollectionHandlers, creat
 import { SidebarTabContext, TabConfig } from '@/shared/types/tabs';
 import { CollectionTab } from '@/components/collections/collection-tab';
 import { FolderTree, Layers, History } from 'lucide-react';
-import HistoryList from '@/components/history/history-list';
+import HistoryTab from '@/components/history/history-tab';
 
 export const SIDEBAR_TABS_CONFIG: TabConfig[] = [
 	{ id: 'collections', label: 'Collections', component: CollectionTab, icon: FolderTree },
 	{ id: 'environments', label: 'Environments', icon: Layers },
-	{ id: 'history', label: 'History', component: HistoryList, icon: History },
+	{ id: 'history', label: 'History', component: HistoryTab, icon: History },
 ];
 
 const App = () => {
@@ -74,7 +74,7 @@ const App = () => {
 	};
 
 	const handleOpenRequest = useCallback((requestId?: string) => {
-		vscode.postMessage({
+		sendToExtension({
 			command: 'createNewRequest',
 			commandId: 'apiClient.openRequest',
 			args: requestId ? [requestId] : [],
@@ -87,8 +87,8 @@ const App = () => {
 	}
 
 	return (
-		<div className='flex flex-col h-screen bg-sidebar text-sidebar-foreground gap-4 py-2 overflow-y-hidden'>
-			<div className='block w-full px-2'>
+		<div className='flex flex-col h-screen w-full bg-sidebar text-sidebar-foreground gap-4 py-2 overflow-y-hidden'>
+			<div className='flex w-full px-2'>
 				<ApiClientSelect
 					classNameTrigger={`w-full bg-muted-foreground/10 border rounded-md`}
 					classNameContent={`w-full`}
@@ -99,8 +99,8 @@ const App = () => {
 					]}
 				/>
 			</div>
-			<div className='block w-full px-2'>
-				<ApiClientButtonGroup size={'lg'} className='w-full' buttonText='New HTTP Request' onClick={() => handleOpenRequest()} />
+			<div className='flex w-full px-2'>
+				<ApiClientButtonGroup size={'lg'} className='w-full' label='New HTTP Request' onClick={() => handleOpenRequest()} />
 			</div>
 			<Separator orientation='horizontal' />
 			<div className='grow flex flex-col w-full px-2 justify-between min-h-0'>
@@ -108,9 +108,9 @@ const App = () => {
 					value={currentTab}
 					context={tabContext}
 					tabs={SIDEBAR_TABS_CONFIG}
-					className='flex-1 flex flex-col min-h-0'
-					listClassName='w-full! justify-between'
-					contentClassName='flex-1 min-h-0'
+					className='flex-1 flex flex-col min-h-0 w-full'
+					listClassName='w-full! justify-between w-full'
+					contentClassName='flex-1 min-h-0 w-full'
 					onChange={tab => setCurrentTab(tab)}
 				/>
 			</div>

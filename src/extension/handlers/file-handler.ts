@@ -1,6 +1,6 @@
 import { WebviewPanel, window, workspace, OpenDialogOptions, Uri, ViewColumn } from 'vscode';
-import * as path from 'path';
 import { contentType as mimeContentType } from 'mime-types';
+import { broadcasterHub } from '../orchestrators/broadcaster-hub';
 
 export class FileHandler {
 	constructor() {}
@@ -23,11 +23,7 @@ export class FileHandler {
 		if (fileUris && fileUris.length > 0) {
 			const paths = fileUris.map(uri => uri.fsPath);
 
-			panel.webview.postMessage({
-				command: 'formDataFileResponse',
-				index,
-				paths,
-			});
+			broadcasterHub.broadcast({ command: 'formDataFileResponse', index, paths });
 		}
 	}
 
@@ -49,12 +45,7 @@ export class FileHandler {
 			const size = (await workspace.fs.stat(fileUris[0])).size;
 			const contentType = mimeContentType(path) || 'application/octet-stream';
 
-			panel.webview.postMessage({
-				command: 'binaryFileResponse',
-				path,
-				size,
-				contentType,
-			});
+			broadcasterHub.broadcast({ command: 'binaryFileResponse', path, size, contentType });
 		}
 	}
 

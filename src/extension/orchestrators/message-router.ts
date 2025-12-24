@@ -10,7 +10,6 @@ import { HistoryHandler } from '../handlers/history-handler';
 import { WebviewMessage, WebviewViewMessage } from '@/shared/types/webview-messages';
 import { SidebarHandler } from '../handlers/sidebar-handler';
 
-/* eslint-disable no-dupe-class-members */
 export class MessageRouter {
 	private requestHandler: RequestHandler;
 	private initializeHandler: InitializeHandler;
@@ -105,10 +104,16 @@ export class MessageRouter {
 				case 'openRequest':
 				case 'sidebarReady':
 				case 'refreshSidebar':
+				case 'openCollectionView':
 					await this.sidebarHandler.handle(message, target);
 					break;
+				case 'createCollection':
+					return this.collectionHandler.handleCreateCollection(message);
+				case 'createFolder':
+					return this.collectionHandler.handleCreateFolder(message);
+				case 'saveRequest':
+					return this.collectionHandler.handleSaveRequest(message);
 			}
 		}
 	}
 }
-/* eslint-disable no-dupe-class-members */

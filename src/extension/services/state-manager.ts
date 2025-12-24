@@ -6,27 +6,24 @@ import { SQLiteCollectionPersistence } from './collection-persistence';
 import { SQLiteHistoryPersistence } from './history-persistence';
 import { getDatabase } from './db-service';
 import { DatabaseTransaction } from './db-helpers';
+import { ApplicationServices } from './application-services';
 
 export class StateManager {
-	static async initialize(): Promise<void> {
+	static async initialize(services: ApplicationServices): Promise<void> {
 		const db = getDatabase();
-
-		// Create persistence adapters
-		const collectionPersistence = new SQLiteCollectionPersistence(db);
-		const historyPersistence = new SQLiteHistoryPersistence(db);
 
 		// Create database transaction manager
 		const transaction = new DatabaseTransaction(db);
 
 		// ✅ Connect persistence adapters to domain services (legacy pattern)
-		collectionService.setPersistence(collectionPersistence);
-		historyService.setPersistence(historyPersistence);
+		collectionService.setPersistence(services.collectionPersistence);
+		historyService.setPersistence(services.historyPersistence);
 
 		// ✅ Configure Unit of Work with persistence adapters and transaction
 		unitOfWork.setPersistence(
 			{
-				collection: collectionPersistence,
-				history: historyPersistence,
+				collection: services.collectionPersistence,
+				history: services.historyPersistence,
 			},
 			transaction
 		);

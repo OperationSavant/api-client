@@ -1,6 +1,7 @@
-import { collectionService } from '@/domain/services/collectionService';
 import { WebviewViewMessage } from '@/shared/types/webview-messages';
 import { commands, WebviewView } from 'vscode';
+import { broadcasterHub } from '../orchestrators/broadcaster-hub';
+import { Collection } from '@/shared/types/collection';
 
 export class SidebarHandler {
 	constructor() {}
@@ -10,7 +11,6 @@ export class SidebarHandler {
 			case 'createNewRequest':
 				await commands.executeCommand(message.commandId, ...(message.args || []));
 				break;
-
 			case 'sidebarReady':
 			case 'refreshSidebar':
 				await this.sendInitialData(webviewView);
@@ -18,11 +18,15 @@ export class SidebarHandler {
 			case 'openRequest':
 				await commands.executeCommand(message.commandId, ...(message.args || []));
 				break;
+			case 'openCollectionView':
+				await commands.executeCommand(message.commandId, message.args as Collection);
+				break;
 		}
 	}
 
 	private async sendInitialData(webviewView: WebviewView): Promise<void> {
 		try {
+			const collectionService = await import('@/domain/services/collectionService').then(m => m.collectionService);
 			await collectionService.loadFromPersistence();
 			const collections = collectionService.getAllCollections();
 
@@ -31,7 +35,7 @@ export class SidebarHandler {
 			await historyService.loadFromPersistence();
 			const history = historyService.getAllHistory();
 
-			webviewView.webview.postMessage({
+			broadcasterHub.broadcast({
 				command: 'initializeDataFromExtension',
 				collections,
 				environments: [],
@@ -40,7 +44,7 @@ export class SidebarHandler {
 		} catch (error) {
 			console.error('Error sending initial data to sidebar:', error);
 
-			webviewView.webview.postMessage({
+			broadcasterHub.broadcast({
 				command: 'initializeDataFromExtension',
 				collections: [],
 				environments: [],

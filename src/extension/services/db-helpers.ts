@@ -1,4 +1,4 @@
-import { Database } from '@vscode/sqlite3';
+import { Database, Statement } from '@vscode/sqlite3';
 
 /**
  * Custom error types for database persistence operations
@@ -214,7 +214,7 @@ export function runQuery(db: Database, sql: string, params?: any[], operation?: 
  * Provides type-safe parameter binding
  */
 export class PreparedStatement {
-	private stmt: any;
+	private stmt: Statement;
 
 	constructor(db: Database, sql: string) {
 		this.stmt = db.prepare(sql);
@@ -225,30 +225,71 @@ export class PreparedStatement {
 	 */
 	async run(params: any[], operation?: string): Promise<void> {
 		return new Promise((resolve, reject) => {
-			this.stmt.run(params, (err: Error | null) => {
-				if (err) {
-					const errorMessage = err.message || '';
-
-					if (errorMessage.includes('UNIQUE constraint')) {
-						reject(new DuplicateKeyError(`Duplicate key constraint violation`, operation || 'PreparedStatement.run', err));
-					} else if (errorMessage.includes('FOREIGN KEY constraint')) {
-						reject(new ForeignKeyViolationError(`Foreign key constraint violation`, operation || 'PreparedStatement.run', err));
-					} else {
-						reject(new PersistenceError(`Statement execution failed`, operation || 'PreparedStatement.run', err));
-					}
-				} else {
-					resolve();
+			// Cast to any to access event emitter methods (standard in node-sqlite3/vscode-sqlite3)
+			const stmtEmitter = this.stmt as any;
+			
+			// 1. Safe callback wrapper
+			const safeCallback = (err: Error | null) => {
+				// Remove error listener to clean up
+				if (typeof stmtEmitter.removeListener === 'function') {
+					stmtEmitter.removeListener('error', errorHandler);
 				}
-			});
+
+				try {
+					if (err) {
+						const errorMessage = err.message || '';
+
+						if (errorMessage.includes('UNIQUE constraint')) {
+							reject(new DuplicateKeyError(`Duplicate key constraint violation`, operation || 'PreparedStatement.run', err));
+						} else if (errorMessage.includes('FOREIGN KEY constraint')) {
+							reject(new ForeignKeyViolationError(`Foreign key constraint violation`, operation || 'PreparedStatement.run', err));
+						} else {
+							reject(new PersistenceError(`Statement execution failed`, operation || 'PreparedStatement.run', err));
+						}
+					} else {
+						resolve();
+					}
+				} catch (callbackError) {
+					reject(new PersistenceError(`Synchronous error in statement callback`, operation || 'PreparedStatement.run', callbackError as Error));
+				}
+			};
+
+			// 2. Error event handler for emitted errors (bypassing callback)
+			const errorHandler = (err: Error) => {
+				if (typeof stmtEmitter.removeListener === 'function') {
+					stmtEmitter.removeListener('error', errorHandler);
+				}
+				reject(new PersistenceError(`Uncaught statement error event`, operation || 'PreparedStatement.run', err));
+			};
+
+			// 3. Attach listener if supported
+			if (typeof stmtEmitter.on === 'function') {
+				stmtEmitter.on('error', errorHandler);
+			}
+
+			try {
+				this.stmt.run(params, safeCallback);
+			} catch (syncError) {
+				if (typeof stmtEmitter.removeListener === 'function') {
+					stmtEmitter.removeListener('error', errorHandler);
+				}
+				reject(new PersistenceError(`Statement execution failed (sync error)`, operation || 'PreparedStatement.run', syncError as Error));
+			}
 		});
 	}
 
 	/**
 	 * Finalize the prepared statement (cleanup)
 	 */
+	// db-helpers.ts - Make finalize safe
 	finalize(): void {
-		if (this.stmt && typeof this.stmt.finalize === 'function') {
-			this.stmt.finalize();
+		try {
+			if (this.stmt && typeof this.stmt.finalize === 'function') {
+				this.stmt.finalize();
+			}
+		} catch (error) {
+			// Finalize errors should not crash the app
+			console.error('PreparedStatement finalize failed:', error);
 		}
 	}
 }

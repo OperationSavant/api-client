@@ -33,6 +33,15 @@ export interface RequestExecutionResult {
 	error?: string;
 }
 
+type CustomResponse = {
+	body: string;
+	headers: Record<string, string>;
+	status: number;
+	statusText: string;
+	responseTime: number;
+	size: number;
+};
+
 export class RequestExecutorService {
 	private httpClient: AxiosInstance;
 	private readonly SIZE_THRESHOLD = 5 * 1024 * 1024; // TODO: Add configurable size threshold (5MB default)
@@ -275,38 +284,24 @@ export class RequestExecutorService {
 		const { data, headers, status, statusText } = response;
 
 		const contentType = mimeContentType(headers['content-type']) || '';
-		const bufferBody = data.toString('utf-8');
+		const size = data.length;
+		let body: string = '';
 
 		try {
-			if (contentType.includes('application/json')) {
-				const body = data.toString('utf-8');
-				return this.handleResponse(
-					body,
-					headers as Record<string, string>,
-					status,
-					statusText,
-					responseTime,
-					this.getContentLength(headers as Record<string, string>, body)
-				);
-			} else if (
-				contentType.includes('text/') ||
-				contentType.includes('application/xml') ||
-				contentType.includes('application/javascript') // Kept it here for completeness
-			) {
-				const body = data.toString('utf-8');
-				return this.handleResponse(
-					body,
-					headers as Record<string, string>,
-					status,
-					statusText,
-					responseTime,
-					this.getContentLength(headers as Record<string, string>, body)
-				);
+			if (contentType.includes('json') || contentType.includes('text/') || contentType.includes('xml') || contentType.includes('javascript')) {
+				body = data.toString('utf-8');
 			} else {
-				const size = data.length;
-				const dataURI = `data:${contentType};base64,${data.toString('base64')}`;
-				return this.handleResponse(dataURI, headers as Record<string, string>, status, statusText, responseTime, size);
+				body = `data:${contentType};base64,${data.toString('base64')}`;
 			}
+			const customResponse: CustomResponse = {
+				body,
+				headers: headers as Record<string, string>,
+				status,
+				statusText,
+				responseTime,
+				size,
+			};
+			return this.handleResponse(customResponse);
 		} catch (error) {
 			throw new Error('Failed to process response content');
 		}
@@ -315,14 +310,9 @@ export class RequestExecutorService {
 	/**
 	 * Handle normal response bodies (parse content)
 	 */
-	private handleResponse(
-		body: string,
-		headers: Record<string, string>,
-		status: number,
-		statusText: string,
-		responseTime: number,
-		size: number
-	): RequestExecutionResult {
+	private handleResponse(customResponse: CustomResponse): RequestExecutionResult {
+		const { body, headers, status, statusText, responseTime, size } = customResponse;
+		const isError = !this.isSuccessStatus(status);
 		return {
 			status,
 			statusText,
@@ -332,8 +322,8 @@ export class RequestExecutorService {
 			size,
 			isLargeBody: false,
 			bodyFilePath: undefined,
-			isError: false,
-			error: undefined,
+			isError,
+			error: isError ? statusText : undefined,
 		};
 	}
 

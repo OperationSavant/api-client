@@ -1,9 +1,10 @@
 type TreeNodeBase = {
+	collectionId: string;
 	id: string;
 	label: string;
 	icon?: React.ReactNode;
 	disabled?: boolean;
-	metadata?: Record<string, unknown>;
+	metadata?: Record<string, any>;
 };
 
 export type FolderNode = TreeNodeBase & {

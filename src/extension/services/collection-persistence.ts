@@ -175,6 +175,7 @@ export class SQLiteCollectionPersistence implements ICollectionPersistence {
 		const folderMap = new Map<string, CollectionFolder>();
 		for (const row of foldersRows) {
 			folderMap.set(row.id, {
+				collectionId: row.collection_id,
 				id: row.id,
 				name: row.name,
 				description: row.description || undefined,
@@ -217,6 +218,7 @@ export class SQLiteCollectionPersistence implements ICollectionPersistence {
 
 		for (const row of requestsRows) {
 			const request: CollectionRequest = {
+				collectionId: row.collection_id,
 				id: row.id,
 				name: row.name,
 				description: row.description || undefined,

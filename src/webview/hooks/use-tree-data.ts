@@ -23,6 +23,7 @@ export function useTreeData(collections: Collection[]): TreeNode[] {
 			}
 
 			const node: FileNode = {
+				collectionId: req.collectionId,
 				id: req.id,
 				type: 'file',
 				label: req.name,
@@ -47,6 +48,7 @@ export function useTreeData(collections: Collection[]): TreeNode[] {
 			}
 
 			const node: FolderNode = {
+				collectionId: folder.collectionId,
 				id: folder.id,
 				type: 'folder',
 				label: folder.name,
@@ -66,6 +68,7 @@ export function useTreeData(collections: Collection[]): TreeNode[] {
 
 			// We typically don't cache collections here (but you can if you want).
 			const node: FolderNode = {
+				collectionId: col.id,
 				id: col.id,
 				type: 'folder',
 				label: col.name,

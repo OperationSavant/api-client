@@ -2,6 +2,7 @@ import { WebviewPanel, workspace, extensions } from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as jsonc from 'jsonc-parser';
+import { broadcasterHub } from '../orchestrators/broadcaster-hub';
 
 interface IVSCodeTheme {
 	$schema: 'vscode://schemas/color-theme';
@@ -36,7 +37,7 @@ export class ThemeService {
 			}
 
 			if (this.themeCache.has(themeName!)) {
-				panel.webview.postMessage({
+				broadcasterHub.broadcast({
 					command: 'themeData',
 					themeContent: this.themeCache.get(themeName!),
 				});
@@ -62,10 +63,10 @@ export class ThemeService {
 			const fileContent = fs.readFileSync(themePath, 'utf-8');
 			const themeContent = jsonc.parse(fileContent) as IVSCodeTheme;
 
-			this.themeCache.set(themeName!, themeContent);
-			panel.webview.postMessage({
+			this.themeCache.set(themeName!, { ...themeContent, type: themeInfo.uiTheme });
+			broadcasterHub.broadcast({
 				command: 'themeData',
-				themeContent,
+				themeContent: { ...themeContent, type: themeInfo.uiTheme },
 			});
 		} catch (e) {
 			console.error('ThemeService: Error reading theme file:', e);

@@ -18,6 +18,7 @@ import { useStateRestoration } from '@/hooks/useStateRestoration';
 import { LoadingFallback } from '@/components/custom/states/loading-fallback';
 import { RequestViewer } from '@/components/request/request-viewer';
 import { createThemeHandlers } from '@/handlers/theme-handlers';
+import { setIsExecuting } from '@/features/editor/editorUISlice';
 
 const App = () => {
 	const dispatch = useAppDispatch();
@@ -58,6 +59,10 @@ const App = () => {
 	}, [isRestored]);
 
 	useEffect(() => {
+		const handleError = () => {
+			dispatch(setIsExecuting(false));
+		};
+
 		messaging.registerHandler('initialize', initializeHandlers.handleInitialize);
 		messaging.registerHandler('apiResponse', responseHandlers.handleApiResponse);
 		messaging.registerHandler('addCollection', collectionHandlers.handleAddCollection);
@@ -68,6 +73,7 @@ const App = () => {
 		messaging.registerHandler('binaryFileResponse', fileHandlers.handleBinaryFileResponse);
 		messaging.registerHandler('themeData', themeHandlers.handleThemeData);
 		messaging.registerHandler('oauth2TokenResponse', oauth2Handlers.handleOAuth2TokenResponse);
+		messaging.registerHandler('error', handleError);
 
 		return () => {
 			messaging.unregisterHandler('initialize');
@@ -80,6 +86,7 @@ const App = () => {
 			messaging.unregisterHandler('binaryFileResponse');
 			messaging.unregisterHandler('themeData');
 			messaging.unregisterHandler('oauth2TokenResponse');
+			messaging.unregisterHandler('error');
 		};
 	}, [messaging, responseHandlers, collectionHandlers, requestHandlers, fileHandlers, themeHandlers, oauth2Handlers]);
 

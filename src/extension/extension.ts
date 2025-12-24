@@ -12,7 +12,7 @@ export async function activate(context: ExtensionContext) {
 	const messageRouter = new MessageRouter(appService);
 	const webviewOrchestrator = new WebviewOrchestrator({ context, messageRouter });
 	const _ = new ViewOrchestrator({ context, messageRouter });
-	await StateManager.initialize();
+	await StateManager.initialize(appService);
 
 	const commandRegistry = new CommandRegistry({
 		context,
