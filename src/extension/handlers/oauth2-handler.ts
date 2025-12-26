@@ -1,4 +1,5 @@
-import { WebviewPanel, window, Uri, env } from 'vscode';
+import type { WebviewPanel} from 'vscode';
+import { window, Uri, env } from 'vscode';
 import axios from 'axios';
 import * as crypto from 'crypto';
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import AuthSelector from '@/components/auth/AuthSelector';
-import { AuthConfig, OAuth2Auth } from '@/shared/types/auth';
+import type { AuthConfig, OAuth2Auth } from '@/shared/types/auth';
 import ApiClientHeader from '../custom/api-client-header';
 
 interface AuthTabProps {

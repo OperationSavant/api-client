@@ -2,14 +2,12 @@ import { RESPONSE_CONTENT_TYPE_OPTIONS } from '@/shared/constants/select-options
 import { Send } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { EmptyState } from '../custom/states/empty-state';
-import ResponseImageViewer from './response-image-viewer';
-import ResponsePDFViewer from './response-pdf-viewer';
-import ResponseStringViewer from './response-string-viewer';
 import { useSelector } from 'react-redux';
-import { RootState, useAppDispatch } from '@/store/main-store';
+import type { RootState } from '@/store/main-store';
+import { useAppDispatch } from '@/store/main-store';
 import { cn } from '@/shared/lib/utils';
 import ApiClientTabs from '../custom/api-client-tabs';
-import { TabConfig } from '@/shared/types/tabs';
+import type { TabConfig } from '@/shared/types/tabs';
 import ResponseSelectTab from './response-select-tab';
 import ResponsePreviewTab from './response-preview-tab';
 import { setActiveResponseBodyTab } from '@/features/editor/editorUISlice';

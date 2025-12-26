@@ -1,6 +1,6 @@
 import React from 'react';
 import { Label } from '@/components/ui/label';
-import { AuthConfig, AuthType, OAuth2Auth } from '@/shared/types/auth';
+import type { AuthConfig, AuthType, OAuth2Auth } from '@/shared/types/auth';
 import BasicAuthComponent from '@/components/auth/BasicAuth';
 import BearerAuthComponent from '@/components/auth/BearerAuth';
 import ApiKeyAuthComponent from '@/components/auth/ApiKeyAuth';

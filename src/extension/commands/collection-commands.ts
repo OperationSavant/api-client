@@ -1,8 +1,9 @@
-import { window, WebviewPanel } from 'vscode';
+import type { WebviewPanel } from 'vscode';
+import { window } from 'vscode';
 import { collectionService } from '@/domain/services/collectionService';
 import { unitOfWork } from '@/domain/services/unit-of-work';
 import { v4 as uuidv4 } from 'uuid';
-import { SidebarProvider } from '../providers/sidebar-provider';
+import type { SidebarProvider } from '../providers/sidebar-provider';
 
 interface CollectionCommandDependencies {
 	saveState: () => void;

@@ -1,5 +1,5 @@
 import { setBinaryBody, updateFormDataWithFiles } from '@/features/request/requestSlice';
-import { AppDispatch } from '@/store/main-store';
+import type { AppDispatch } from '@/store/main-store';
 
 interface FileHandlerDependencies {
 	dispatch: AppDispatch;
@@ -16,7 +16,7 @@ export function createFileHandlers(deps: FileHandlerDependencies) {
 	const handleBinaryFileResponse = (message: any) => {
 		const { path, size, contentType } = message;
 		if (path) {
-			const fileName = path.split('\\').pop()!.split('/').pop()!;
+			const fileName = path.split('\\').pop()?.split('/').pop();
 			deps.dispatch(setBinaryBody({ filePath: path, fileName, size, contentType }));
 		}
 	};

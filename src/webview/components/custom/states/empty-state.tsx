@@ -1,6 +1,6 @@
 import React from 'react';
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription, EmptyContent } from '@/components/ui/empty';
-import { LucideIcon } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { cn } from '@/shared/lib/utils';
 
 interface EmptyStateProps {

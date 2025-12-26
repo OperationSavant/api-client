@@ -1,7 +1,7 @@
 // AWS Signature Version 4 implementation
 // Based on AWS documentation: https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html
 
-import { RequestBody } from '@/shared/types/body';
+import type { RequestBody } from '@/shared/types/body';
 
 export async function hmacSha256(key: ArrayBuffer, data: string): Promise<ArrayBuffer> {
 	const cryptoKey = await crypto.subtle.importKey('raw', key, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);

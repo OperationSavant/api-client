@@ -1,6 +1,6 @@
 import { ApiClientTable } from '../custom/api-client-kvp';
 import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '@/store/main-store';
+import type { RootState } from '@/store/main-store';
 import { useKeyValueTable } from '@/hooks/useKeyValueTable';
 import { setUrlEncoded } from '@/features/request/requestSlice';
 

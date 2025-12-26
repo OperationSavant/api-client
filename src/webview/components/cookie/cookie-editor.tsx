@@ -15,7 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { InfoIcon, ShieldIcon, AlertTriangleIcon, CheckIcon, XIcon } from 'lucide-react';
-import { Cookie, CookieEditorProps, CookieValidationResult } from '@/shared/types/cookie';
+import type { Cookie, CookieEditorProps, CookieValidationResult } from '@/shared/types/cookie';
 
 export const CookieEditor: React.FC<CookieEditorProps> = ({ cookie, isOpen, onSave, onCancel, onDelete }) => {
 	const [formData, setFormData] = useState<Partial<Cookie>>({

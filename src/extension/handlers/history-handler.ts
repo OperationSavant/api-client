@@ -1,4 +1,5 @@
-import { WebviewPanel, window } from 'vscode';
+import type { WebviewPanel} from 'vscode';
+import { window } from 'vscode';
 import { historyService } from '@/domain/services/history-service';
 import { unitOfWork } from '@/domain/services/unit-of-work';
 import { broadcasterHub } from '../orchestrators/broadcaster-hub';

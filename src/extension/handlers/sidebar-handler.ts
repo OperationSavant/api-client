@@ -1,5 +1,6 @@
-import { WebviewViewMessage } from '@/shared/types/webview-messages';
-import { commands, WebviewView } from 'vscode';
+import type { WebviewViewMessage } from '@/shared/types/webview-messages';
+import type { WebviewView } from 'vscode';
+import { commands } from 'vscode';
 import { broadcasterHub } from '../orchestrators/broadcaster-hub';
 
 export class SidebarHandler {

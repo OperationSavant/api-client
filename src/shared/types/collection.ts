@@ -1,6 +1,6 @@
-import { AuthConfig } from './auth';
-import { RequestBody } from './body';
-import { TestSuite } from './testing';
+import type { AuthConfig } from './auth';
+import type { RequestBody } from './body';
+import type { TestSuite } from './testing';
 
 export interface SaveRequestPayload {
 	collectionId: string;

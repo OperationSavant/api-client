@@ -1,4 +1,5 @@
-import { Binary, Braces, CodeXml, FileCode, FileJson, FileType2, LucideIcon, Rows4, ScanText, Scroll } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
+import { Binary, Braces, CodeXml, FileCode, FileJson, FileType2, Rows4, ScanText, Scroll } from 'lucide-react';
 import { GetIcon, PostIcon, PutIcon, PatchIcon, DeleteIcon, HeadIcon, OptionsIcon } from '../../webview/assets';
 
 export const HTTP_VERBS_OPTIONS: (Record<'value' | 'label', string> & {

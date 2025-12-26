@@ -1,8 +1,7 @@
 import { setIsExecuting } from '@/features/editor/editorUISlice';
 import { setResponse } from '@/features/response/responseSlice';
-import { Response } from '@/shared/types/response';
-// import { CookieIntegration } from '@/services/cookie-integration'; // TODO:Temporarily disable cookie integration due to folder restructure
-import { AppDispatch, RootState } from '@/store/main-store';
+import type { Response } from '@/shared/types/response';
+import type { AppDispatch } from '@/store/main-store';
 
 interface ResponseHandlerDependencies {
 	dispatch: AppDispatch;
@@ -27,27 +26,6 @@ export function createResponseHandlers({ dispatch }: ResponseHandlerDependencies
 			return;
 		}
 
-		// if (httpResponse.headers) {
-		// 	let requestUrl = url.trim() || 'api.example.com/data';
-		// 	requestUrl = requestUrl.replace(/^https?:\/\//, '');
-		// 	const fullRequestUrl = `${protocol}://${requestUrl}`;
-
-		// 	try {
-		// 		// cookieIntegration.processResponse(httpResponse, fullRequestUrl);
-		// 	} catch (error) {
-		// 		console.warn('Failed to process cookies from response:', error);
-		// 	}
-		// }
-		// let responseBodyString: string;
-		// if (message.isLargeBody) {
-		// 	responseBodyString = '';
-		// } else if (typeof httpResponse === 'string') {
-		// 	responseBodyString = httpResponse;
-		// } else if (httpResponse !== null && httpResponse !== undefined) {
-		// 	responseBodyString = httpResponse.data;
-		// } else {
-		// 	responseBodyString = '';
-		// }
 		const enhancedResponseData: Response = {
 			status: message.status,
 			statusText: message.statusText,

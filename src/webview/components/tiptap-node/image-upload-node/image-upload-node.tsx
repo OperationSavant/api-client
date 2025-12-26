@@ -1,5 +1,3 @@
-'use client';
-
 import { useRef, useState } from 'react';
 import type { NodeViewProps } from '@tiptap/react';
 import { NodeViewWrapper } from '@tiptap/react';
@@ -413,13 +411,13 @@ export const ImageUploadNode: React.FC<NodeViewProps> = props => {
 		}
 	};
 
-	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+	const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
 		const files = e.target.files;
 		if (!files || files.length === 0) {
 			extension.options.onError?.(new Error('No file selected'));
 			return;
 		}
-		handleUpload(Array.from(files));
+		await handleUpload(Array.from(files));
 	};
 
 	const handleClick = () => {

@@ -5,7 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { Upload, File, X, FileImage, FileText, Music, Video } from 'lucide-react';
 import { BinaryBody } from '@/shared/types/body';
-import { RootState, useAppDispatch } from '@/store/main-store';
+import type { RootState } from '@/store/main-store';
+import { useAppDispatch } from '@/store/main-store';
 import { useSelector } from 'react-redux';
 import { setBinaryBody } from '@/features/request/requestSlice';
 
@@ -21,31 +22,31 @@ const BinaryBody: React.FC<BinaryBodyProps> = ({ onSelectFile }) => {
 	const dispatch = useAppDispatch();
 	const body = useSelector((state: RootState) => state.request.body);
 
-	if (body.type !== 'binary') {
-		return null;
-	}
-
-	const binaryConfig = body.binary;
+	const binaryConfig = body.type === 'binary' ? body.binary : null;
 
 	const updateBinaryConfig = (newValues: Partial<BinaryBody>) => {
 		dispatch(setBinaryBody({ ...binaryConfig, ...newValues }));
 	};
 
 	useEffect(() => {
-		if (binaryConfig.filePath) {
-			setUploadProgress(0);
-			const interval = setInterval(() => {
-				setUploadProgress(prev => {
-					if (prev >= 100) {
-						clearInterval(interval);
-						return 100;
-					}
-					return prev + 10;
-				});
-			}, 100);
-			return () => clearInterval(interval);
-		}
-	}, [binaryConfig.filePath]);
+		if (!binaryConfig?.filePath) return;
+		setUploadProgress(0);
+		const interval = setInterval(() => {
+			setUploadProgress(prev => {
+				if (prev >= 100) {
+					clearInterval(interval);
+					return 100;
+				}
+				return prev + 10;
+			});
+		}, 100);
+
+		return () => clearInterval(interval);
+	}, [binaryConfig?.filePath]);
+
+	if (body.type !== 'binary' || !binaryConfig) {
+		return null;
+	}
 
 	const handleFileSelect = (file: File) => {
 		updateBinaryConfig({

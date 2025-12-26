@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useState, useRef, useEffect } from 'react';
 import { Tabs, TabsList, TabsContent, TabsTrigger } from '../ui/tabs';
 import { cn } from '@/shared/lib/utils';
-import { TabConfig } from '@/shared/types/tabs';
+import type { TabConfig } from '@/shared/types/tabs';
 import { ChevronDown } from 'lucide-react'; // or your icon library
 import { useContainerBreakpoint } from '@/hooks/use-container-breakpoint';
 
@@ -163,7 +163,7 @@ const TabTriggerWithIcon: React.FC<
 		isActive?: boolean;
 	}
 > = ({ value, icon: Icon, badge, disabled, children, className, selectMode, isActive = false }) => {
-	const { isCompact, ref } = useContainerBreakpoint();
+	const { ref } = useContainerBreakpoint();
 	return (
 		<TabsTrigger
 			ref={ref}

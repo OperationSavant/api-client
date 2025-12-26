@@ -1,6 +1,7 @@
 import { useTreeData } from '@/hooks/use-tree-data';
-import { TreeNode } from '@/shared/types/tree-node';
-import { RootState, useAppDispatch } from '@/store/sidebar-store';
+import type { TreeNode } from '@/shared/types/tree-node';
+import type { RootState} from '@/store/sidebar-store';
+import { useAppDispatch } from '@/store/sidebar-store';
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { TreeView } from '../custom/api-client-tree-view';

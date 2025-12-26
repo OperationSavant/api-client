@@ -1,7 +1,7 @@
-import { Database } from '@vscode/sqlite3';
-import { HistoryItem } from '@/shared/types/history';
+import type { Database } from '@vscode/sqlite3';
+import type { HistoryItem } from '@/shared/types/history';
 import { queryAll, queryOne, runQuery, PreparedStatement, safeJsonParse, safeJsonStringify, PersistenceError } from './db-helpers';
-import { IHistoryPersistence } from '@/domain/types/history-persistence';
+import type { IHistoryPersistence } from '@/domain/types/history-persistence';
 
 export class SQLiteHistoryPersistence implements IHistoryPersistence {
 	constructor(private db: Database) {

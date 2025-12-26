@@ -1,7 +1,7 @@
 // Only import types, not the full Monaco API
 
 import { forwardRef, lazy, Suspense } from 'react';
-import { MonacoEditorHandle, MonacoEditorProps } from '@/shared/types/monaco';
+import type { MonacoEditorHandle, MonacoEditorProps } from '@/shared/types/monaco';
 import { LoadingFallback } from '../custom/states/loading-fallback';
 
 // Lazy load the actual Monaco editor

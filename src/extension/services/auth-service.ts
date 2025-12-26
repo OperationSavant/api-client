@@ -1,7 +1,7 @@
-import { AuthConfig } from '@/shared/types/auth';
+import type { AuthConfig } from '@/shared/types/auth';
 import { buildBasicAuthCredentials } from '@/shared/lib/auth-utils';
 import { createAwsSignature } from '@/shared/lib/awsSignature';
-import { RequestBody } from '@/shared/types/body';
+import type { RequestBody } from '@/shared/types/body';
 
 export class AuthService {
 	/**

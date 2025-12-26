@@ -1,7 +1,7 @@
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Trash2 } from 'lucide-react';
-import { KeyValueEntry } from '@/shared/types/request';
+import type { KeyValueEntry } from '@/shared/types/request';
 import { Autocomplete } from './api-client-autocomplete';
 import { COMMON_HEADER_NAMES } from '@/shared/constants/headers';
 import { HEADER_DEFAULT_VALUES } from '@/shared/constants/header-default-values';

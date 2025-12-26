@@ -1,5 +1,5 @@
 import { addCollection, setCollections } from '@/features/collections/sidebar-collectionSlice';
-import { AppDispatch } from '@/store/sidebar-store';
+import type { AppDispatch } from '@/store/sidebar-store';
 
 interface SidebarCollectionHandlerDependencies {
 	dispatch: AppDispatch;

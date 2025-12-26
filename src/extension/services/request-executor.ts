@@ -1,13 +1,14 @@
-import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { AxiosError } from 'axios';
 import * as fs from 'fs';
 import * as path from 'path';
 import { contentType as mimeContentType, lookup } from 'mime-types';
 import FormData from 'form-data';
 
 // Import shared types
-import { RequestBody } from '@/shared/types/body';
-import { AuthConfig } from '@/shared/types/auth';
-import { AuthService } from './auth-service';
+import type { RequestBody } from '@/shared/types/body';
+import type { AuthConfig } from '@/shared/types/auth';
+import type { AuthService } from './auth-service';
 
 // Define request configuration (what webview sends)
 export interface RequestExecutionConfig {

@@ -1,4 +1,4 @@
-import { KeyValueEntry } from '@/shared/types/request';
+import type { KeyValueEntry } from '@/shared/types/request';
 
 export const useKeyValueTable = <T extends KeyValueEntry>(rows: T[], setRows: (newRows: T[]) => void, defaultRow: T) => {
 	const keepOnlyOneEmptyRow = (arr: T[]): T[] => {

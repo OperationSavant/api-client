@@ -2,7 +2,8 @@ import { Suspense, useRef, useState } from 'react';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { RootState, useAppDispatch } from '@/store/main-store';
+import type { RootState } from '@/store/main-store';
+import { useAppDispatch } from '@/store/main-store';
 import { useSelector } from 'react-redux';
 import { GraphQLBody } from '@/shared/types/body';
 import { Label } from '@/components/ui/label';
@@ -11,7 +12,7 @@ import ApiClientHeader from '@/components/custom/api-client-header';
 import ApiClientButton from '@/components/custom/api-client-button';
 import ApiClientFieldRow from '@/components/custom/api-client-field-row';
 import { ApiClientInput } from '@/components/custom/api-client-input';
-import { MonacoEditorHandle } from '@/shared/types/monaco';
+import type { MonacoEditorHandle } from '@/shared/types/monaco';
 import { setGraphQLBody, setGraphQLOperationName } from '@/features/request/requestSlice';
 import { LoadingFallback } from '../custom/states/loading-fallback';
 import { MonacoEditor } from '@/components/editor/lazy-monaco-editor';
@@ -22,15 +23,14 @@ const GraphQLBody: React.FC = () => {
 
 	const dispatch = useAppDispatch();
 	const bodyConfig = useSelector((state: RootState) => state.request.body);
+	const queryEditorRef = useRef<MonacoEditorHandle>(null);
+	const variablesEditorRef = useRef<MonacoEditorHandle>(null);
 
 	if (bodyConfig.type !== 'graphql' || !bodyConfig.graphql) {
 		return null;
 	}
 
 	const graphqlConfig = bodyConfig.graphql;
-
-	const queryEditorRef = useRef<MonacoEditorHandle>(null);
-	const variablesEditorRef = useRef<MonacoEditorHandle>(null);
 
 	const updateConfig = (newValues: Partial<GraphQLBody>) => {
 		dispatch(setGraphQLBody({ ...graphqlConfig, ...newValues }));
@@ -49,12 +49,12 @@ const GraphQLBody: React.FC = () => {
 		}
 	};
 
-	const formatQuery = () => {
-		formatContent(queryEditorRef, 'query');
+	const formatQuery = async () => {
+		await formatContent(queryEditorRef, 'query');
 	};
 
-	const formatVariables = () => {
-		formatContent(variablesEditorRef, 'variables');
+	const formatVariables = async () => {
+		await formatContent(variablesEditorRef, 'variables');
 	};
 
 	const insertExampleQuery = () => {
@@ -82,10 +82,10 @@ const GraphQLBody: React.FC = () => {
 	};
 
 	const validateVariables = () => {
-		if (!graphqlConfig.variables!.trim()) return { valid: true, message: 'No variables' };
+		if (!graphqlConfig.variables?.trim()) return { valid: true, message: 'No variables' };
 
 		try {
-			JSON.parse(graphqlConfig.variables!);
+			JSON.parse(graphqlConfig.variables);
 			return { valid: true, message: 'Valid JSON' };
 		} catch (error) {
 			return {

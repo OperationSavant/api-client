@@ -1,7 +1,7 @@
 // hooks/useRequestExecution.ts
 import { useSelector } from 'react-redux';
 import { useCallback } from 'react';
-import { RootState } from '@/store/main-store';
+import type { RootState } from '@/store/main-store';
 import { arrayToRecord } from '@/shared/lib/utils';
 import { assembleBodyForExecution, mergeContentTypeHeader } from '@/shared/lib/body-assembler';
 

@@ -1,6 +1,6 @@
 import { useMemo, useCallback, useRef } from 'react';
-import { Collection, CollectionFolder, CollectionRequest } from '@/shared/types/collection';
-import { FileNode, FolderNode, TreeNode } from '@/shared/types/tree-node';
+import type { Collection, CollectionFolder, CollectionRequest } from '@/shared/types/collection';
+import type { FileNode, FolderNode, TreeNode } from '@/shared/types/tree-node';
 
 export function useTreeData(collections: Collection[]): TreeNode[] {
 	// caches persist across renders — keep stable node objects when possible

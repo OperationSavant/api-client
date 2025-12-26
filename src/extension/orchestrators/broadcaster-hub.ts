@@ -1,4 +1,5 @@
-import { WebviewPanel, WebviewView, window } from 'vscode';
+import type { WebviewPanel, WebviewView} from 'vscode';
+import { window } from 'vscode';
 
 export class BroadcasterHub {
 	private static instance: BroadcasterHub;

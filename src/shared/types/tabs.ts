@@ -1,4 +1,4 @@
-import { AuthConfig, OAuth2Auth } from './auth';
+import type { AuthConfig, OAuth2Auth } from './auth';
 
 export interface TabConfig<T extends string = string> {
 	id: T;

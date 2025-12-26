@@ -1,4 +1,5 @@
-import { commands, ExtensionContext, WebviewPanel } from 'vscode';
+import type { ExtensionContext, WebviewPanel } from 'vscode';
+import { commands } from 'vscode';
 import { v4 as uuidv4 } from 'uuid';
 import { broadcasterHub } from '../orchestrators/broadcaster-hub';
 

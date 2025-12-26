@@ -1,5 +1,6 @@
 // Test execution engine for VS Code API Client
-import { TestSuite, TestAssertion, TestResult, TestExecution, ResponseTestData, TestAssertionType, TestOperator } from '@/shared/types/testing';
+import type { TestSuite, TestAssertion, TestResult, TestExecution, ResponseTestData} from '@/shared/types/testing';
+import { TestAssertionType, TestOperator } from '@/shared/types/testing';
 
 // Simple UUID generator for environments where crypto.randomUUID is not available
 const generateUUID = (): string => {

@@ -1,4 +1,5 @@
-import { WebviewPanel, workspace, extensions } from 'vscode';
+import type { WebviewPanel} from 'vscode';
+import { workspace, extensions } from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as jsonc from 'jsonc-parser';

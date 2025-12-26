@@ -1,4 +1,4 @@
-import { Collection, CollectionFolder, CollectionRequest } from '@/shared/types/collection';
+import type { Collection, CollectionFolder, CollectionRequest } from '@/shared/types/collection';
 
 /**
  * Port interface for collection persistence

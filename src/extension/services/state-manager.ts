@@ -6,7 +6,7 @@ import { SQLiteCollectionPersistence } from './collection-persistence';
 import { SQLiteHistoryPersistence } from './history-persistence';
 import { getDatabase } from './db-service';
 import { DatabaseTransaction } from './db-helpers';
-import { ApplicationServices } from './application-services';
+import type { ApplicationServices } from './application-services';
 
 export class StateManager {
 	static async initialize(services: ApplicationServices): Promise<void> {

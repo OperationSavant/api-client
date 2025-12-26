@@ -1,6 +1,7 @@
-import { window, ExtensionContext } from 'vscode';
+import type { ExtensionContext } from 'vscode';
+import { window } from 'vscode';
 import { SidebarProvider } from '@/extension/providers/sidebar-provider';
-import { MessageRouter } from './message-router';
+import type { MessageRouter } from './message-router';
 
 interface ViewOrchestratorDependencies {
 	context: ExtensionContext;

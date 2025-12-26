@@ -1,5 +1,6 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Cookie } from '@/shared/types/cookie';
+import type { PayloadAction } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
+import type { Cookie } from '@/shared/types/cookie';
 
 export interface CookiesState {
 	items: Cookie[];

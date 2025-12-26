@@ -1,4 +1,5 @@
-import { Webview, Uri } from 'vscode';
+import type { Webview} from 'vscode';
+import { Uri } from 'vscode';
 
 export class ContentBuilder {
 	/**

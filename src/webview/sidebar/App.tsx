@@ -8,7 +8,7 @@ import { useAppDispatch } from '@/store/sidebar-store';
 import { vscode } from '@/vscode';
 import { LoadingFallback } from '@/components/custom/states/loading-fallback';
 import { createSidebarInitializeHandlers, createSidebarCollectionHandlers, createSidebarHistoryHandlers } from '@/handlers';
-import { SidebarTabContext, TabConfig } from '@/shared/types/tabs';
+import type { SidebarTabContext, TabConfig } from '@/shared/types/tabs';
 import { CollectionTab } from '@/components/collections/collection-tab';
 import { FolderTree, Layers, History } from 'lucide-react';
 import HistoryTab from '@/components/history/history-tab';
@@ -39,7 +39,7 @@ const App = () => {
 		if (isReady) {
 			sendToExtension({ source: 'webviewView', command: 'sidebarReady' });
 		}
-	}, [isReady]);
+	}, [isReady, sendToExtension]);
 
 	useEffect(() => {
 		messaging.registerHandler('initializeDataFromExtension', initializeHandlers.handleInitialize);
@@ -58,7 +58,7 @@ const App = () => {
 			messaging.unregisterHandler('historyItemRemoved');
 			messaging.unregisterHandler('historyCleared');
 		};
-	}, [messaging, initializeHandlers, collectionHandlers, historyHandlers]);
+	}, [messaging, initializeHandlers, collectionHandlers, historyHandlers, markReady]);
 
 	const tabContext: SidebarTabContext = {
 		sendToExtension,
@@ -70,7 +70,7 @@ const App = () => {
 			args: [],
 			source: 'webviewView',
 		});
-	}, []);
+	}, [sendToExtension]);
 
 	if (!isInitialized) {
 		return <LoadingFallback message='Restoring session...' description='Please wait while we restore your previous workspace state' />;

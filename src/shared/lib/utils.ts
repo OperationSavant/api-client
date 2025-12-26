@@ -1,4 +1,4 @@
-import { Param } from '@/shared/types/request';
+import type { Param } from '@/shared/types/request';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 

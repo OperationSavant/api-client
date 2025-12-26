@@ -1,5 +1,6 @@
-import { ExtensionContext, Uri, ViewColumn, WebviewPanel } from 'vscode';
-import { MessageRouter } from './message-router';
+import type { ExtensionContext, WebviewPanel } from 'vscode';
+import { Uri, ViewColumn } from 'vscode';
+import type { MessageRouter } from './message-router';
 import { broadcasterHub } from './broadcaster-hub';
 import { OrchestratorHelper } from './orchestrator-helper';
 

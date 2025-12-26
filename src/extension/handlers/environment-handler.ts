@@ -1,4 +1,5 @@
-import { WebviewPanel, window } from 'vscode';
+import type { WebviewPanel} from 'vscode';
+import { window } from 'vscode';
 import { environmentService } from '@/domain/services/environment-service';
 import { unitOfWork } from '@/domain/services/unit-of-work';
 

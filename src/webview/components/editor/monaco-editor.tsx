@@ -1,7 +1,7 @@
 import { editor as monacoEditorInstance, languages } from 'monaco-editor/esm/vs/editor/editor.api';
 import { useEffect, useRef, useState, forwardRef, useImperativeHandle } from 'react';
 import { format } from 'prettier/standalone';
-import { MonacoEditorHandle, MonacoEditorProps } from '@/shared/types/monaco';
+import type { MonacoEditorHandle, MonacoEditorProps } from '@/shared/types/monaco';
 
 export const MonacoEditor = forwardRef<MonacoEditorHandle, MonacoEditorProps>(
 	(
@@ -101,8 +101,8 @@ export const MonacoEditor = forwardRef<MonacoEditorHandle, MonacoEditorProps>(
 				const handleResize = () => editor.layout();
 				window.addEventListener('resize', handleResize);
 				if (formatOnMount && value) {
-					setTimeout(() => {
-						editor.getAction('editor.action.formatDocument')?.run();
+					setTimeout(async () => {
+						await editor.getAction('editor.action.formatDocument')?.run();
 					}, 100);
 				}
 				return () => {
@@ -110,7 +110,7 @@ export const MonacoEditor = forwardRef<MonacoEditorHandle, MonacoEditorProps>(
 					editor.dispose();
 				};
 			}
-		}, []);
+		}, [formatOnMount, language, lineNumbers, minimap, readOnly, value, wordWrap]);
 
 		useEffect(() => {
 			const editor = editorInstanceRef.current;
@@ -119,8 +119,8 @@ export const MonacoEditor = forwardRef<MonacoEditorHandle, MonacoEditorProps>(
 				if (model && model.getValue() !== value) {
 					editor.setValue(value);
 					if (formatOnMount && value) {
-						setTimeout(() => {
-							editor.getAction('editor.action.formatDocument')?.run();
+						setTimeout(async () => {
+							await editor.getAction('editor.action.formatDocument')?.run();
 						}, 100);
 					}
 				}

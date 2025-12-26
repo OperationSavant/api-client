@@ -11,13 +11,14 @@ import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import {
+import type {
 	TestSuite,
 	TestAssertion,
 	TestExecution,
-	TestResult,
 	TestAssertionType,
-	TestOperator,
+	TestOperator} from '@/shared/types/testing';
+import {
+	TestResult,
 	TEST_ASSERTION_CONFIGS,
 	createDefaultTestAssertion,
 	createDefaultTestSuite,

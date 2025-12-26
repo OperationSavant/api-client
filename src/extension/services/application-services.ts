@@ -1,4 +1,5 @@
-import { ExtensionContext, Uri } from 'vscode';
+import type { ExtensionContext} from 'vscode';
+import { Uri } from 'vscode';
 import { RequestExecutorService } from './request-executor';
 import { collectionService } from '@/domain/services/collectionService';
 import { historyService } from '@/domain/services/history-service';

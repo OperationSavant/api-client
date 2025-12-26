@@ -1,5 +1,5 @@
-import { AuthConfig } from './auth';
-import { Collection } from './collection';
+import type { AuthConfig } from './auth';
+import type { Collection } from './collection';
 export type WebviewMessage =
 	| { source: 'webview'; command: 'webviewReady' }
 	| {

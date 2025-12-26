@@ -1,6 +1,6 @@
 import { ApiClientTable } from '@/components/custom/api-client-kvp';
 import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '@/store/main-store';
+import type { RootState } from '@/store/main-store';
 import ApiClientHeader from '../custom/api-client-header';
 import { useKeyValueTable } from '@/hooks/useKeyValueTable';
 import { setHeaders } from '@/features/request/requestSlice';

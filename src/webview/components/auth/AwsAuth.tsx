@@ -1,4 +1,4 @@
-import { AwsAuth as AwsAuthType } from '@/shared/types/auth';
+import type { AwsAuth as AwsAuthType } from '@/shared/types/auth';
 import { ApiClientInput } from '@/components/custom/api-client-input';
 import { ApiClientSelect } from '@/components/custom/api-client-select';
 import ApiClientFieldRow from '@/components/custom/api-client-field-row';

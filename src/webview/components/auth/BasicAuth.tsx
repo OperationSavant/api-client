@@ -1,5 +1,5 @@
 import React from 'react';
-import { BasicAuth } from '@/shared/types/auth';
+import type { BasicAuth } from '@/shared/types/auth';
 import { ApiClientInput } from '@/components/custom/api-client-input';
 import ApiClientInputPassword from '@/components/custom/api-client-input-password';
 import ApiClientFieldRow from '@/components/custom/api-client-field-row';

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { OAuth2Auth } from '@/shared/types/auth';
+import type { OAuth2Auth } from '@/shared/types/auth';
 import { ApiClientTextarea } from '@/components/custom/api-client-textarea';
 import { ApiClientInput } from '@/components/custom/api-client-input';
 import { ApiClientSelect } from '@/components/custom/api-client-select';

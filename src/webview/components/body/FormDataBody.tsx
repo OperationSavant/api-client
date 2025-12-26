@@ -9,7 +9,7 @@ import { ApiClientSelect } from '../custom/api-client-select';
 import { cn } from '@/shared/lib/utils';
 import { useKeyValueTable } from '@/hooks/useKeyValueTable';
 import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '@/store/main-store';
+import type { RootState } from '@/store/main-store';
 import { FORM_DATA_FIELD_TYPE_OPTIONS } from '@/shared/constants/select-options';
 import { setFormData } from '@/features/request/requestSlice';
 

@@ -1,6 +1,7 @@
-import { ExtensionContext, Uri, WebviewView, WebviewViewProvider } from 'vscode';
+import type { ExtensionContext, WebviewView, WebviewViewProvider } from 'vscode';
+import { Uri } from 'vscode';
 import { ContentBuilder } from '../services/webview-content-builder';
-import { MessageRouter } from '../orchestrators/message-router';
+import type { MessageRouter } from '../orchestrators/message-router';
 import { broadcasterHub } from '../orchestrators/broadcaster-hub';
 import { OrchestratorHelper } from '../orchestrators/orchestrator-helper';
 

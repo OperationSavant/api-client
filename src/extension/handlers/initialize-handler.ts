@@ -1,4 +1,4 @@
-import { WebviewPanel } from 'vscode';
+import type { WebviewPanel } from 'vscode';
 import { ThemeService } from '../services/theme-service';
 import { collectionService } from '@/domain/services/collectionService';
 import { environmentService } from '@/domain/services/environment-service';

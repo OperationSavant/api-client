@@ -1,4 +1,4 @@
-import { AppDispatch } from '@/store/sidebar-store';
+import type { AppDispatch } from '@/store/sidebar-store';
 import { setCollections } from '@/features/collections/sidebar-collectionSlice';
 import { setHistory } from '@/features/history/sidebar-historySlice';
 

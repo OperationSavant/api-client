@@ -1,4 +1,4 @@
-import { AppDispatch } from '@/store/main-store';
+import type { AppDispatch } from '@/store/main-store';
 import { setCollections } from '@/features/collections/main-collectionsSlice';
 import { loadRequest } from '@/features/request/requestSlice';
 

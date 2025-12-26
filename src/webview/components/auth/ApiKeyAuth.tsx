@@ -1,6 +1,6 @@
 import React from 'react';
 import { Label } from '@/components/ui/label';
-import { ApiKeyAuth } from '@/shared/types/auth';
+import type { ApiKeyAuth } from '@/shared/types/auth';
 import { ApiClientInput } from '@/components/custom/api-client-input';
 import { ApiClientSelect } from '@/components/custom/api-client-select';
 import { API_KEY_OPTIONS } from '@/shared/constants/select-options';
