@@ -16,8 +16,10 @@ export async function activate(context: ExtensionContext) {
 
 	const commandRegistry = new CommandRegistry({
 		context,
-		createWebview: name => {
-			const panel = webviewOrchestrator.createPanel(name);
+		createWebview: (name: string, kind: string) => {
+			const scriptName = kind === 'main' ? 'main.js' : 'secondary.js';
+			const rootId = kind === 'main' ? 'main-root' : 'secondary-root';
+			const panel = webviewOrchestrator.createPanel(name, scriptName, rootId);
 			return panel;
 		},
 	});

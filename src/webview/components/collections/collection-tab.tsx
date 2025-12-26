@@ -88,12 +88,21 @@ export const CollectionTab: React.FC<CollectionTabProps> = ({ sendToExtension })
 	};
 
 	const createCollection = () => {
-		sendToExtension({ source: 'webviewView', command: 'createCollection', name: 'New Collection' });
+		// sendToExtension({ source: 'webviewView', command: 'createCollection', name: 'New Collection' });
+		sendToExtension({ source: 'webviewView', command: 'openCollectionView' });
 	};
 
 	function generateId(): string {
 		return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 	}
+
+	const openExistingrequest = ({ request, collectionId }: { request: any; collectionId: string }) => {
+		sendToExtension({
+			command: 'openRequest',
+			args: [{ request, collectionId }],
+			source: 'webviewView',
+		});
+	};
 
 	return (
 		<div className='flex flex-col gap-4 h-full'>
@@ -106,12 +115,7 @@ export const CollectionTab: React.FC<CollectionTabProps> = ({ sendToExtension })
 				onSelect={node => {
 					if (node.type === 'file') {
 						// Load request into editor
-						sendToExtension({
-							command: 'openRequest',
-							commandId: 'apiClient.openRequest',
-							args: [{ request: node?.metadata?.request, collectionId: node.id }],
-							source: 'webviewView',
-						});
+						openExistingrequest({ request: node?.metadata?.request, collectionId: node.id });
 					}
 				}}
 				onRename={(node, newLabel) => {

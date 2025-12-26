@@ -1,7 +1,6 @@
 import { WebviewViewMessage } from '@/shared/types/webview-messages';
 import { commands, WebviewView } from 'vscode';
 import { broadcasterHub } from '../orchestrators/broadcaster-hub';
-import { Collection } from '@/shared/types/collection';
 
 export class SidebarHandler {
 	constructor() {}
@@ -9,17 +8,17 @@ export class SidebarHandler {
 	async handle(message: WebviewViewMessage, webviewView: WebviewView): Promise<void> {
 		switch (message.command) {
 			case 'createNewRequest':
-				await commands.executeCommand(message.commandId, ...(message.args || []));
+				await commands.executeCommand(message.command, ...(message.args || []));
 				break;
 			case 'sidebarReady':
 			case 'refreshSidebar':
 				await this.sendInitialData(webviewView);
 				break;
 			case 'openRequest':
-				await commands.executeCommand(message.commandId, ...(message.args || []));
+				await commands.executeCommand(message.command, ...(message.args || []));
 				break;
 			case 'openCollectionView':
-				await commands.executeCommand(message.commandId, message.args as Collection);
+				await commands.executeCommand(message.command, ...(message.args || []));
 				break;
 		}
 	}

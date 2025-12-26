@@ -13,15 +13,17 @@ export class InitializeHandler {
 		const environments = environmentService.getScopes();
 		const history = historyService.getAllHistory();
 
-		ThemeService.sendThemeToWebview(panel);
+		const context = broadcasterHub.getPanelContext(panel);
+
+		// ThemeService.sendThemeToWebview(panel);
 
 		broadcasterHub.broadcast({
 			command: 'initialize',
 			collections: collections,
 			environments: environments,
 			history: history,
+			request: context?.request,
+			collectionId: context?.collectionId,
 		});
-
-		broadcasterHub.flushPendingMessages();
 	}
 }

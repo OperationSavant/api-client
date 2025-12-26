@@ -26,8 +26,8 @@ export function useContainerBreakpoint() {
 
 	return {
 		ref,
-		isCompact: width < 400,
-		isNormal: width >= 400 && width < 768,
+		isCompact: width < 300,
+		isNormal: width >= 300 && width < 768,
 		isWide: width >= 768,
 	};
 }

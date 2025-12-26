@@ -7,8 +7,6 @@
 
 interface VsCodeApi {
 	postMessage(message: { command: string; [key: string]: any }): void;
-	getState<T>(): T | undefined;
-	setState<T>(newState: T): void;
 }
 
 declare const acquireVsCodeApi: () => VsCodeApi;

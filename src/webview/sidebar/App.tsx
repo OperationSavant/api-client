@@ -6,14 +6,13 @@ import { Separator } from '@/components/ui/separator';
 import { useWebviewMessaging } from '@/hooks/useWebviewMessaging';
 import { useAppDispatch } from '@/store/sidebar-store';
 import { vscode } from '@/vscode';
-import { SidebarViewState } from '@/types/sidebarview-state';
-import { useSidebarStateRestoration } from '@/hooks/useSidebarStateRestoration';
 import { LoadingFallback } from '@/components/custom/states/loading-fallback';
 import { createSidebarInitializeHandlers, createSidebarCollectionHandlers, createSidebarHistoryHandlers } from '@/handlers';
 import { SidebarTabContext, TabConfig } from '@/shared/types/tabs';
 import { CollectionTab } from '@/components/collections/collection-tab';
 import { FolderTree, Layers, History } from 'lucide-react';
 import HistoryTab from '@/components/history/history-tab';
+import { useWebviewInitialization } from '@/hooks/useStateRestoration';
 
 export const SIDEBAR_TABS_CONFIG: TabConfig[] = [
 	{ id: 'collections', label: 'Collections', component: CollectionTab, icon: FolderTree },
@@ -24,7 +23,7 @@ export const SIDEBAR_TABS_CONFIG: TabConfig[] = [
 const App = () => {
 	const dispatch = useAppDispatch();
 	const messaging = useWebviewMessaging();
-	const initialState = useMemo(() => vscode.getState<SidebarViewState>(), []);
+	const { isReady, isInitialized, markReady, markInitialized } = useWebviewInitialization();
 
 	const [currentTab, setCurrentTab] = useState('collections');
 
@@ -32,24 +31,15 @@ const App = () => {
 		vscode.postMessage(message);
 	}, []);
 
-	const persistState = useCallback((state: SidebarViewState) => {
-		vscode.setState(state);
-	}, []);
-
-	const { isRestored } = useSidebarStateRestoration({
-		initialState,
-		onStatePersist: persistState,
-	});
-
-	const initializeHandlers = useMemo(() => createSidebarInitializeHandlers({ dispatch }), [dispatch]);
+	const initializeHandlers = useMemo(() => createSidebarInitializeHandlers({ dispatch, onInitialized: markInitialized }), [dispatch, markInitialized]);
 	const collectionHandlers = useMemo(() => createSidebarCollectionHandlers({ dispatch }), [dispatch]);
 	const historyHandlers = useMemo(() => createSidebarHistoryHandlers({ dispatch }), [dispatch]);
 
 	useEffect(() => {
-		if (isRestored) {
+		if (isReady) {
 			sendToExtension({ source: 'webviewView', command: 'sidebarReady' });
 		}
-	}, [isRestored]);
+	}, [isReady]);
 
 	useEffect(() => {
 		messaging.registerHandler('initializeDataFromExtension', initializeHandlers.handleInitialize);
@@ -58,6 +48,7 @@ const App = () => {
 		messaging.registerHandler('historyItemAdded', historyHandlers.handleAddHistoryItem);
 		messaging.registerHandler('historyItemRemoved', historyHandlers.handleRemoveHistoryItem);
 		messaging.registerHandler('historyCleared', historyHandlers.handleClearHistory);
+		markReady();
 
 		return () => {
 			messaging.unregisterHandler('initializeDataFromExtension');
@@ -73,16 +64,15 @@ const App = () => {
 		sendToExtension,
 	};
 
-	const handleOpenRequest = useCallback((requestId?: string) => {
+	const handleOpenRequest = useCallback(() => {
 		sendToExtension({
-			command: 'createNewRequest',
-			commandId: 'apiClient.openRequest',
-			args: requestId ? [requestId] : [],
+			command: 'openRequest',
+			args: [],
 			source: 'webviewView',
 		});
 	}, []);
 
-	if (!isRestored) {
+	if (!isInitialized) {
 		return <LoadingFallback message='Restoring session...' description='Please wait while we restore your previous workspace state' />;
 	}
 
