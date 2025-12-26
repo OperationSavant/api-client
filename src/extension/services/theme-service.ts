@@ -80,7 +80,7 @@ export class ThemeService {
 	static watchThemeChanges(panel: WebviewPanel): { dispose: () => void } {
 		const disposable = workspace.onDidChangeConfiguration(e => {
 			if (e.affectsConfiguration('workbench.colorTheme')) {
-				this.sendThemeToWebview(panel);
+				// this.sendThemeToWebview(panel);
 			}
 		});
 

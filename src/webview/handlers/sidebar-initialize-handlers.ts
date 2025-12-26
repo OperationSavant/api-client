@@ -4,17 +4,19 @@ import { setHistory } from '@/features/history/sidebar-historySlice';
 
 interface InitializeHandlerDependencies {
 	dispatch: AppDispatch;
+	onInitialized: () => void;
 }
 
-export function createSidebarInitializeHandlers(deps: InitializeHandlerDependencies) {
+export function createSidebarInitializeHandlers({dispatch, onInitialized}: InitializeHandlerDependencies) {
 	const handleInitialize = (payload: any) => {
 		if (payload !== null && payload !== undefined) {
 			if (Array.isArray(payload.collections)) {
-				deps.dispatch(setCollections(payload.collections));
+				dispatch(setCollections(payload.collections));
 			}
 			if (Array.isArray(payload.history)) {
-				deps.dispatch(setHistory(payload.history));
+				dispatch(setHistory(payload.history));
 			}
+			onInitialized();
 		}
 	};
 

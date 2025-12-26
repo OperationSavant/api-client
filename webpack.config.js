@@ -325,5 +325,80 @@ const sidebarWebviewConfig = {
 	],
 };
 
-module.exports = [config, mainWebviewConfig, sidebarWebviewConfig];
+/**@type {import('webpack').Configuration}*/
+const secondaryWebviewConfig = {
+	target: 'web',
+	mode: 'none',
+	entry: './src/webview/collections/main.tsx',
+	output: {
+		path: path.resolve(__dirname, 'dist'),
+		filename: 'secondary.js',
+		libraryTarget: 'module',
+	},
+	experiments: {
+		outputModule: true,
+	},
+	resolve: {
+		extensions: ['.ts', '.js', '.tsx', '.css'],
+		alias: [
+			{ name: '@/shared', alias: path.resolve(__dirname, 'src/shared') },
+			{ name: '@', alias: path.resolve(__dirname, 'src/webview') },
+		],
+		fallback: {
+			process: false,
+			buffer: require.resolve('buffer/'),
+		},
+	},
+	optimization: {
+		concatenateModules: true,
+		mergeDuplicateChunks: true,
+		sideEffects: true,
+		minimize: true,
+		minimizer: [
+			new TerserPlugin({
+				terserOptions: {
+					format: { comments: false },
+				},
+				extractComments: {
+					condition: /^\**!|@preserve|@license|@cc_on/i,
+					filename: fileData =>
+						// The "fileData" argument contains object with "filename", "basename", "query" and "hash"
+						`${fileData.filename}.LICENSE.txt${fileData.query}`,
+					banner: licenseFile => `License information can be found in ${licenseFile}`,
+				},
+			}),
+		],
+	},
+	module: {
+		rules: [
+			{
+				test: /\.(ts|tsx)$/,
+				exclude: /node_modules/,
+				use: [
+					{
+						loader: 'ts-loader',
+						options: {
+							configFile: path.resolve(__dirname, 'tsconfig.webview.json'),
+						},
+					},
+				],
+			},
+			{
+				test: /\.svg$/,
+				use: ['@svgr/webpack'],
+			},
+		],
+	},
+	plugins: [
+		new webpack.DefinePlugin({
+			'process.env.NODE_ENV': JSON.stringify('production'),
+		}),
+		new (require('webpack').ProvidePlugin)({
+			process: 'process/browser',
+			Buffer: ['buffer', 'Buffer'],
+		}),
+	],
+};
+
+module.exports = [config, mainWebviewConfig, sidebarWebviewConfig, secondaryWebviewConfig];
 

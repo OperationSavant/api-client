@@ -1,23 +1,18 @@
 import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
 import { ErrorBoundary } from 'react-error-boundary';
-// import { store } from '@/store';
-import { Provider } from 'react-redux';
 import { ErrorFallback } from '@/components/custom/states/error-fallback';
 import { LoadingFallback } from '@/components/custom/states/loading-fallback';
-import { sidebarStore } from '@/store/sidebar-store';
 
 const App = lazy(() => import('./App'));
 
-const root = ReactDOM.createRoot(document.getElementById('sidebar-root') as HTMLElement);
+const root = ReactDOM.createRoot(document.getElementById('secondary-root') as HTMLElement);
 root.render(
 	<React.StrictMode>
 		<ErrorBoundary FallbackComponent={ErrorFallback}>
-			<Provider store={sidebarStore}>
-				<Suspense fallback={<LoadingFallback message='Loading Sidebar...' description='Please wait while we prepare your sidebar' />}>
-					<App />
-				</Suspense>
-			</Provider>
+			<Suspense fallback={<LoadingFallback />}>
+				<App />
+			</Suspense>
 		</ErrorBoundary>
 	</React.StrictMode>
 );

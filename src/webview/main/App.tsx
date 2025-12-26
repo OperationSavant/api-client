@@ -1,7 +1,7 @@
 import { useRef, useEffect, useMemo, useCallback } from 'react';
 import { vscode } from '@/vscode';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
-import { ImperativePanelGroupHandle } from 'react-resizable-panels';
+import type { ImperativePanelGroupHandle } from 'react-resizable-panels';
 import { ResponseViewer } from '@/components/response/response-viewer';
 import { useAppDispatch } from '@/store/main-store';
 import {
@@ -13,8 +13,7 @@ import {
 	createOAuth2Handlers,
 } from '@/handlers';
 import { useWebviewMessaging } from '@/hooks/useWebviewMessaging';
-import { MainViewState } from '@/types/mainview-state';
-import { useStateRestoration } from '@/hooks/useStateRestoration';
+import { useWebviewInitialization } from '@/hooks/useStateRestoration';
 import { LoadingFallback } from '@/components/custom/states/loading-fallback';
 import { RequestViewer } from '@/components/request/request-viewer';
 import { createThemeHandlers } from '@/handlers/theme-handlers';
@@ -24,39 +23,25 @@ const App = () => {
 	const dispatch = useAppDispatch();
 	const messaging = useWebviewMessaging();
 	const panelGroupRef = useRef<ImperativePanelGroupHandle>(null);
-	const initialState = useMemo(() => vscode.getState<MainViewState>(), []);
+	const { isReady, isInitialized, markReady, markInitialized } = useWebviewInitialization();
 
 	const sendToExtension = useCallback((message: any) => {
 		vscode.postMessage(message);
 	}, []);
 
-	const persistState = useCallback((state: MainViewState) => {
-		vscode.setState(state);
-	}, []);
-
-	const { isRestored } = useStateRestoration({
-		initialState,
-		onStatePersist: persistState,
-	});
-
-	const initializeHandlers = useMemo(() => createInitializeHandlers({ dispatch }), [dispatch]);
-
+	const initializeHandlers = useMemo(() => createInitializeHandlers({ dispatch, onInitialized: markInitialized }), [dispatch, markInitialized]);
 	const responseHandlers = useMemo(() => createResponseHandlers({ dispatch }), [dispatch]);
-
 	const collectionHandlers = useMemo(() => createCollectionHandlers({ dispatch }), [dispatch]);
-
 	const requestHandlers = useMemo(() => createRequestHandlers({ dispatch }), [dispatch]);
-
 	const fileHandlers = useMemo(() => createFileHandlers({ dispatch }), [dispatch]);
-
 	const themeHandlers = useMemo(() => createThemeHandlers(), []);
 	const oauth2Handlers = useMemo(() => createOAuth2Handlers({ dispatch }), [dispatch]);
 
 	useEffect(() => {
-		if (isRestored) {
+		if (isReady) {
 			sendToExtension({ source: 'webview', command: 'webviewReady' });
 		}
-	}, [isRestored]);
+	}, [isReady]);
 
 	useEffect(() => {
 		const handleError = () => {
@@ -67,20 +52,19 @@ const App = () => {
 		messaging.registerHandler('apiResponse', responseHandlers.handleApiResponse);
 		messaging.registerHandler('addCollection', collectionHandlers.handleAddCollection);
 		messaging.registerHandler('setCollections', collectionHandlers.handleSetCollections);
-		messaging.registerHandler('loadRequest', requestHandlers.handleLoadRequest);
 		messaging.registerHandler('resetState', requestHandlers.handleResetState);
 		messaging.registerHandler('formDataFileResponse', fileHandlers.handleFormDataFileResponse);
 		messaging.registerHandler('binaryFileResponse', fileHandlers.handleBinaryFileResponse);
 		messaging.registerHandler('themeData', themeHandlers.handleThemeData);
 		messaging.registerHandler('oauth2TokenResponse', oauth2Handlers.handleOAuth2TokenResponse);
 		messaging.registerHandler('error', handleError);
+		markReady();
 
 		return () => {
 			messaging.unregisterHandler('initialize');
 			messaging.unregisterHandler('apiResponse');
 			messaging.unregisterHandler('addCollection');
 			messaging.unregisterHandler('setCollections');
-			messaging.unregisterHandler('loadRequest');
 			messaging.unregisterHandler('resetState');
 			messaging.unregisterHandler('formDataFileResponse');
 			messaging.unregisterHandler('binaryFileResponse');
@@ -88,10 +72,10 @@ const App = () => {
 			messaging.unregisterHandler('oauth2TokenResponse');
 			messaging.unregisterHandler('error');
 		};
-	}, [messaging, responseHandlers, collectionHandlers, requestHandlers, fileHandlers, themeHandlers, oauth2Handlers]);
+	}, [messaging, responseHandlers, collectionHandlers, requestHandlers, fileHandlers, themeHandlers, oauth2Handlers, markReady]);
 
-	if (!isRestored) {
-		return <LoadingFallback message='Restoring session...' description='Please wait while we restore your previous workspace state' />;
+	if (!isInitialized) {
+		return <LoadingFallback message={'Restoring session...'} description={'Please wait while we restore your previous workspace state'} />;
 	}
 
 	return (

@@ -35,7 +35,7 @@ export type WebviewMessage =
 
 export type WebviewViewMessage =
 	| { source: 'webviewView'; command: 'createCollection'; name: string }
-	| { source: 'webviewView'; command: 'openCollectionView'; commandId: string; args?: Collection }
+	| { source: 'webviewView'; command: 'openCollectionView'; commandId: string; args?: [Collection] }
 	| { source: 'webviewView'; command: 'createNewRequest'; commandId: string; args?: any[] }
 	| { source: 'webviewView'; command: 'createFolder'; payload: { collectionId: string; name: string; parentId?: string; description?: string } }
 	| { source: 'webviewView'; command: 'openRequest'; commandId: string; args?: any[] }

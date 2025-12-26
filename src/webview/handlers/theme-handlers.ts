@@ -12,7 +12,7 @@ export function createThemeHandlers() {
 				monaco,
 				themeType: message.themeContent.type,
 			});
-			monaco.editor.setTheme('vscode-theme');
+			// monaco.editor.setTheme('vscode-theme');
 		} catch (error) {
 			// Monaco not loaded yet or not needed - theme will apply when Monaco loads
 			console.debug('Monaco not available for theme application:', error);

@@ -1,7 +1,8 @@
-import { Uri, WebviewView, WebviewViewProvider } from 'vscode';
+import { ExtensionContext, Uri, WebviewView, WebviewViewProvider } from 'vscode';
 import { ContentBuilder } from '../services/webview-content-builder';
 import { MessageRouter } from '../orchestrators/message-router';
 import { broadcasterHub } from '../orchestrators/broadcaster-hub';
+import { OrchestratorHelper } from '../orchestrators/orchestrator-helper';
 
 export class SidebarProvider implements WebviewViewProvider {
 	constructor(
@@ -15,20 +16,21 @@ export class SidebarProvider implements WebviewViewProvider {
 			enableScripts: true,
 			localResourceRoots: [Uri.joinPath(this.extensionUri, 'dist')],
 		};
-		webviewView.webview.onDidReceiveMessage(async message => {
-			try {
-				await this.messageRouter.route(message, webviewView);
-			} catch (error) {
-				console.error('[SidebarProvider] Message handling error:', error);
-				// Send error to webview for user feedback
-				broadcasterHub.broadcast({
-					command: 'error',
-					message: error instanceof Error ? error.message : 'An unexpected error occurred',
-				});
-			}
-		});
+		// webviewView.webview.onDidReceiveMessage(async message => {
+		// 	try {
+		// 		await this.messageRouter.route(message, webviewView);
+		// 	} catch (error) {
+		// 		console.error('[SidebarProvider] Message handling error:', error);
+		// 		// Send error to webview for user feedback
+		// 		broadcasterHub.broadcast({
+		// 			command: 'error',
+		// 			message: error instanceof Error ? error.message : 'An unexpected error occurred',
+		// 		});
+		// 	}
+		// });
+		OrchestratorHelper.watchWebViewMessages(webviewView, this.messageRouter);
 		const webviewUri = Uri.joinPath(this.extensionUri, 'dist', 'sidebar.js');
-		webviewView.webview.html = ContentBuilder.buildHtml(webviewView.webview, webviewUri, 'sidebar-root');
+		OrchestratorHelper.configurePanel(webviewUri, webviewView, { extensionUri: this.extensionUri } as ExtensionContext, 'sidebar-root');
 		broadcasterHub.registerWebviewView(webviewView);
 	}
 }
