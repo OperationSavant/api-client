@@ -1,4 +1,4 @@
-import { Database } from '@vscode/sqlite3';
+import type { Database } from '@vscode/sqlite3';
 import { PersistenceError } from './db-helpers';
 
 export class SQLiteEnvironmentPersistence {

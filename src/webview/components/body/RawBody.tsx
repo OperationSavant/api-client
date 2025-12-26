@@ -3,11 +3,12 @@ import { Button } from '@/components/ui/button';
 import { Code } from 'lucide-react';
 import { RawBody } from '@/shared/types/body';
 import { useSelector } from 'react-redux';
-import { RootState, useAppDispatch } from '@/store/main-store';
+import type { RootState} from '@/store/main-store';
+import { useAppDispatch } from '@/store/main-store';
 import { ApiClientSelect } from '@/components/custom/api-client-select';
 import ApiClientFieldRow from '@/components/custom/api-client-field-row';
 import { BODY_TYPE_OPTIONS } from '@/shared/constants/select-options';
-import { MonacoEditorHandle } from '@/shared/types/monaco';
+import type { MonacoEditorHandle } from '@/shared/types/monaco';
 import { setRawBody } from '@/features/request/requestSlice';
 import { MonacoEditor } from '@/components/editor/lazy-monaco-editor';
 

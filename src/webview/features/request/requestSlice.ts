@@ -1,21 +1,23 @@
-import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
-import { AuthConfig } from '@/shared/types/auth';
-import {
+import type { PayloadAction} from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import type { AuthConfig } from '@/shared/types/auth';
+import type {
 	RequestBody,
 	FormDataBody,
-	createDefaultRequestBody,
 	BinaryBody,
 	RawBody,
 	GraphQLBody,
-	KeyValuePair,
+	KeyValuePair} from '@/shared/types/body';
+import {
+	createDefaultRequestBody,
 	isFormDataBody,
 	isUrlEncodedBody,
 	isRawBody,
 	isBinaryBody,
 	isGraphQLBody,
 } from '@/shared/types/body';
-import { Param } from '@/shared/types/request';
-import { BodyType } from '@/shared/types';
+import type { Param } from '@/shared/types/request';
+import type { BodyType } from '@/shared/types';
 
 /**
  * Request Editor State

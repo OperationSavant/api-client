@@ -4,7 +4,6 @@ import {
 	ChevronRight,
 	ChevronDown,
 	Folder,
-	File,
 	MoreHorizontal,
 	Copy,
 	MoveRight,
@@ -27,13 +26,13 @@ import {
 	DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { FolderNode, TreeNode } from '@/shared/types/tree-node';
+import type { FolderNode, TreeNode } from '@/shared/types/tree-node';
 import ApiClientButton from './api-client-button';
 import { Tooltip, TooltipTrigger, TooltipContent } from '../ui/tooltip';
 import { useContainerBreakpoint } from '@/hooks/use-container-breakpoint';
 import { ApiClientInput } from './api-client-input';
 import { Badge } from '../ui/badge';
-import { HttpVerb } from '@/shared/types';
+import type { HttpVerb } from '@/shared/types';
 
 /* ------------------------------------------------------
    TYPES
@@ -194,9 +193,10 @@ export const TreeView: React.FC<TreeViewProps> = ({
 	const size = isCompact ? 'icon' : 'sm';
 
 	React.useEffect(() => {
+		const current = autoExpandTimeouts.current;
 		return () => {
-			autoExpandTimeouts.current.forEach(id => clearTimeout(id));
-			autoExpandTimeouts.current.clear();
+			current.forEach(id => clearTimeout(id));
+			current.clear();
 		};
 	}, []);
 
@@ -530,11 +530,12 @@ const TreeNodeItem: React.FC<TreeNodeItemProps> = ({
 	const ref = React.useRef<HTMLDivElement | null>(null);
 
 	React.useEffect(() => {
+		const currentNoderefs = nodeRefs.current;
 		if (ref.current) {
-			nodeRefs.current?.set(node.id, ref.current);
+			currentNoderefs?.set(node.id, ref.current);
 		}
 		return () => {
-			nodeRefs.current?.delete(node.id);
+			currentNoderefs?.delete(node.id);
 		};
 	}, [node.id, nodeRefs]);
 
@@ -588,6 +589,7 @@ const TreeNodeItem: React.FC<TreeNodeItemProps> = ({
 	};
 
 	const getDropPosition = (e: React.DragEvent): 'above' | 'inside' | 'below' => {
+		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		const el = ref.current!;
 		const rect = el.getBoundingClientRect();
 		const offset = e.clientY - rect.top;
@@ -601,6 +603,7 @@ const TreeNodeItem: React.FC<TreeNodeItemProps> = ({
 		const pos = getDropPosition(e);
 
 		if (node.type === 'file' && pos === 'inside') {
+			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 			const el = ref.current!;
 			const rect = el.getBoundingClientRect();
 			const offset = e.clientY - rect.top;

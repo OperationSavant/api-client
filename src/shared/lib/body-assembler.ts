@@ -1,5 +1,6 @@
-import { RequestBody, isFormDataBody, isRawBody, isUrlEncodedBody, isBinaryBody, isGraphQLBody, isNoneBody } from '@/shared/types/body';
-import { Param } from '@/shared/types/request';
+import type { RequestBody} from '@/shared/types/body';
+import { isFormDataBody, isRawBody, isUrlEncodedBody, isBinaryBody, isGraphQLBody, isNoneBody } from '@/shared/types/body';
+import type { Param } from '@/shared/types/request';
 
 export interface BodyAssemblyResult {
 	body: RequestBody;

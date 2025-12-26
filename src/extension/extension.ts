@@ -1,4 +1,5 @@
-import { ExtensionContext, WebviewPanel } from 'vscode';
+import type { ExtensionContext} from 'vscode';
+import { WebviewPanel } from 'vscode';
 import { MessageRouter } from '@/extension/orchestrators/message-router';
 import { WebviewOrchestrator } from '@/extension/orchestrators/webview-orchestrator';
 import { ViewOrchestrator } from '@/extension/orchestrators/view-orchestrator';

@@ -1,4 +1,4 @@
-import { HistoryItem } from '@/shared/types/history';
+import type { HistoryItem } from '@/shared/types/history';
 
 /**
  * Port interface for history persistence

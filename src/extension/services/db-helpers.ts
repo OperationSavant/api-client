@@ -1,4 +1,4 @@
-import { Database, Statement } from '@vscode/sqlite3';
+import type { Database, Statement } from '@vscode/sqlite3';
 
 /**
  * Custom error types for database persistence operations

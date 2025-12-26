@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { useAppDispatch, RootState } from '@/store/sidebar-store';
-import { SidebarViewState } from '@/types/sidebarview-state';
+import type { RootState } from '@/store/sidebar-store';
+import { useAppDispatch } from '@/store/sidebar-store';
+import type { SidebarViewState } from '@/types/sidebarview-state';
 import { useSelector } from 'react-redux';
 import { setCollectionState } from '@/features/collections/sidebar-collectionSlice';
 

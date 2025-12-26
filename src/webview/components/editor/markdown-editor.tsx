@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { cn } from '@/shared/lib/utils';
-import { MonacoEditorHandle } from '@/shared/types/monaco';
 import { SimpleEditor } from '../tiptap-templates/simple/simple-editor';
 
 interface MarkdownEditorProps {
@@ -10,10 +9,7 @@ interface MarkdownEditorProps {
 	className?: string;
 }
 
-export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ value, onChange, className }) => {
-	const editorRef = React.useRef<MonacoEditorHandle>(null);
-	const [activeTab, setActiveTab] = useState<'markdown' | 'preview'>('markdown');
-
+export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ className }) => {
 	return (
 		<div className={cn('flex flex-col border border-input rounded-md h-40', className)}>
 			{/* <div className='flex border-b border-input'>

@@ -1,5 +1,5 @@
 import { addCollection, setCollections } from '@/features/collections/main-collectionsSlice';
-import { AppDispatch } from '@/store/main-store';
+import type { AppDispatch } from '@/store/main-store';
 
 interface CollectionHandlerDependencies {
 	dispatch: AppDispatch;

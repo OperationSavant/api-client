@@ -1,8 +1,9 @@
-import { ExtensionContext, Uri, ViewColumn, WebviewOptions, WebviewPanel, WebviewPanelOptions, WebviewView, window } from 'vscode';
+import type { ExtensionContext, ViewColumn, WebviewOptions, WebviewPanel, WebviewPanelOptions, WebviewView} from 'vscode';
+import { Uri, window } from 'vscode';
 import { ContentBuilder } from '../services/webview-content-builder';
 import { broadcasterHub } from './broadcaster-hub';
-import { MessageRouter } from './message-router';
-import { WebviewMessage, WebviewViewMessage } from '@/shared/types/webview-messages';
+import type { MessageRouter } from './message-router';
+import type { WebviewMessage, WebviewViewMessage } from '@/shared/types/webview-messages';
 
 export class OrchestratorHelper {
 	static createPanel(

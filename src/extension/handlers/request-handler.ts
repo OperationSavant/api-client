@@ -1,9 +1,9 @@
-import { WebviewPanel } from 'vscode';
-import { RequestExecutionConfig, RequestExecutorService } from '../services/request-executor';
+import type { WebviewPanel } from 'vscode';
+import type { RequestExecutionConfig, RequestExecutorService } from '../services/request-executor';
 import { historyService } from '@/domain/services/history-service';
 import { unitOfWork } from '@/domain/services/unit-of-work';
 import { StateManager } from '../services/state-manager';
-import { HistoryItem } from '@/shared/types/history';
+import type { HistoryItem } from '@/shared/types/history';
 import { broadcasterHub } from '../orchestrators/broadcaster-hub';
 
 interface RequestHandlerDependencies {

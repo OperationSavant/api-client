@@ -1,5 +1,5 @@
 import React from 'react';
-import { BearerAuth } from '@/shared/types/auth';
+import type { BearerAuth } from '@/shared/types/auth';
 import { ApiClientInput } from '@/components/custom/api-client-input';
 import { ApiClientTextarea } from '@/components/custom/api-client-textarea';
 import ApiClientFieldRow from '@/components/custom/api-client-field-row';

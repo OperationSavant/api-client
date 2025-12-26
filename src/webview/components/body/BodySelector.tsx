@@ -9,8 +9,8 @@ const RawBody = lazy(() => import('./RawBody'));
 import BinaryBody from './BinaryBody';
 const GraphQLBody = lazy(() => import('./GraphQLBody'));
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '@/store/main-store';
-import { BodyType } from '@/shared/types';
+import type { RootState } from '@/store/main-store';
+import type { BodyType } from '@/shared/types';
 import { setBodyType } from '@/features/request/requestSlice';
 import { LoadingFallback } from '../custom/states/loading-fallback';
 

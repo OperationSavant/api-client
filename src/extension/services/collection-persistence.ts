@@ -1,6 +1,6 @@
-import { Database } from '@vscode/sqlite3';
-import { ICollectionPersistence } from '@/domain/types/collection-persistence';
-import { Collection, CollectionFolder, CollectionRequest } from '@/shared/types/collection';
+import type { Database } from '@vscode/sqlite3';
+import type { ICollectionPersistence } from '@/domain/types/collection-persistence';
+import type { Collection, CollectionFolder, CollectionRequest } from '@/shared/types/collection';
 import { queryAll, runQuery, PreparedStatement, safeJsonParse, safeJsonStringify, PersistenceError } from './db-helpers';
 
 export class SQLiteCollectionPersistence implements ICollectionPersistence {

@@ -1,4 +1,4 @@
-import { TabConfig } from '@/shared/types/tabs';
+import type { TabConfig } from '@/shared/types/tabs';
 import ParamsTab from '@/components/request-tabs/ParamsTab';
 import HeadersTab from '@/components/request-tabs/HeadersTab';
 import AuthTab from '@/components/request-tabs/AuthTab';

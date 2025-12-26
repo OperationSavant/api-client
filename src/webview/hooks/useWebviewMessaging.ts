@@ -3,7 +3,7 @@ import { useRef, useCallback, useEffect } from 'react';
 export const useWebviewMessaging = () => {
 	const messageHandlers = useRef<Record<string, (data: any) => void>>({});
 
-	const registerHandler = useCallback((command: string, handler: (data: any) => void) => {
+	const registerHandler = useCallback((command: string, handler: (data: any, ...rest: any) => void) => {
 		messageHandlers.current[command] = handler;
 	}, []);
 

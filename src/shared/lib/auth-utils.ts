@@ -1,4 +1,4 @@
-import { AuthConfig } from '@/shared/types/auth';
+import type { AuthConfig } from '@/shared/types/auth';
 
 export function validateAuth(auth: AuthConfig): string[] {
 	const errors: string[] = [];

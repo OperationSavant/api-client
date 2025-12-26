@@ -1,5 +1,5 @@
-import { Collection, CollectionFolder, CollectionRequest, CollectionMetadata, CollectionTreeNode } from '@/shared/types/collection';
-import { ICollectionPersistence } from '@/domain/types/collection-persistence';
+import type { Collection, CollectionFolder, CollectionRequest, CollectionMetadata, CollectionTreeNode } from '@/shared/types/collection';
+import type { ICollectionPersistence } from '@/domain/types/collection-persistence';
 import { unitOfWork } from './unit-of-work';
 
 export class CollectionService {

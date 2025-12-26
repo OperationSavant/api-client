@@ -41,13 +41,12 @@ const App = () => {
 		if (isReady) {
 			sendToExtension({ source: 'webview', command: 'webviewReady' });
 		}
-	}, [isReady]);
+	}, [isReady, sendToExtension]);
 
 	useEffect(() => {
 		const handleError = () => {
 			dispatch(setIsExecuting(false));
 		};
-
 		messaging.registerHandler('initialize', initializeHandlers.handleInitialize);
 		messaging.registerHandler('apiResponse', responseHandlers.handleApiResponse);
 		messaging.registerHandler('addCollection', collectionHandlers.handleAddCollection);
@@ -72,7 +71,7 @@ const App = () => {
 			messaging.unregisterHandler('oauth2TokenResponse');
 			messaging.unregisterHandler('error');
 		};
-	}, [messaging, responseHandlers, collectionHandlers, requestHandlers, fileHandlers, themeHandlers, oauth2Handlers, markReady]);
+	}, [messaging, initializeHandlers, responseHandlers, collectionHandlers, requestHandlers, fileHandlers, themeHandlers, oauth2Handlers, markReady, dispatch]);
 
 	if (!isInitialized) {
 		return <LoadingFallback message={'Restoring session...'} description={'Please wait while we restore your previous workspace state'} />;

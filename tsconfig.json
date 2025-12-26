@@ -15,14 +15,7 @@
 			"@/shared/*": ["src/shared/*"]
 		}
 	},
-	"include": [
-		"src/extension/**/*",
-		"src/domain/**/*",
-		"src/shared/**/*",
-		"src/webview/lib/tiptap-utils.ts",
-		"src/webview/types/mainview-state.ts",
-		"src/webview/types/sidebarview-state.ts"
-	],
+	"include": ["src/extension/**/*", "src/domain/**/*", "src/shared/**/*"],
 	"exclude": ["node_modules", ".vscode-test", "src/webview"],
 	"references": [{ "path": "./tsconfig.webview.json" }]
 }

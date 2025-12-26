@@ -1,5 +1,6 @@
 const tseslint = require('@typescript-eslint/eslint-plugin');
 const tsparser = require('@typescript-eslint/parser');
+const reactHooks = require('eslint-plugin-react-hooks');
 
 module.exports = [
 	{
@@ -15,7 +16,7 @@ module.exports = [
 				ecmaFeatures: {
 					jsx: true,
 				},
-				project: ['./tsconfig.json', './tsconfig.webview.json'],
+				project: './tsconfig.eslint.json',
 				tsconfigRootDir: __dirname,
 			},
 			globals: {
@@ -34,6 +35,7 @@ module.exports = [
 		},
 		plugins: {
 			'@typescript-eslint': tseslint,
+			'react-hooks': reactHooks,
 		},
 		rules: {
 			'prefer-const': 'error',
@@ -57,6 +59,8 @@ module.exports = [
 			'@typescript-eslint/explicit-module-boundary-types': 'off',
 			'@typescript-eslint/no-var-requires': 'off',
 			'no-console': 'off',
+			'react-hooks/rules-of-hooks': 'error',
+			'react-hooks/exhaustive-deps': 'warn',
 		},
 	},
 ];

@@ -2,7 +2,7 @@ import React from 'react';
 import ApiClientHeader from '../custom/api-client-header';
 import { BodySelector } from '../body/BodySelector';
 import { useSelector } from 'react-redux';
-import { RootState } from '@/store/main-store';
+import type { RootState } from '@/store/main-store';
 
 interface BodyTabProps {
 	onSelectFile: (index: number) => void;

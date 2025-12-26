@@ -1,16 +1,15 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { RootState } from '@/store/main-store';
+import type { RootState } from '@/store/main-store';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { ApiClientInput } from '../api-client-input';
 import ApiClientButton from '../api-client-button';
 import { ApiClientSelect } from '../api-client-select';
 import ApiClientFieldRow from '../api-client-field-row';
-import { CollectionRequest, CollectionFolder, SaveRequestPayload, Collection } from '@/shared/types/collection';
+import type { CollectionRequest, CollectionFolder, SaveRequestPayload } from '@/shared/types/collection';
 import { arrayToRecord } from '@/shared/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { FileText, Folder, ListFilter } from 'lucide-react';
-import { MarkdownEditor } from '../../editor/markdown-editor';
 
 interface SaveRequestDialogProps {
 	isOpen: boolean;
@@ -72,7 +71,7 @@ export const ApiClientSaveRequestDialog: React.FC<SaveRequestDialogProps> = ({ i
 			setNewCollectionName('');
 			setFilterText('');
 		}
-	}, [isOpen]);
+	}, [isOpen, request, collections]);
 
 	const handleCreateCollection = () => {
 		if (!newCollectionName.trim()) return;

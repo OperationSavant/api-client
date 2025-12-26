@@ -1,12 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import ApiClientButton from '@/components/custom/api-client-button';
 import { Download, Filter, FolderPlus, Search, Trash2, X } from 'lucide-react';
-import { SidebarTabContext } from '@/shared/types/tabs';
-import { useSelector } from 'react-redux';
-import { RootState } from '@/store/sidebar-store';
-import { HistoryFilter, HistorySort } from '@/shared/types/history';
+import type { SidebarTabContext } from '@/shared/types/tabs';
+import type { HistoryFilter, HistorySort } from '@/shared/types/history';
 import { Checkbox } from '../ui/checkbox';
 import ApiClientFieldRow from '../custom/api-client-field-row';
 import { ApiClientSelect } from '../custom/api-client-select';

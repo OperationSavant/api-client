@@ -1,5 +1,5 @@
 import { setHistory, addHistoryItem, removeHistoryItem, clearHistory } from '@/features/history/sidebar-historySlice';
-import { AppDispatch } from '@/store/sidebar-store';
+import type { AppDispatch } from '@/store/sidebar-store';
 
 interface SidebarHistoryHandlerDependencies {
 	dispatch: AppDispatch;

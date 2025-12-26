@@ -1,17 +1,18 @@
 import { useCallback } from 'react';
 import { ApiClientRequestBar } from '../custom/app/api-client-request-bar';
 import { REQUEST_TABS_CONFIG } from '@/config/tabs/tabs-config';
-import { RequestTabContext } from '@/shared/types/tabs';
-import { AuthConfig, OAuth2Auth } from '@/shared/types/auth';
+import type { RequestTabContext } from '@/shared/types/tabs';
+import type { AuthConfig, OAuth2Auth } from '@/shared/types/auth';
 import ApiClientTabs from '../custom/api-client-tabs';
-import { RootState, useAppDispatch } from '@/store/main-store';
+import type { RootState} from '@/store/main-store';
+import { useAppDispatch } from '@/store/main-store';
 import { useSelector } from 'react-redux';
 import { setAuth, setMethod, setUrl } from '@/features/request/requestSlice';
 import { setActiveRequestTab, setIsExecuting, setIsSaveDialogOpen } from '@/features/editor/editorUISlice';
 import { useRequestExecution } from '@/hooks/useRequestExecution';
 import { clearResponse } from '@/features/response/responseSlice';
 import { ApiClientSaveRequestDialog } from '../custom/app/api-client-save-request-dialog';
-import { SaveRequestPayload } from '@/shared/types/collection';
+import type { SaveRequestPayload } from '@/shared/types/collection';
 
 interface RequestViewProps {
 	sendToExtension: (message: any) => void;

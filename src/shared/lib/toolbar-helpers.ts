@@ -1,4 +1,4 @@
-import { MonacoEditorHandle } from '@/shared/types/monaco';
+import type { MonacoEditorHandle } from '@/shared/types/monaco';
 
 export const handleHeadingClick = (editorRef: React.RefObject<MonacoEditorHandle | null>) => {
 	const editor = editorRef.current?.getEditor();

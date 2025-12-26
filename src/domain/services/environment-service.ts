@@ -1,4 +1,4 @@
-import {
+import type {
 	EnvironmentVariable,
 	EnvironmentScope,
 	VariableScope,

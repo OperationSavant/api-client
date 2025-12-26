@@ -1,7 +1,7 @@
 // cURL Integration utilities for VS Code API Client
 // Handles parsing cURL commands to requests and generating cURL from requests
 
-import { RequestBody } from '@/shared/types/body';
+import type { RequestBody } from '@/shared/types/body';
 
 export interface CurlParseResult {
 	url: string;

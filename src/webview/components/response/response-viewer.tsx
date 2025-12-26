@@ -3,16 +3,16 @@ import { Button } from '../ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Label } from '../ui/label';
 import { Maximize2, Minimize2, ChevronsUpDown, ExternalLink, Send, AlignStartVertical, TextSelect, TestTube, Cookie } from 'lucide-react';
-import { Response } from '@/shared/types/response';
+import type { Response } from '@/shared/types/response';
 import { Separator } from '../ui/separator';
 import { Badge } from '../ui/badge';
 import { LoadingFallback } from '../custom/states/loading-fallback';
 import { EmptyState } from '../custom/states/empty-state';
-import { ApiClientTable } from '../custom/api-client-kvp';
-import { cn, recordToArray } from '@/shared/lib/utils';
+import { cn } from '@/shared/lib/utils';
 import ApiClientTabs from '../custom/api-client-tabs';
-import { ResponseTabContext, TabConfig } from '@/shared/types/tabs';
-import { RootState, useAppDispatch } from '@/store/main-store';
+import type { ResponseTabContext, TabConfig } from '@/shared/types/tabs';
+import type { RootState } from '@/store/main-store';
+import { useAppDispatch } from '@/store/main-store';
 import { useSelector } from 'react-redux';
 import { setActiveResponseTab, setResponsePanelSize } from '@/features/editor/editorUISlice';
 import ResponseBodyTab from './response-body-tab';
@@ -56,7 +56,7 @@ export const ResponseViewer: React.FC<ResponseViewerProps> = ({ sendToExtension,
 				setResponsePanelSize('default');
 				break;
 		}
-	}, [responsePanelSize]);
+	}, [responsePanelSize, panelGroupRef]);
 
 	const formatBytes = (bytes: number): string => {
 		if (bytes === 0) return '0 Bytes';
@@ -150,9 +150,9 @@ export const ResponseViewer: React.FC<ResponseViewerProps> = ({ sendToExtension,
 		</div>
 	);
 
-	const handleCopy = () => {
+	const handleCopy = async () => {
 		if (response && response.body && typeof response.body === 'string') {
-			navigator.clipboard.writeText(response.body);
+			await navigator.clipboard.writeText(response.body);
 		}
 	};
 

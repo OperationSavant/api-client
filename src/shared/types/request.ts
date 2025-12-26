@@ -1,8 +1,9 @@
 // Types for HTTP requests and cURL integration
 
-import { HttpVerb } from '.';
-import { AuthConfig } from './auth';
-import { createDefaultRequestBody, RequestBody } from './body';
+import type { HttpVerb } from '.';
+import type { AuthConfig } from './auth';
+import type { RequestBody } from './body';
+import { createDefaultRequestBody } from './body';
 
 export type Param = { key: string; value: string; checked: boolean };
 

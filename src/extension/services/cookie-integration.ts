@@ -3,8 +3,8 @@
  * Integration component for automatic cookie handling in HTTP requests
  */
 
-import { CookieService } from '@/domain/services/cookie-service';
-import { Request } from '@/shared/types/request';
+import type { CookieService } from '@/domain/services/cookie-service';
+import type { Request } from '@/shared/types/request';
 
 export interface HttpResponse {
 	status: number;

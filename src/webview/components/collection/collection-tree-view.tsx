@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { ChevronRight, ChevronDown, FolderOpen, Folder, FileText, Plus, Edit, Trash2, Save, X, MoreVertical } from 'lucide-react';
-import { Collection, CollectionTreeNode, CollectionFolder, CollectionRequest } from '@/shared/types/collection';
+import type { Collection, CollectionTreeNode, CollectionRequest } from '@/shared/types/collection';
+import { CollectionFolder } from '@/shared/types/collection';
 
 interface CollectionTreeViewProps {
 	collection: Collection;

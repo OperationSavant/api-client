@@ -1,5 +1,6 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { HistoryItem } from '@/shared/types/history';
+import type { PayloadAction } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
+import type { HistoryItem } from '@/shared/types/history';
 
 export interface HistoryState {
 	history: HistoryItem[];

@@ -1,17 +1,14 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Filter, Download, Trash2, Clock, CheckCircle, XCircle, Calendar, FileText, FolderPlus, ChevronDown, ChevronRight, X } from 'lucide-react';
-import { HistoryFilter, HistoryItem, HistorySort } from '@/shared/types/history';
-import { RootState } from '@/store/sidebar-store';
-import { SidebarTabContext } from '@/shared/types/tabs';
+import { Trash2, Clock, CheckCircle, XCircle, Calendar, FileText, FolderPlus, ChevronDown, ChevronRight } from 'lucide-react';
+import type { HistoryFilter, HistoryItem, HistorySort } from '@/shared/types/history';
+import type { RootState } from '@/store/sidebar-store';
+import type { SidebarTabContext } from '@/shared/types/tabs';
 import { ScrollArea } from '../ui/scroll-area';
 import { formatDate, getMethodColor, getStatusColor } from '@/lib/ui-utils';
-import ApiClientButton from '../custom/api-client-button';
 import { Checkbox } from '../ui/checkbox';
 
 interface HistoryListProps {

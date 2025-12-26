@@ -1,4 +1,5 @@
-import { WebviewPanel, window, workspace, OpenDialogOptions, Uri, ViewColumn } from 'vscode';
+import type { WebviewPanel, OpenDialogOptions} from 'vscode';
+import { window, workspace, Uri, ViewColumn } from 'vscode';
 import { contentType as mimeContentType } from 'mime-types';
 import { broadcasterHub } from '../orchestrators/broadcaster-hub';
 

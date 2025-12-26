@@ -3,7 +3,8 @@
  * Handles cookie storage, parsing, and management operations
  */
 
-import { Cookie, CookieJar, CookieFilter, CookieStats, SetCookieHeader, CookieValidationResult } from '@/shared/types/cookie';
+import type { Cookie, CookieFilter, CookieStats, SetCookieHeader, CookieValidationResult } from '@/shared/types/cookie';
+import { CookieJar } from '@/shared/types/cookie';
 
 export class CookieService {
 	private cookies: Map<string, Cookie> = new Map();

@@ -33,7 +33,7 @@ import {
 	AlertTriangleIcon,
 } from 'lucide-react';
 import { cn } from '@/shared/lib/utils';
-import { Cookie, CookieFilter, CookieStats, CookieManagerProps } from '@/shared/types/cookie';
+import type { Cookie, CookieFilter, CookieStats, CookieManagerProps } from '@/shared/types/cookie';
 
 export const CookieManager: React.FC<CookieManagerProps> = ({
 	cookies,

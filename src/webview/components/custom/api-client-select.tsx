@@ -1,6 +1,6 @@
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { cn } from '@/shared/lib/utils';
-import { LucideIcon } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
 interface ApiClientSelectProps extends React.ComponentProps<typeof Select> {
 	options: (Record<'label' | 'value', string> & { Icon?: LucideIcon | React.FC<React.SVGProps<SVGSVGElement>> })[];
