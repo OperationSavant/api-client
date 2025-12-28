@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Code } from 'lucide-react';
 import { RawBody } from '@/shared/types/body';
 import { useSelector } from 'react-redux';
-import type { RootState} from '@/store/main-store';
+import type { RootState } from '@/store/main-store';
 import { useAppDispatch } from '@/store/main-store';
 import { ApiClientSelect } from '@/components/custom/api-client-select';
 import ApiClientFieldRow from '@/components/custom/api-client-field-row';
@@ -66,7 +66,7 @@ const RawBody: React.FC = () => {
 						onValueChange={value => updateRawConfig({ language: value as RawBody['language'] })}
 						placeholder='Select Body Type'
 						options={BODY_TYPE_OPTIONS}
-						classNameTrigger={`w-[230px] bg-muted-foreground/10 border rounded-md`}
+						classNameTrigger={`w-[230px]`}
 						classNameContent={`w-[230px]`}
 					/>
 				</ApiClientFieldRow>

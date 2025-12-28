@@ -12,6 +12,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import type { RootState } from '@/store/main-store';
 import { FORM_DATA_FIELD_TYPE_OPTIONS } from '@/shared/constants/select-options';
 import { setFormData } from '@/features/request/requestSlice';
+import { ApiClientInput } from '../custom/api-client-input';
 
 interface FormDataBodyProps {
 	onSelectFile: (index: number) => void;
@@ -52,15 +53,15 @@ const FormDataBody: React.FC<FormDataBodyProps> = ({ onSelectFile }) => {
 							</TableCell>
 							<TableCell className='border-r border-muted-foreground p-0'>
 								<div className='flex'>
-									<Input
-										className='w-full h-10 font-medium border-none focus:ring-0 focus:border-none rounded-none bg-transparent px-2 text-xs!'
+									<ApiClientInput
+										className='w-full text-xs'
 										placeholder='Key'
 										value={param.key}
 										onChange={e => updateRow(idx, { key: e.target.value })}
 										disabled={false}
 									/>
 									<ApiClientSelect
-										classNameTrigger='w-[200px] text-xs!'
+										classNameTrigger='w-[200px]'
 										onValueChange={(value: 'text' | 'file') => updateRow(idx, { type: value, value: '' })}
 										options={FORM_DATA_FIELD_TYPE_OPTIONS}
 										value={param.type}

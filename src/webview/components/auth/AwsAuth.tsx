@@ -47,7 +47,7 @@ export function AwsAuth({ auth, onChange }: AwsAuthProps) {
 					onValueChange={value => handleChange('region', value)}
 					placeholder='Select region'
 					options={AWS_REGIONS.map(region => ({ label: region, value: region }))}
-					classNameTrigger={`w-full bg-muted-foreground/10 border rounded-md`}
+					classNameTrigger={`w-full`}
 					classNameContent={`w-full`}
 				/>
 			</ApiClientFieldRow>
@@ -56,7 +56,7 @@ export function AwsAuth({ auth, onChange }: AwsAuthProps) {
 					onValueChange={value => handleChange('service', value)}
 					placeholder='Select service'
 					options={AWS_SERVICES.map(service => ({ label: service, value: service }))}
-					classNameTrigger={`w-full bg-muted-foreground/10 border rounded-md`}
+					classNameTrigger={`w-full`}
 					classNameContent={`w-full`}
 				/>
 			</ApiClientFieldRow>

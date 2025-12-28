@@ -1,16 +1,20 @@
 import { RESPONSE_CONTENT_TYPE_OPTIONS } from '@/shared/constants/select-options';
-import { Send } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import { CircleCheck, Copy, Download, Filter, Play, Search, Send, WrapText } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
 import { EmptyState } from '../custom/states/empty-state';
 import { useSelector } from 'react-redux';
 import type { RootState } from '@/store/main-store';
 import { useAppDispatch } from '@/store/main-store';
 import { cn } from '@/shared/lib/utils';
-import ApiClientTabs from '../custom/api-client-tabs';
-import type { TabConfig } from '@/shared/types/tabs';
-import ResponseSelectTab from './response-select-tab';
-import ResponsePreviewTab from './response-preview-tab';
 import { setActiveResponseBodyTab } from '@/features/editor/editorUISlice';
+import { ApiClientSelect } from '../custom/api-client-select';
+import ApiClientButton from '../custom/api-client-button';
+import { Separator } from '../ui/separator';
+import ResponseImageViewer from './response-image-viewer';
+import ResponsePDFViewer from './response-pdf-viewer';
+import ResponseStringViewer from './response-string-viewer';
+import { ApiClientInput } from '../custom/api-client-input';
+import type { MonacoEditorHandle } from '@/shared/types/monaco';
 
 interface ResponseBodyTabProps {
 	responseBody: string;
@@ -18,23 +22,37 @@ interface ResponseBodyTabProps {
 	handleCopy: () => void;
 }
 
-// const responseBodySelector = (responseBody: string, contentType: string, language: string) => {
-// 	if (contentType.includes('json')) {
-// 		return <ResponseStringViewer value={responseBody} language={language} wordWrap={true} copyButtonVisible={false} formatOnMount={true} />;
-// 	} else if (contentType.includes('html')) {
-// 		return <ResponseStringViewer value={responseBody} language={language} wordWrap={true} copyButtonVisible={false} formatOnMount={true} />;
-// 	} else if (contentType.includes('image')) {
-// 		return <ResponseImageViewer dataUri={responseBody!} altText={'response-image'} />;
-// 	} else if (contentType.includes('pdf')) {
-// 		return <ResponsePDFViewer pdfData={responseBody!} />;
-// 	}
-// };
+const responseBodySelector = (responseBody: string, contentType: string) => {
+	if (contentType.includes('image')) {
+		return <ResponseImageViewer dataUri={responseBody} altText={'response-image'} />;
+	} else if (contentType.includes('pdf')) {
+		return <ResponsePDFViewer pdfData={responseBody} />;
+	}
+};
 
-const ResponseBodyTab: React.FC<ResponseBodyTabProps> = ({ responseBody, contentType, handleCopy }) => {
+const renderBody = (
+	activeResponseBodyTab: string,
+	responseBody: string,
+	contentType: string,
+	language: string,
+	wordWrap: boolean,
+	editorRef: React.RefObject<MonacoEditorHandle | null>
+) => {
+	if (activeResponseBodyTab === 'preview') {
+		return responseBodySelector(responseBody, contentType);
+	}
+	return <ResponseStringViewer value={responseBody} language={language} wordWrap={wordWrap} formatOnMount={true} ref={editorRef} />;
+};
+
+const ResponseBodyTab: React.FC<ResponseBodyTabProps> = ({ responseBody, contentType }) => {
 	const dispatch = useAppDispatch();
 	const {
 		ui: { isExecuting, activeResponseBodyTab },
 	} = useSelector((state: RootState) => state);
+	const editorRef = useRef<MonacoEditorHandle>(null);
+	const [wordWrap, setWordWrap] = useState(false);
+	const [showFilter, setShowFilter] = useState(false);
+	const [copied, setCopied] = useState(false);
 
 	const getOptionsBasedOnresponseType = (contentType: string) => {
 		if (contentType.includes('image') || contentType.includes('pdf')) {
@@ -43,14 +61,14 @@ const ResponseBodyTab: React.FC<ResponseBodyTabProps> = ({ responseBody, content
 		return RESPONSE_CONTENT_TYPE_OPTIONS;
 	};
 
-	const getDefaultTabForContentType = (contentType: string): string => {
+	const setVisualBasedOnContentType = (contentType: string): string => {
 		if (contentType.includes('image') || contentType.includes('pdf')) {
 			return 'preview';
 		}
 		return 'default';
 	};
 
-	const getDeafultLangugaeForContentType = (contentType: string): string => {
+	const getDefaultLanguageForContentType = (contentType: string): string => {
 		if (contentType.includes('json')) {
 			return 'json';
 		} else if (contentType.includes('html')) {
@@ -65,14 +83,31 @@ const ResponseBodyTab: React.FC<ResponseBodyTabProps> = ({ responseBody, content
 		return 'hex';
 	};
 
-	const [language, setLanguage] = React.useState('json');
+	const [language, setLanguage] = useState(() => getDefaultLanguageForContentType(contentType));
 	const [options, setOptions] = useState(() => getOptionsBasedOnresponseType(contentType));
+
+	const handleValueChange = (value: string) => {
+		setLanguage(value);
+		dispatch(setActiveResponseBodyTab('default'));
+	};
+
+	const handleSearch = async () => {
+		await editorRef.current?.openSearch();
+	};
+
+	const handleCopy = async () => {
+		setCopied(true);
+		await editorRef.current?.copyToClipboard();
+		setTimeout(() => {
+			setCopied(false);
+		}, 1000);
+	};
 
 	useEffect(() => {
 		setOptions(getOptionsBasedOnresponseType(contentType));
-		const defaultTab = getDefaultTabForContentType(contentType);
-		dispatch(setActiveResponseBodyTab(defaultTab));
-		const defaultLanguage = getDeafultLangugaeForContentType(contentType);
+		const tab = setVisualBasedOnContentType(contentType);
+		dispatch(setActiveResponseBodyTab(tab));
+		const defaultLanguage = getDefaultLanguageForContentType(contentType);
 		setLanguage(defaultLanguage);
 	}, [contentType, dispatch]);
 
@@ -89,40 +124,63 @@ const ResponseBodyTab: React.FC<ResponseBodyTabProps> = ({ responseBody, content
 		);
 	}
 
-	const tabContext = {
-		responseBody,
-		contentType,
-		language,
-		options,
-	};
-
-	const RESPONSE_BODY_TABS_CONFIG: TabConfig[] = [
-		{
-			id: 'default',
-			label: '',
-			component: ResponseSelectTab,
-			selectMode: {
-				options,
-				enabled: true,
-				selectedValue: language,
-				onSelectChange: (value: string) => {
-					setLanguage(value);
-				},
-			},
-		},
-		{ id: 'preview', label: 'Preview', component: ResponsePreviewTab },
-	];
-
+	const currentOption = options.find(option => option.value === language);
 	return (
-		<div className='relative h-full w-full border border-border rounded-none bg-secondary flex flex-col'>
-			<ApiClientTabs
-				tabs={RESPONSE_BODY_TABS_CONFIG}
-				context={tabContext}
-				value={activeResponseBodyTab}
-				onChange={value => dispatch(setActiveResponseBodyTab(value))}
-				className='flex-1 flex flex-col min-h-0'
-				contentClassName='flex-1 min-h-0 h-full'
-			/>
+		<div className='relative h-full w-full rounded-none flex flex-col gap-2'>
+			{/* HEADER DIV */}
+			<div className='flex justify-between items-center w-full'>
+				{/* TABS */}
+				<div className='flex flex-1 gap-2 h-9'>
+					{activeResponseBodyTab !== 'default' ? (
+						<ApiClientButton variant='outline' content={language.toUpperCase()} className='w-fit' onClick={() => dispatch(setActiveResponseBodyTab('default'))}>
+							{currentOption?.Icon && <currentOption.Icon />}
+						</ApiClientButton>
+					) : (
+						<ApiClientSelect
+							classNameTrigger={cn(`w-fit`, `${activeResponseBodyTab === 'default' ? 'border border-primary' : ''}`)}
+							classNameContent={`w-fit justify-start`}
+							classNameDiv='flex justify-center items-center uppercase'
+							options={options.map(option => ({ label: option.label, value: option.value, Icon: option.Icon }))}
+							value={language}
+							onValueChange={value => handleValueChange(value)}
+						/>
+					)}
+					<Separator orientation='vertical' className='w-1 bg-primary' />
+					<ApiClientButton
+						variant={`${activeResponseBodyTab === 'preview' ? 'default' : 'outline'}`}
+						content='Preview'
+						onClick={() => dispatch(setActiveResponseBodyTab('preview'))}>
+						<Play />
+					</ApiClientButton>
+				</div>
+				{/* OPTIONS */}
+				<div className='flex justify-between items-center gap-2 h-9'>
+					<ApiClientButton variant={wordWrap ? 'default' : 'outline'} size='icon' data-testid='wrap-button' onClick={() => setWordWrap(!wordWrap)}>
+						<WrapText />
+					</ApiClientButton>
+					<Separator orientation='vertical' className='w-1 bg-primary' />
+					<ApiClientButton variant={showFilter ? 'default' : 'outline'} size='icon' data-testid='filter-button' onClick={() => setShowFilter(!showFilter)}>
+						<Filter />
+					</ApiClientButton>
+					<ApiClientButton variant={'outline'} size='icon' data-testid='search-button' onClick={handleSearch}>
+						<Search />
+					</ApiClientButton>
+					<Separator orientation='vertical' className='w-1 bg-primary' />
+					<ApiClientButton variant='outline' size='icon' data-testid='copy-button' onClick={handleCopy}>
+						{copied ? <CircleCheck className='bg-primary' /> : <Copy />}
+					</ApiClientButton>
+					<ApiClientButton variant='outline' size='icon' data-testid='download-button'>
+						<Download />
+					</ApiClientButton>
+				</div>
+			</div>
+			{/* Filter */}
+			{showFilter && activeResponseBodyTab === 'default' && (
+				<div className='flex w-full h-9'>
+					<ApiClientInput className='w-full' />
+				</div>
+			)}
+			{renderBody(activeResponseBodyTab, responseBody, contentType, language, wordWrap, editorRef)}
 		</div>
 	);
 };

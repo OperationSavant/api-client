@@ -12,17 +12,6 @@ export interface TabConfig<T extends string = string> {
 	props?: Record<string, any>;
 	hidden?: boolean;
 	testId?: string;
-	selectMode?: {
-		enabled: boolean;
-		options: Array<{
-			value: string;
-			label: string;
-			icon?: React.ComponentType<{ className?: string }>;
-		}>;
-		selectedValue?: string;
-		onSelectChange?: (value: string) => void;
-		placeholder?: string;
-	};
 }
 
 export interface RequestTabContext {
@@ -37,7 +26,6 @@ export interface ResponseTabContext {
 	responseBody?: string;
 	contentType?: string;
 	headers?: Record<string, string>;
-	handleCopy: () => void;
 }
 
 export interface SidebarTabContext {

@@ -164,7 +164,7 @@ export const ApiClientSaveRequestDialog: React.FC<SaveRequestDialogProps> = ({ i
 								placeholder='Select a collection'
 								options={collections.map(c => ({ label: c.name, value: c.id }))}
 								onValueChange={value => setSelectedCollectionId(value)}
-								classNameTrigger={`w-full rounded-[1px]`}
+								classNameTrigger={`w-full`}
 								classNameContent={`w-full max-h-50 overflow-y-auto`}
 							/>
 						</ApiClientFieldRow>

@@ -1,25 +1,27 @@
 import { MonacoEditor } from '@/components/editor/lazy-monaco-editor';
+import type { MonacoEditorHandle } from '@/shared/types/monaco';
+import { forwardRef } from 'react';
 
 interface ResponseStringViewerProps {
 	value: string;
 	language: string;
 	wordWrap: boolean;
+	searchEnabled?: boolean;
 	formatOnMount?: boolean;
-	copyButtonVisible?: boolean;
 }
 
-const ResponseStringViewer: React.FC<ResponseStringViewerProps> = ({ value, language, wordWrap, formatOnMount, copyButtonVisible }) => {
+const ResponseStringViewer = forwardRef<MonacoEditorHandle, ResponseStringViewerProps>(({ value, language, wordWrap, searchEnabled, formatOnMount }, ref) => {
 	return (
 		<MonacoEditor
+			ref={ref}
 			value={value}
 			language={language}
-			formatOnMount={formatOnMount}
 			wordWrap={wordWrap}
-			height='100%'
-			copyButtonVisible={copyButtonVisible}
+			searchEnabled={searchEnabled}
+			formatOnMount={formatOnMount}
 			readOnly={true}
+			height='100%'
 		/>
 	);
-};
-
+});
 export default ResponseStringViewer;

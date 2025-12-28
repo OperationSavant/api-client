@@ -4,7 +4,7 @@ import { ApiClientSelect } from '../api-client-select';
 import ApiClientButton from '../api-client-button';
 import { ApiClientInput } from '../api-client-input';
 import { HTTP_VERBS_OPTIONS } from '@/shared/constants/select-options';
-import type { LucideIcon} from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { Download, Save, Send } from 'lucide-react';
 import { HttpIcon, GraphQLIcon, GrpcIcon, SocketIOIcon, WebSocketIcon } from '../../../assets';
 import { useState } from 'react';
@@ -82,7 +82,7 @@ export function ApiClientRequestBar({
 							options={saveRequestOptions}
 							showIconOnly={true}
 							classNameDiv='flex justify-center items-center uppercase'
-							classNameTrigger={`w-[60px] h-4 bg-transparent`}
+							classNameTrigger={`w-[60px] h-4`}
 							classNameContent={`w-[160px] justify-start`}
 							value={requestType}
 							onValueChange={requestType => setRequestType(requestType)}

@@ -80,7 +80,7 @@ const App = () => {
 		<div className='flex flex-col h-screen w-full bg-sidebar text-sidebar-foreground gap-4 py-2 overflow-y-hidden'>
 			<div className='flex w-full px-2'>
 				<ApiClientSelect
-					classNameTrigger={`w-full bg-muted-foreground/10 border rounded-md`}
+					classNameTrigger={`w-full`}
 					classNameContent={`w-full`}
 					placeholder='Select workspace'
 					options={[
@@ -92,7 +92,7 @@ const App = () => {
 			<div className='flex w-full px-2'>
 				<ApiClientButtonGroup size={'lg'} className='w-full' label='New HTTP Request' onClick={() => handleOpenRequest()} />
 			</div>
-			<Separator orientation='horizontal' />
+			<Separator orientation='horizontal' className='bg-primary' />
 			<div className='grow flex flex-col w-full px-2 justify-between min-h-0'>
 				<ApiClientTabs
 					value={currentTab}

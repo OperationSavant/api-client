@@ -119,7 +119,7 @@ const HistoryTab = ({ context, handleExport, handleDeleteSelected, handleSelectA
 											)}
 											defaultOption={true}
 											placeholder='All methods'
-											classNameTrigger={`w-full bg-muted-foreground/10 border rounded-md`}
+											classNameTrigger={`w-full`}
 											classNameContent={`w-full`}
 										/>
 									</ApiClientFieldRow>
@@ -141,7 +141,7 @@ const HistoryTab = ({ context, handleExport, handleDeleteSelected, handleSelectA
 												{ label: 'Error', value: 'error' },
 											]}
 											placeholder='All statuses'
-											classNameTrigger={`w-full bg-muted-foreground/10 border rounded-md`}
+											classNameTrigger={`w-full`}
 											classNameContent={`w-full`}
 										/>
 									</ApiClientFieldRow>
@@ -169,7 +169,7 @@ const HistoryTab = ({ context, handleExport, handleDeleteSelected, handleSelectA
 												{ label: 'Slowest first', value: 'responseTime-desc' },
 											]}
 											placeholder='Sort by...'
-											classNameTrigger={`w-full bg-muted-foreground/10 border rounded-md`}
+											classNameTrigger={`w-full`}
 											classNameContent={`w-full`}
 										/>
 									</ApiClientFieldRow>
@@ -186,7 +186,7 @@ const HistoryTab = ({ context, handleExport, handleDeleteSelected, handleSelectA
 												{ label: 'None', value: 'none' },
 											]}
 											placeholder='Group by...'
-											classNameTrigger={`w-full bg-muted-foreground/10 border rounded-md`}
+											classNameTrigger={`w-full`}
 											classNameContent={`w-full`}
 										/>
 									</ApiClientFieldRow>

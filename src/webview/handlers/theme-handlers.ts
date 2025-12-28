@@ -5,7 +5,7 @@ export function createThemeHandlers() {
 		// Dynamically import Monaco only if it's being used
 		// This prevents Monaco from bundling in the main chunk
 		try {
-			const monaco = await import('monaco-editor/esm/vs/editor/editor.api');
+			const monaco = await import('monaco-editor');
 			defineVscodeTheme({
 				tokenColors: message.themeContent.tokenColors,
 				themeColors: message.themeContent.colors,
