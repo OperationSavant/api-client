@@ -150,12 +150,6 @@ export const ResponseViewer: React.FC<ResponseViewerProps> = ({ sendToExtension,
 		</div>
 	);
 
-	const handleCopy = async () => {
-		if (response && response.body && typeof response.body === 'string') {
-			await navigator.clipboard.writeText(response.body);
-		}
-	};
-
 	const ResponseViewerHeader = () => {
 		if (!response) return null;
 		const PanelIcon = responsePanelSize === 'default' ? Maximize2 : responsePanelSize === 'maximized' ? Minimize2 : ChevronsUpDown;
@@ -374,7 +368,6 @@ export const ResponseViewer: React.FC<ResponseViewerProps> = ({ sendToExtension,
 		responseBody: response?.body || '',
 		contentType: response?.contentType || '',
 		headers: response?.headers || {},
-		handleCopy,
 	};
 
 	const RESPONSE_TABS_CONFIG: TabConfig[] = [

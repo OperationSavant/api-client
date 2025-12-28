@@ -1,5 +1,5 @@
-import { editor as monacoEditorInstance, languages } from 'monaco-editor/esm/vs/editor/editor.api';
-import { useEffect, useRef, useState, forwardRef, useImperativeHandle } from 'react';
+import { editor as monacoEditor, languages } from 'monaco-editor';
+import { forwardRef, useEffect, useRef, useImperativeHandle } from 'react';
 import { format } from 'prettier/standalone';
 import type { MonacoEditorHandle, MonacoEditorProps } from '@/shared/types/monaco';
 
@@ -12,203 +12,217 @@ export const MonacoEditor = forwardRef<MonacoEditorHandle, MonacoEditorProps>(
 			height = '400px',
 			wordWrap = false,
 			minimap = false,
+			formatOnMount = false,
 			lineNumbers = true,
-			copyButtonVisible = true,
-			formatOnMount = true,
 			onContentChange,
 			className,
 		},
 		ref
 	) => {
-		const editorRef = useRef<HTMLDivElement>(null);
-		const editorInstanceRef = useRef<monacoEditorInstance.IStandaloneCodeEditor | null>(null);
-		const onContentChangeRef = useRef(onContentChange);
-		const [copyText, setCopyText] = useState('Copy');
+		const containerRef = useRef<HTMLDivElement>(null);
+		const editorRef = useRef<monacoEditor.IStandaloneCodeEditor | null>(null);
+		const onChangeRef = useRef(onContentChange);
 
+		/* -----------------------------
+		 * Keep onChange stable
+		 * ----------------------------- */
 		useEffect(() => {
-			onContentChangeRef.current = onContentChange;
+			onChangeRef.current = onContentChange;
 		}, [onContentChange]);
 
-		useImperativeHandle(
-			ref,
-			() => ({
-				async format() {
-					const editor = editorInstanceRef.current;
-					if (!editor) {
-						return;
-					}
-					await editor.getAction('editor.action.formatDocument')?.run();
-					return editor.getValue();
-				},
-				getEditor: () => editorInstanceRef.current,
-			}),
-			[]
-		);
-
-		const handleCopy = async () => {
-			if (editorInstanceRef.current) {
-				const content = editorInstanceRef.current.getValue();
-				try {
-					await navigator.clipboard.writeText(content);
-					setCopyText('Copied!');
-					setTimeout(() => setCopyText('Copy'), 2000);
-				} catch (error) {
-					console.error('Failed to copy content:', error);
-				}
-			}
-		};
-
+		/* -----------------------------
+		 * Register formatters (ONCE)
+		 * ----------------------------- */
 		useEffect(() => {
-			if (editorRef.current) {
-				const editor = monacoEditorInstance.create(editorRef.current, {
-					value,
-					language,
-					readOnly,
-					automaticLayout: true,
-					minimap: { enabled: minimap },
-					scrollBeyondLastLine: false,
-					renderLineHighlight: 'none',
-					lineNumbers: lineNumbers ? 'on' : 'off',
-					glyphMargin: false,
-					folding: true,
-					showFoldingControls: 'mouseover',
-					foldingStrategy: 'indentation',
-					renderWhitespace: 'none',
-					guides: {
-						indentation: true,
-						highlightActiveIndentation: 'always',
-						bracketPairs: 'active',
-						bracketPairsHorizontal: 'active',
-					},
-					wordWrap: wordWrap ? 'on' : 'off',
-					scrollbar: {
-						verticalScrollbarSize: 8,
-						horizontalScrollbarSize: 8,
-						useShadows: false,
-					},
-					overviewRulerLanes: 0,
-					hideCursorInOverviewRuler: true,
-					overviewRulerBorder: false,
-					formatOnPaste: true,
-					formatOnType: true,
-				});
-				editorInstanceRef.current = editor;
-				editor.onDidChangeModelContent(() => {
-					if (onContentChangeRef.current) {
-						onContentChangeRef.current(editor.getValue());
-					}
-				});
-				const handleResize = () => editor.layout();
-				window.addEventListener('resize', handleResize);
-				if (formatOnMount && value) {
-					setTimeout(async () => {
-						await editor.getAction('editor.action.formatDocument')?.run();
-					}, 100);
-				}
-				return () => {
-					window.removeEventListener('resize', handleResize);
-					editor.dispose();
-				};
-			}
-		}, [formatOnMount, language, lineNumbers, minimap, readOnly, value, wordWrap]);
-
-		useEffect(() => {
-			const editor = editorInstanceRef.current;
-			if (editor) {
-				const model = editor.getModel();
-				if (model && model.getValue() !== value) {
-					editor.setValue(value);
-					if (formatOnMount && value) {
-						setTimeout(async () => {
-							await editor.getAction('editor.action.formatDocument')?.run();
-						}, 100);
-					}
-				}
-			}
-		}, [value, formatOnMount]);
-		useEffect(() => {
-			const editor = editorInstanceRef.current;
-			if (editor) {
-				const model = editor.getModel();
-				if (model) {
-					monacoEditorInstance.setModelLanguage(model, language);
-				}
-			}
-		}, [language]);
-
-		useEffect(() => {
-			const provider: languages.DocumentFormattingEditProvider = {
+			const graphqlProvider = languages.registerDocumentFormattingEditProvider('graphql', {
 				async provideDocumentFormattingEdits(model) {
-					const { default: prettierPluginGraphql } = await import('prettier/plugins/graphql');
-					const text = model.getValue();
-					try {
-						const formatted = await format(text, {
-							parser: 'graphql',
-							plugins: [prettierPluginGraphql],
-						});
-						return [
-							{
-								range: model.getFullModelRange(),
-								text: formatted,
-							},
-						];
-					} catch (error) {
-						console.error('Prettier formatting failed:', error);
-						return [];
-					}
-				},
-			};
-			const graphqlFormattingProvider = languages.registerDocumentFormattingEditProvider('graphql', provider);
+					const { default: graphqlPlugin } = await import('prettier/plugins/graphql');
+					const formatted = await format(model.getValue(), {
+						parser: 'graphql',
+						plugins: [graphqlPlugin],
+					});
 
-			const xmlProvider: languages.DocumentFormattingEditProvider = {
-				async provideDocumentFormattingEdits(model) {
-					const { default: prettierPluginXml } = await import('@prettier/plugin-xml');
-					const text = model.getValue();
-					try {
-						const formatted = await format(text, {
-							parser: 'xml',
-							plugins: [prettierPluginXml],
-						});
-						return [
-							{
-								range: model.getFullModelRange(),
-								text: formatted,
-							},
-						];
-					} catch (error) {
-						console.error('Prettier XML formatting failed:', error);
-						return [];
-					}
+					return [
+						{
+							range: model.getFullModelRange(),
+							text: formatted,
+						},
+					];
 				},
-			};
-			const xmlFormattingProvider = languages.registerDocumentFormattingEditProvider('xml', xmlProvider);
+			});
+
+			const xmlProvider = languages.registerDocumentFormattingEditProvider('xml', {
+				async provideDocumentFormattingEdits(model) {
+					const { default: xmlPlugin } = await import('@prettier/plugin-xml');
+					const formatted = await format(model.getValue(), {
+						parser: 'xml',
+						plugins: [xmlPlugin],
+						printWidth: 120,
+						tabWidth: 2,
+						useTabs: false,
+
+						xmlWhitespaceSensitivity: 'ignore',
+						proseWrap: 'preserve',
+					});
+
+					return [
+						{
+							range: model.getFullModelRange(),
+							text: formatted,
+						},
+					];
+				},
+			});
+
 			return () => {
-				graphqlFormattingProvider.dispose();
-				xmlFormattingProvider.dispose();
+				graphqlProvider.dispose();
+				xmlProvider.dispose();
 			};
 		}, []);
 
+		/* -----------------------------
+		 * Create editor ONCE
+		 * ----------------------------- */
+		useEffect(() => {
+			if (!containerRef.current) return;
+
+			const model = monacoEditor.createModel(value ?? '', language);
+
+			const editor = monacoEditor.create(containerRef.current, {
+				model,
+				automaticLayout: true,
+				scrollBeyondLastLine: false,
+				renderLineHighlight: 'none',
+			});
+
+			editor.onDidChangeModelContent(() => {
+				onChangeRef.current?.(editor.getValue());
+			});
+
+			if (formatOnMount && value) {
+				queueMicrotask(async () => {
+					await editor.getAction('editor.action.formatDocument')?.run();
+				});
+			}
+
+			editorRef.current = editor;
+
+			return () => {
+				editor.dispose();
+				model.dispose();
+			};
+			// eslint-disable-next-line react-hooks/exhaustive-deps
+		}, []);
+
+		/* -----------------------------
+		 * Update model value
+		 * ----------------------------- */
+		useEffect(() => {
+			const editor = editorRef.current;
+			if (!editor) return;
+
+			const model = editor.getModel();
+			if (!model) return;
+
+			if (model.getValue() !== value) {
+				model.setValue(value ?? '');
+			}
+		}, [value]);
+
+		/* -----------------------------
+		 * Update language
+		 * ----------------------------- */
+		useEffect(() => {
+			const model = editorRef.current?.getModel();
+			if (model) {
+				monacoEditor.setModelLanguage(model, language);
+			}
+		}, [language]);
+
+		/* -----------------------------
+		 * Update editor options (SAFE)
+		 * ----------------------------- */
+		useEffect(() => {
+			const editor = editorRef.current;
+			if (!editor) return;
+
+			editor.updateOptions({
+				readOnly,
+				wordWrap: wordWrap ? 'on' : 'off',
+
+				minimap: { enabled: minimap },
+				lineNumbers: lineNumbers ? 'on' : 'off',
+
+				glyphMargin: false,
+				folding: true,
+				showFoldingControls: 'mouseover',
+				foldingStrategy: 'indentation',
+
+				renderWhitespace: 'none',
+
+				find: {
+					cursorMoveOnType: true,
+					seedSearchStringFromSelection: 'always',
+					addExtraSpaceOnTop: false,
+					autoFindInSelection: 'never',
+					loop: true,
+				},
+
+				guides: {
+					indentation: true,
+					highlightActiveIndentation: 'always',
+					bracketPairs: 'active',
+					bracketPairsHorizontal: 'active',
+				},
+
+				scrollbar: {
+					verticalScrollbarSize: 8,
+					horizontalScrollbarSize: 8,
+					useShadows: false,
+				},
+
+				overviewRulerLanes: 0,
+				hideCursorInOverviewRuler: true,
+				overviewRulerBorder: false,
+
+				formatOnPaste: true,
+				formatOnType: true,
+			});
+		}, [readOnly, wordWrap, minimap, lineNumbers]);
+
+		/* -----------------------------
+		 * Imperative API (COMMANDS)
+		 * ----------------------------- */
+		useImperativeHandle(ref, () => ({
+			format: async () => {
+				const editor = editorRef.current;
+				await editor?.getAction('editor.action.formatDocument')?.run();
+				return editor?.getValue();
+			},
+			openSearch: async () => {
+				const editor = editorRef.current;
+				await editor?.getAction('actions.find')?.run();
+			},
+			copyToClipboard: async () => {
+				const editor = editorRef.current;
+				const isEmptySelection = editor?.getSelection()?.isEmpty();
+				if (isEmptySelection) {
+					editor?.focus();
+					editor?.trigger('keyboard', 'editor.action.selectAll', null);
+				}
+				await editor?.getAction('editor.action.clipboardCopyWithSyntaxHighlightingAction')?.run();
+			},
+			getEditor() {
+				return editorRef.current;
+			},
+		}));
+
 		return (
-			<div
-				className={`monaco-editor-container ${className}`}
-				style={{ position: 'relative', height }}
-				data-testid='monaco-editor-container'
-				aria-label={`Monaco code editor for ${language} content`}>
-				{copyButtonVisible && (
-					<button
-						onClick={handleCopy}
-						tabIndex={0}
-						className='absolute top-2 right-2 z-10 px-3 py-1 bg-background border border-border rounded text-xs hover:bg-accent transition-colors'>
-						{copyText}
-					</button>
-				)}
-				<div ref={editorRef} className='monaco-editor-wrapper' style={{ width: '100%', height: '100%' }} />
-			</div>
+			<div ref={containerRef} className={className} style={{ height, width: '100%' }} data-testid='monaco-editor' aria-label={`Monaco editor (${language})`} />
 		);
 	}
 );
 
 MonacoEditor.displayName = 'MonacoEditor';
-
 export default MonacoEditor;
 

@@ -201,32 +201,7 @@ const mainWebviewConfig = {
 		new MiniCssExtractPlugin({
 			filename: 'main.css',
 		}),
-		new MonacoWebpackPlugin({
-			// languages: ['javascript', 'typescript', 'json', 'html', 'xml', 'css', 'yaml', 'graphql', 'markdown', 'shell'],
-			// features: [
-			// 	'bracketMatching',
-			// 	'clipboard',
-			// 	'codeEditor',
-			// 	'comment',
-			// 	'!contextmenu',
-			// 	'documentSymbols',
-			// 	'find',
-			// 	'folding',
-			// 	'format',
-			// 	'gotoError',
-			// 	'hover',
-			// 	'links',
-			// 	'multicursor',
-			// 	'parameterHints',
-			// 	'wordHighlighter',
-			// 	'inPlaceReplace',
-			// 	'smartSelect',
-			// 	'lineSelection',
-			// 	'linesOperations',
-			// ],
-			languages: ['json', 'xml', 'html', 'javascript', 'css', 'typescript'],
-			features: ['bracketMatching', 'clipboard', 'find', 'folding', 'format', 'wordHighlighter'],
-		}),
+		new MonacoWebpackPlugin({}),
 		new CopyPlugin({
 			patterns: [
 				{

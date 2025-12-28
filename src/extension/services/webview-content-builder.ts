@@ -1,4 +1,4 @@
-import type { Webview} from 'vscode';
+import type { Webview } from 'vscode';
 import { Uri } from 'vscode';
 
 export class ContentBuilder {
@@ -11,8 +11,22 @@ export class ContentBuilder {
 
 		const styleUri = webview.asWebviewUri(Uri.joinPath(webviewUri, '..', 'main.css'));
 		const scriptUri = webview.asWebviewUri(webviewUri);
-		const pdfJsUri = webview.asWebviewUri(Uri.joinPath(webviewUri, '..', 'build', 'pdf.worker.min.mjs'));
+		const additionalScripts: Uri[] = [];
+		if (rootId === 'main-root') {
+			additionalScripts.push(
+				webview.asWebviewUri(Uri.joinPath(webviewUri, '..', 'build', 'pdf.worker.min.mjs')),
+				webview.asWebviewUri(Uri.joinPath(webviewUri, '..', 'ts.worker.js')),
+				webview.asWebviewUri(Uri.joinPath(webviewUri, '..', 'css.worker.js')),
+				webview.asWebviewUri(Uri.joinPath(webviewUri, '..', 'html.worker.js')),
+				webview.asWebviewUri(Uri.joinPath(webviewUri, '..', 'json.worker.js')),
+				webview.asWebviewUri(Uri.joinPath(webviewUri, '..', 'editor.worker.js'))
+			);
+		}
 
+		return this.html(nonce, webview, styleUri.toString(), scriptUri.toString(), rootId, additionalScripts);
+	}
+
+	private static html(nonce: string, webview: Webview, styleUri: string, scriptUri: string, rootId: string, additionalScripts: Uri[]): string {
 		return `<!DOCTYPE html>
       <html lang="en">
       <head>
@@ -32,7 +46,7 @@ export class ContentBuilder {
         <noscript>You need to enable JavaScript to run this app.</noscript>
         <div id="${rootId}"></div>
         <script nonce="${nonce}" type="module" src="${scriptUri}"></script>
-        <script nonce="${nonce}" type="module" src="${pdfJsUri}"></script>
+				${additionalScripts.map(script => `<script nonce="${nonce}" type="module" src="${script}"></script>`).join('')}
       </body>
       </html>`;
 	}

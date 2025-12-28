@@ -72,7 +72,7 @@ const OAuth2AuthComponent: React.FC<OAuth2AuthProps> = ({ auth, onChange, onGene
 					onValueChange={handleGrantTypeChange}
 					placeholder='Select grant type'
 					options={OAUTH2_GRANT_TYPE_OPTIONS}
-					classNameTrigger={`w-full bg-muted-foreground/10 border rounded-md`}
+					classNameTrigger={`w-full`}
 					classNameContent={`w-full`}
 				/>
 			</ApiClientFieldRow>
@@ -120,7 +120,7 @@ const OAuth2AuthComponent: React.FC<OAuth2AuthProps> = ({ auth, onChange, onGene
 					onValueChange={handleClientAuthChange}
 					placeholder='Select client authentication method'
 					options={OAUTH2_CLIENT_AUTH_OPTIONS}
-					classNameTrigger={`w-full bg-muted-foreground/10 border rounded-md`}
+					classNameTrigger={`w-full`}
 					classNameContent={`w-full`}
 				/>
 			</ApiClientFieldRow>

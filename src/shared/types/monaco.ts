@@ -1,7 +1,9 @@
-import type * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
+import type * as monaco from 'monaco-editor';
 
 export interface MonacoEditorHandle {
 	format: () => Promise<string | undefined>;
+	openSearch: () => Promise<void>;
+	copyToClipboard: () => Promise<void>;
 	getEditor: () => monaco.editor.IStandaloneCodeEditor | null;
 }
 
@@ -11,9 +13,9 @@ export interface MonacoEditorProps {
 	readOnly?: boolean;
 	height?: string | number;
 	wordWrap?: boolean;
+	searchEnabled?: boolean;
 	minimap?: boolean;
 	lineNumbers?: boolean;
-	copyButtonVisible?: boolean;
 	formatOnMount?: boolean;
 	onContentChange?: (value: string) => void;
 	className?: string;

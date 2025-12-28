@@ -93,7 +93,7 @@ const AuthSelector: React.FC<AuthSelectorProps> = ({ auth, onChange, onGenerateO
 				</Label>
 				<ApiClientSelect
 					options={AUTH_SECTION_OPTIONS}
-					classNameTrigger={`w-[250px] bg-muted-foreground/10 border rounded-md`}
+					classNameTrigger={`w-[250px]`}
 					classNameContent={`w-[250px]`}
 					placeholder='Select authorization type'
 					onValueChange={handleAuthTypeChange}
