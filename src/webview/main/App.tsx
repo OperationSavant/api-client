@@ -18,6 +18,8 @@ import { LoadingFallback } from '@/components/custom/states/loading-fallback';
 import { RequestViewer } from '@/components/request/request-viewer';
 import { createThemeHandlers } from '@/handlers/theme-handlers';
 import { setIsExecuting } from '@/features/editor/editorUISlice';
+import type { MessageEnvelope } from '@/shared/types/webview-messages';
+import { CLIENT_COMMANDS } from '@/shared/constants/commands';
 
 const App = () => {
 	const dispatch = useAppDispatch();
@@ -25,7 +27,7 @@ const App = () => {
 	const panelGroupRef = useRef<ImperativePanelGroupHandle>(null);
 	const { isReady, isInitialized, markReady, markInitialized } = useWebviewInitialization();
 
-	const sendToExtension = useCallback((message: any) => {
+	const sendToExtension = useCallback((message: MessageEnvelope) => {
 		vscode.postMessage(message);
 	}, []);
 
@@ -39,7 +41,7 @@ const App = () => {
 
 	useEffect(() => {
 		if (isReady) {
-			sendToExtension({ source: 'webview', command: 'webviewReady' });
+			sendToExtension({ source: 'webview', command: CLIENT_COMMANDS.WEBVIEW_READY });
 		}
 	}, [isReady, sendToExtension]);
 

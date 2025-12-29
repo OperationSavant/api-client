@@ -1,66 +1,31 @@
-import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
+import type { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 import * as fs from 'fs';
 import * as path from 'path';
 import { lookup } from 'mime-types';
 import FormData from 'form-data';
 import { parse as parseContentType } from 'content-type';
 import { fromBuffer } from 'file-type';
-
-// Import shared types
-import type { RequestBody } from '@/shared/types/body';
-import type { AuthConfig } from '@/shared/types/auth';
+import type { BinaryBody, FormDataBody, GraphQLBody, UrlEncodedBody, RawBody, RequestBody } from '@/shared/types/body';
 import type { AuthService } from './auth-service';
+import type { HexRow, HexViewModel, Response, ResponseAnalysis } from '@/shared/types/response';
+import type { Request } from '@/shared/types/request';
 
-interface ResponseAnalysis {
-	nature: 'text' | 'binary';
-	format: 'json' | 'html' | 'xml' | 'text' | 'binary';
-	confidence: 'high' | 'low';
-	reason: string[];
-}
-
-// Define request configuration (what webview sends)
-export interface RequestExecutionConfig {
-	url: string;
-	method: string;
-	headers: Record<string, string>;
-	params?: Record<string, string>;
-	bodyConfig?: RequestBody;
-	auth?: AuthConfig;
-}
-
-// Define result structure (what gets sent back to webview)
-export interface RequestExecutionResult {
-	status: number;
-	statusText: string;
-	headers: Record<string, string>;
-	body: string;
-	representations?: {
-		raw: string;
-		base64: string;
-		hex: string;
-	};
-	responseTime: number;
-	size: number;
-	isLargeBody: boolean;
-	bodyFilePath?: string;
-	isError: boolean;
-	error?: string;
-	analysis?: ResponseAnalysis;
-}
-
-type CustomResponse = {
-	body: string;
-	headers: Record<string, string>;
-	status: number;
-	statusText: string;
-	responseTime: number;
-	size: number;
-};
-
+/**
+ * SIZE_THRESHOLD defines the maximum response payload size (in bytes) for which
+ * the system will:
+ *  - render the response inline in the viewer
+ *  - attempt expensive analysis operations (e.g. full JSON.parse for confidence boosting)
+ *
+ * Responses larger than this threshold are treated conservatively:
+ *  - rendered via download / external handling
+ *  - analyzed using structural heuristics only
+ *
+ * This is a deliberate product and performance policy, not an implementation detail.
+ */
+const SIZE_THRESHOLD = 5 * 1024 * 1024; // TODO: Add configurable size threshold (5MB default)
 export class RequestExecutorService {
 	private httpClient: AxiosInstance;
-	private readonly SIZE_THRESHOLD = 5 * 1024 * 1024; // TODO: Add configurable size threshold (5MB default)
 
 	constructor(private authService: AuthService) {
 		this.httpClient = axios.create({
@@ -75,7 +40,7 @@ export class RequestExecutorService {
 	/**
 	 * Execute HTTP request with all body type support
 	 */
-	async execute(config: RequestExecutionConfig): Promise<RequestExecutionResult> {
+	async execute(config: Request): Promise<Response> {
 		const startTime = Date.now();
 
 		try {
@@ -86,7 +51,7 @@ export class RequestExecutorService {
 					config.url,
 					config.headers,
 					config.params || {},
-					config.bodyConfig
+					config.body
 				);
 				config.headers = headers;
 				config.params = params;
@@ -100,37 +65,39 @@ export class RequestExecutorService {
 				responseType: 'arraybuffer',
 			};
 
-			if (config.bodyConfig) {
-				await this.applyRequestBody(axiosConfig, config.bodyConfig);
+			if (config.body) {
+				await this.applyRequestBody(axiosConfig, config.body);
 			}
 
 			const response: AxiosResponse = await this.httpClient.request(axiosConfig);
 
-			const responseTime = Date.now() - startTime;
+			const duration = Date.now() - startTime;
 
-			const result = await this.processResponse(response, responseTime);
+			const result = await this.processResponse(response, duration);
 
 			return result;
-		} catch (error: AxiosError | any) {
-			const responseData = error.response?.data;
+		} catch (error: unknown) {
+			const duration = Date.now() - startTime;
+			const axiosError = error as AxiosError;
+			const responseData = axiosError.response?.data;
 			let size = 0;
-
+			let dataString = '';
 			if (responseData !== undefined && responseData !== null) {
-				const dataString = typeof responseData === 'string' ? responseData : JSON.stringify(responseData);
+				dataString = typeof responseData === 'string' ? responseData : JSON.stringify(responseData);
 				size = Buffer.byteLength(dataString, 'utf8');
 			}
-
 			return {
-				status: error.response?.status || 0,
-				statusText: error.response?.statusText || 'Request Failed',
-				headers: error.response?.headers || {},
-				body: responseData || null,
-				responseTime: Date.now() - startTime,
-				size: size,
-				isLargeBody: false,
-				bodyFilePath: undefined,
+				status: axiosError.response?.status || 0,
+				statusText: axiosError.response?.statusText || 'Request Failed',
+				headers: (axiosError.response?.headers as Record<string, string>) || {},
+				body: dataString,
+				contentType: axiosError.response?.headers
+					? (axiosError.response?.headers['content-type'] as string) || (axiosError.response?.headers['Content-Type'] as string)
+					: 'text/plain',
+				size,
+				duration,
 				isError: true,
-				error: error.message || 'Unknown error',
+				error: axiosError.message || 'Unknown error',
 			};
 		}
 	}
@@ -181,7 +148,7 @@ export class RequestExecutorService {
 	/**
 	 * Handle GraphQL body
 	 */
-	private applyGraphQLBody(axiosConfig: AxiosRequestConfig, graphql: any): void {
+	private applyGraphQLBody(axiosConfig: AxiosRequestConfig, graphql: GraphQLBody): void {
 		if (!axiosConfig.headers) axiosConfig.headers = {};
 		const payload = {
 			query: graphql.query || '',
@@ -195,7 +162,7 @@ export class RequestExecutorService {
 	/**
 	 * Handle multipart/form-data with files
 	 */
-	private async applyFormDataBody(axiosConfig: AxiosRequestConfig, formData: any[]): Promise<void> {
+	private async applyFormDataBody(axiosConfig: AxiosRequestConfig, formData: FormDataBody[]): Promise<void> {
 		const form = new FormData();
 
 		for (const field of formData) {
@@ -226,7 +193,7 @@ export class RequestExecutorService {
 	/**
 	 * Handle application/x-www-form-urlencoded
 	 */
-	private applyUrlEncodedBody(axiosConfig: AxiosRequestConfig, urlEncoded: any[]): void {
+	private applyUrlEncodedBody(axiosConfig: AxiosRequestConfig, urlEncoded: UrlEncodedBody[]): void {
 		const params = new URLSearchParams();
 
 		for (const field of urlEncoded) {
@@ -245,8 +212,11 @@ export class RequestExecutorService {
 	/**
 	 * Handle binary file upload
 	 */
-	private async applyBinaryBody(axiosConfig: AxiosRequestConfig, binary: any): Promise<void> {
+	private async applyBinaryBody(axiosConfig: AxiosRequestConfig, binary: BinaryBody): Promise<void> {
 		const filePath = binary.filePath;
+		if (filePath === undefined) {
+			throw new Error('Binary body requires a valid file path.');
+		}
 		const stats = fs.statSync(filePath);
 		const stream = fs.createReadStream(filePath);
 
@@ -264,7 +234,7 @@ export class RequestExecutorService {
 	/**
 	 * Handle raw body (JSON, XML, text, etc.)
 	 */
-	private applyRawBody(axiosConfig: AxiosRequestConfig, raw: any): void {
+	private applyRawBody(axiosConfig: AxiosRequestConfig, raw: RawBody): void {
 		if (!axiosConfig.headers) {
 			axiosConfig.headers = {};
 		}
@@ -296,39 +266,10 @@ export class RequestExecutorService {
 	/**
 	 * Process response and handle large bodies
 	 */
-	// private async processResponse(response: AxiosResponse, responseTime: number): Promise<RequestExecutionResult> {
-	// 	const { data, headers, status, statusText } = response;
-
-	// 	const { type: contentType, parameters } = parseContentType(headers['content-type'] || '') || '';
-	// 	const size = data.length;
-	// 	let body: string = '';
-
-	// 	try {
-	// 		if (contentType.includes('json') || contentType.includes('text/') || contentType.includes('xml') || contentType.includes('javascript')) {
-	// 			body = data.toString('utf-8');
-	// 			body = new TextDecoder(parameters?.charset || 'utf-8', { fatal: false }).decode(data);
-	// 		} else {
-	// 			body = `data:${contentType};base64,${data.toString('base64')}`;
-	// 		}
-	// 		const customResponse: CustomResponse = {
-	// 			body,
-	// 			headers: headers as Record<string, string>,
-	// 			status,
-	// 			statusText,
-	// 			responseTime,
-	// 			size,
-	// 		};
-	// 		return this.handleResponse(customResponse);
-	// 	} catch (error) {
-	// 		throw new Error('Failed to process response content');
-	// 	}
-	// }
-	private async processResponse(response: AxiosResponse, responseTime: number): Promise<RequestExecutionResult> {
+	private async processResponse(response: AxiosResponse, duration: number): Promise<Response> {
 		const { data, headers, status, statusText } = response;
-		const buffer = Buffer.isBuffer(data) ? data : Buffer.from(data);
+		const buffer = Buffer.isBuffer(data) ? data : Buffer.from(data?.buffer, data?.byteOffset, data?.byteLength);
 		const size = buffer.length;
-
-		// ---- weak content-type parsing (only for mime + charset hints) ----
 		let contentType = '';
 		let charset = 'utf-8';
 
@@ -339,84 +280,35 @@ export class RequestExecutorService {
 				contentType = parsed.type;
 				charset = parsed.parameters?.charset || charset;
 			}
-		} catch {
-			// ignore malformed content-type
-		}
-
-		// ---- authoritative analysis (no decoding yet) ----
-		const analysis = await analyzeResponse(data, contentType, charset);
+		} catch {}
+		const analysis = await this.analyzeResponse(buffer, contentType, charset);
 
 		let body: string;
 
 		if (analysis.nature === 'binary') {
-			// binary must be sent as data URI (renderer contract)
 			const mime = analysis.confidence === 'high' && contentType ? contentType : 'application/octet-stream';
 
 			body = `data:${mime};base64,${buffer.toString('base64')}`;
 		} else {
-			// text-safe → decode using resolved charset
-			body = buffer.toString(normalizeToBufferEncoding(charset) ?? 'utf-8');
+			try {
+				body = new TextDecoder(charset || 'utf-8', { fatal: false }).decode(buffer);
+			} catch {
+				body = new TextDecoder('utf-8').decode(buffer);
+			}
 		}
-
-		const representations = buildRepresentations(buffer, charset);
-
+		const representations = this.buildRepresentations(buffer);
 		return {
 			status,
 			statusText,
 			headers: headers as Record<string, string>,
 			body,
 			representations,
-			responseTime,
+			contentType,
 			size,
-			isLargeBody: false,
-			bodyFilePath: undefined,
-			isError: !this.isSuccessStatus(status),
-			error: !this.isSuccessStatus(status) ? statusText : undefined,
+			duration,
 			analysis,
 		};
 	}
-
-	/**
-	 * Handle normal response bodies (parse content)
-	 */
-	private handleResponse(customResponse: CustomResponse): RequestExecutionResult {
-		const { status, statusText } = customResponse;
-		const isError = !this.isSuccessStatus(status);
-		return {
-			...customResponse,
-			isLargeBody: false,
-			bodyFilePath: undefined,
-			isError,
-			error: isError ? statusText : undefined,
-		};
-	}
-
-	/**
-	 * Handle large response bodies (write to temp file)
-	 */
-	// private async handleLargeResponse(response: AxiosResponse, bodyBuffer: Buffer, responseTime: number, size: number): Promise<RequestExecutionResult> {
-	// 	if (!fs.existsSync(this.storageUri.fsPath)) {
-	// 		fs.mkdirSync(this.storageUri.fsPath, { recursive: true });
-	// 	}
-
-	// 	const tempFileName = `response-${Date.now()}.tmp`;
-	// 	const tempFileUri = Uri.joinPath(this.storageUri, tempFileName);
-
-	// 	fs.writeFileSync(tempFileUri.fsPath, bodyBuffer);
-
-	// 	return {
-	// 		status: response.status,
-	// 		statusText: response.statusText,
-	// 		headers: response.headers as Record<string, string>,
-	// 		body: null,
-	// 		responseTime,
-	// 		size,
-	// 		isLargeBody: true,
-	// 		bodyFilePath: tempFileUri.toString(),
-	// 		isError: !this.isSuccessStatus(response.status),
-	// 		error: !this.isSuccessStatus(response.status) ? `HTTP ${response.status} ${response.statusText}` : undefined,
-	// 	};
-	// }
 
 	/**
 	 * Check if status code is success (2xx)
@@ -425,177 +317,191 @@ export class RequestExecutorService {
 		return status >= 200 && status < 300;
 	}
 
-	private getContentLength = (headers: Record<string, string>, body: string): number => {
-		const contentLengthHeader = headers['content-length'] || headers['Content-Length'] || 0;
-		return contentLengthHeader ? parseInt(contentLengthHeader, 10) : Buffer.byteLength(body, 'utf8');
-	};
-}
+	/**
+	 * Analyzes response data with confidence
+	 * content type is only used for weak hints
+	 * @param {Buffer} buffer
+	 * @param {string} [contentTypeHeader]
+	 * @param {string} [charset='utf-8']
+	 * @return {*}  {Promise<ResponseAnalysis>}
+	 */
+	private async analyzeResponse(buffer: Buffer, contentTypeHeader?: string, charset: string = 'utf-8'): Promise<ResponseAnalysis> {
+		// ------------------------------------------------------------
+		// 1. Known binary detection (authoritative, high confidence)
+		// ------------------------------------------------------------
+		const fileType = await fromBuffer(buffer);
+		if (fileType) {
+			return {
+				nature: 'binary',
+				format: 'binary',
+				confidence: 'high',
+				reason: [`file-type detected (${fileType.mime})`],
+			};
+		}
 
-export async function analyzeResponse(buffer: ArrayBuffer, contentTypeHeader?: string, charset: string = 'utf-8'): Promise<ResponseAnalysis> {
-	const reasons: string[] = [];
+		// ------------------------------------------------------------
+		// 2. Text-safety check (hard gate)
+		// ------------------------------------------------------------
+		if (!this.isTextSafe(buffer)) {
+			return {
+				nature: 'binary',
+				format: 'binary',
+				confidence: 'low',
+				reason: ['payload is not safely decodable as text'],
+			};
+		}
 
-	// ------------------------------------------------------------
-	// 1. Known binary detection (authoritative, high confidence)
-	// ------------------------------------------------------------
-	const fileType = await fromBuffer(buffer);
-	if (fileType) {
+		// ------------------------------------------------------------
+		// 3. Decode small head only (safe now)
+		// ------------------------------------------------------------
+		const head = this.decodeHead(buffer, charset);
+
+		// ------------------------------------------------------------
+		// 4. HTML detection (highest priority for text)
+		// ------------------------------------------------------------
+		if (this.looksLikeHtml(head)) {
+			return {
+				nature: 'text',
+				format: 'html',
+				confidence: 'high',
+				reason: ['html structural markers detected', ...this.getHeaderHints(contentTypeHeader || '')],
+			};
+		}
+
+		// ------------------------------------------------------------
+		// 5. JSON detection (shape + parse)
+		// ------------------------------------------------------------
+		if (this.looksLikeJson(head)) {
+			const parsed = this.parsesAsJson(buffer, charset);
+
+			return {
+				nature: 'text',
+				format: 'json',
+				confidence: parsed ? 'high' : 'low',
+				reason: parsed
+					? ['json shape + successful parse', ...this.getHeaderHints(contentTypeHeader || '')]
+					: ['json structural markers detected', ...this.getHeaderHints(contentTypeHeader || '')],
+			};
+		}
+
+		// ------------------------------------------------------------
+		// 6. XML detection (namespace-agnostic, html-biased)
+		// ------------------------------------------------------------
+		if (this.looksLikeXml(head)) {
+			return {
+				nature: 'text',
+				format: 'xml',
+				confidence: 'high',
+				reason: ['xml structural markers detected', ...this.getHeaderHints(contentTypeHeader || '')],
+			};
+		}
+
+		// ------------------------------------------------------------
+		// 8. Text fallback (explicit, low confidence)
+		// ------------------------------------------------------------
 		return {
-			nature: 'binary',
-			format: 'binary',
-			confidence: 'high',
-			reason: [`file-type detected (${fileType.mime})`],
-		};
-	}
-
-	// ------------------------------------------------------------
-	// 2. Text-safety check (hard gate)
-	// ------------------------------------------------------------
-	if (!isTextSafe(buffer)) {
-		return {
-			nature: 'binary',
-			format: 'binary',
+			nature: 'text',
+			format: 'text',
 			confidence: 'low',
-			reason: ['payload is not safely decodable as text'],
+			reason: this.getHeaderHints(contentTypeHeader || '').length ? this.getHeaderHints(contentTypeHeader || '') : ['no dominant format detected'],
 		};
 	}
 
-	// ------------------------------------------------------------
-	// 3. Decode small head only (safe now)
-	// ------------------------------------------------------------
-	const head = decodeHead(buffer, charset);
+	/* ============================================================
+   Helpers
+   ============================================================ */
 
-	// ------------------------------------------------------------
-	// 4. HTML detection (highest priority for text)
-	// ------------------------------------------------------------
-	if (looksLikeHtml(head)) {
-		return {
-			nature: 'text',
-			format: 'html',
-			confidence: 'high',
-			reason: ['html structural markers detected'],
-		};
-	}
-
-	// ------------------------------------------------------------
-	// 5. JSON detection (shape + parse)
-	// ------------------------------------------------------------
-	if (looksLikeJson(head) && parsesAsJson(buffer, charset)) {
-		return {
-			nature: 'text',
-			format: 'json',
-			confidence: 'high',
-			reason: ['json shape + successful parse'],
-		};
-	}
-
-	// ------------------------------------------------------------
-	// 6. XML detection (namespace-agnostic, html-biased)
-	// ------------------------------------------------------------
-	if (looksLikeXml(head)) {
-		return {
-			nature: 'text',
-			format: 'xml',
-			confidence: 'high',
-			reason: ['xml structural markers detected'],
-		};
-	}
-
-	// ------------------------------------------------------------
-	// 7. Weak header signal (confidence booster only)
-	// ------------------------------------------------------------
-	if (contentTypeHeader) {
+	private getHeaderHints(contentTypeHeader: string): string[] {
+		const reasons: string[] = [];
 		const ct = contentTypeHeader.toLowerCase();
 		if (ct.includes('json')) reasons.push('content-type hints json');
 		if (ct.includes('xml')) reasons.push('content-type hints xml');
 		if (ct.includes('html')) reasons.push('content-type hints html');
+		return reasons;
 	}
 
-	// ------------------------------------------------------------
-	// 8. Text fallback (explicit, low confidence)
-	// ------------------------------------------------------------
-	return {
-		nature: 'text',
-		format: 'text',
-		confidence: 'low',
-		reason: reasons.length ? reasons : ['no dominant format detected'],
-	};
-}
+	private isTextSafe(buffer: Buffer): boolean {
+		const len = Math.min(buffer.length, 512);
+		let control = 0;
 
-/* ============================================================
-   Helpers
-   ============================================================ */
+		for (let i = 0; i < len; i++) {
+			const b = buffer[i];
+			if (b === 0) return false;
+			if (b < 9 || (b > 13 && b < 32)) control++;
+		}
 
-function isTextSafe(buffer: ArrayBuffer): boolean {
-	const view = new Uint8Array(buffer);
-	const len = Math.min(view.length, 512);
-	let control = 0;
-
-	for (let i = 0; i < len; i++) {
-		const b = view[i];
-		if (b === 0) return false;
-		if (b < 9 || (b > 13 && b < 32)) control++;
+		return control / len < 0.1;
 	}
 
-	return control / len < 0.1;
-}
-
-function decodeHead(buffer: ArrayBuffer, charset: string): string {
-	return new TextDecoder(charset || 'utf-8', { fatal: false }).decode(buffer.slice(0, 1024)).trim();
-}
-
-function looksLikeHtml(head: string): boolean {
-	return /^<!doctype html/i.test(head) || /^<html[\s>]/i.test(head) || /<(head|body|script|meta|link|style)\b/i.test(head);
-}
-
-function looksLikeJson(head: string): boolean {
-	return head.startsWith('{') || head.startsWith('[');
-}
-
-function parsesAsJson(buffer: ArrayBuffer, charset: string): boolean {
-	try {
-		const text = new TextDecoder(charset || 'utf-8').decode(buffer);
-		JSON.parse(text);
-		return true;
-	} catch {
-		return false;
+	private decodeHead(buffer: Buffer, charset: string): string {
+		return new TextDecoder(charset || 'utf-8', { fatal: false }).decode(buffer.slice(0, 1024)).trim();
 	}
-}
 
-function looksLikeXml(head: string): boolean {
-	if (head.startsWith('<?xml')) return true;
+	private looksLikeHtml(head: string): boolean {
+		return /^<!doctype html/i.test(head) || /^<html[\s>]/i.test(head) || /<(head|body|script|meta|link|style)\b/i.test(head);
+	}
 
-	return /^<[\w:-]+>/.test(head) && !/<(html|head|body|script|meta|style)\b/i.test(head);
-}
+	private looksLikeJson(head: string): boolean {
+		return head.startsWith('{') || head.startsWith('[');
+	}
 
-function buildRepresentations(data: Buffer, charset: string) {
-	return {
-		raw: data.toString(normalizeToBufferEncoding(charset) ?? 'utf-8'),
-		base64: data.toString('base64'),
-		hex: data.toString('hex'),
-	};
-}
+	/**
+	 * Only attempt full parse on reasonably-sized payloads
+	 * For large payloads, rely on shape-based detection only
+	 * @private
+	 * @param {Buffer} buffer
+	 * @param {string} charset
+	 * @return {*}  {boolean}
+	 * @memberof RequestExecutorService
+	 */
+	private parsesAsJson(buffer: Buffer, charset: string): boolean {
+		try {
+			if (buffer.byteLength > SIZE_THRESHOLD) {
+				return false;
+			}
+			JSON.parse(new TextDecoder(charset || 'utf-8').decode(buffer));
+			return true;
+		} catch {
+			return false;
+		}
+	}
 
-function normalizeToBufferEncoding(charset?: string): BufferEncoding {
-	if (!charset) return 'utf8';
+	private looksLikeXml(head: string): boolean {
+		if (head.startsWith('<?xml')) return true;
 
-	switch (charset.toLowerCase()) {
-		case 'utf-8':
-		case 'utf8':
-			return 'utf8';
+		return /^<[\w:-]+>/.test(head) && !/<(html|head|body|script|meta|style)\b/i.test(head);
+	}
 
-		case 'latin1':
-		case 'iso-8859-1':
-			return 'latin1';
+	private buildRepresentations(data: Buffer) {
+		return {
+			raw: data.toString('latin1'),
+			base64: data.toString('base64'),
+			hex: this.buildHexViewModel(data),
+		};
+	}
 
-		case 'ascii':
-			return 'ascii';
+	private buildHexViewModel(buffer: Buffer, bytesPerRow = 16): HexViewModel {
+		const rows: HexRow[] = [];
 
-		case 'ucs-2':
-		case 'ucs2':
-		case 'utf-16le':
-			return 'utf16le';
+		for (let offset = 0; offset < buffer.length; offset += bytesPerRow) {
+			const slice = buffer.subarray(offset, offset + bytesPerRow);
 
-		default:
-			return 'utf8';
+			const hex: string[] = [];
+			let ascii = '';
+
+			for (const byte of slice) {
+				hex.push(byte.toString(16).padStart(2, '0'));
+
+				ascii += byte >= 32 && byte <= 126 ? String.fromCharCode(byte) : '.';
+			}
+
+			rows.push({
+				offset,
+				hex,
+				ascii,
+			});
+		}
+
+		return { bytesPerRow, rows };
 	}
 }

@@ -1,4 +1,4 @@
-import type { WebviewPanel} from 'vscode';
+import type { WebviewPanel } from 'vscode';
 import { window } from 'vscode';
 import { historyService } from '@/domain/services/history-service';
 import { unitOfWork } from '@/domain/services/unit-of-work';
@@ -17,7 +17,8 @@ export class HistoryHandler {
 	 * Clear all history
 	 * ACTUAL CODE: extension.ts lines 156-164
 	 */
-	async handleClearHistory(message: any, panel: WebviewPanel): Promise<void> {
+	async handleClearHistory(): Promise<void> {
+		//TODO: Use BroadcastrHub to support multiple panels
 		const confirmation = await window.showWarningMessage('Clear all request history?', { modal: true }, 'Clear');
 
 		if (confirmation === 'Clear') {
@@ -30,15 +31,15 @@ export class HistoryHandler {
 
 				// Broadcast update to all panels
 				this.broadcastHistoryUpdate();
-
-				window.showInformationMessage('History cleared.');
+				//TODO: Use BroadcastrHub to support multiple panels
+				// window.showInformationMessage('History cleared.');
 			} catch (error) {
 				console.error('Failed to clear history:', error);
 
 				// Rollback in-memory changes
 				unitOfWork.rollback();
-
-				window.showErrorMessage(`Failed to clear history: ${error instanceof Error ? error.message : 'Unknown error'}`);
+				//TODO: Use BroadcastrHub to support multiple panels
+				// window.showErrorMessage(`Failed to clear history: ${error instanceof Error ? error.message : 'Unknown error'}`);
 				throw error;
 			}
 		}
@@ -48,7 +49,7 @@ export class HistoryHandler {
 	 * Delete single history item
 	 * NOTE: No webview message handler in commented code, but method exists in service
 	 */
-	async handleDeleteHistoryItem(message: any, panel: WebviewPanel): Promise<void> {
+	async handleDeleteHistoryItem(message: any): Promise<void> {
 		try {
 			const { historyId } = message;
 
@@ -60,15 +61,15 @@ export class HistoryHandler {
 
 			// Broadcast update to all panels
 			this.broadcastHistoryUpdate();
-
-			window.showInformationMessage('History item deleted.');
+			//TODO: Use BroadcastrHub to support multiple panels
+			// window.showInformationMessage('History item deleted.');
 		} catch (error) {
 			console.error('Failed to delete history item:', error);
 
 			// Rollback in-memory changes
 			unitOfWork.rollback();
-
-			window.showErrorMessage(`Failed to delete history item: ${error instanceof Error ? error.message : 'Unknown error'}`);
+			//TODO: Use BroadcastrHub to support multiple panels
+			// window.showErrorMessage(`Failed to delete history item: ${error instanceof Error ? error.message : 'Unknown error'}`);
 			throw error;
 		}
 	}

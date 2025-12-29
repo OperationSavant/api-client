@@ -1,5 +1,6 @@
 import { RESPONSE_CONTENT_TYPE_OPTIONS } from '@/shared/constants/select-options';
 import { CircleCheck, Copy, Download, Filter, Play, Search, Send, WrapText } from 'lucide-react';
+import type { JSX } from 'react';
 import React, { useEffect, useRef, useState } from 'react';
 import { EmptyState } from '../custom/states/empty-state';
 import { useSelector } from 'react-redux';
@@ -15,14 +16,25 @@ import ResponsePDFViewer from './response-pdf-viewer';
 import ResponseStringViewer from './response-string-viewer';
 import { ApiClientInput } from '../custom/api-client-input';
 import type { MonacoEditorHandle } from '@/shared/types/monaco';
+import type { Response } from '@/shared/types/response';
+import { ResponseHexViewer } from './response-hex-viewer';
 
 interface ResponseBodyTabProps {
-	responseBody: string;
-	contentType: string;
-	handleCopy: () => void;
+	response: Response;
 }
 
-const responseBodySelector = (responseBody: string, contentType: string) => {
+const RenderFormatter = (language: string, response: Response, wordWrap: boolean, editorRef: React.RefObject<MonacoEditorHandle | null>) => {
+	switch (language) {
+		case 'hex':
+			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+			return <ResponseHexViewer model={response.representations?.hex!} />;
+		default:
+			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+			return <ResponseStringViewer value={response.body!} language={language} wordWrap={wordWrap} formatOnMount={true} ref={editorRef} />;
+	}
+};
+
+const ResponseBodySelector = (responseBody: string, contentType: string): JSX.Element | undefined => {
 	if (contentType.includes('image')) {
 		return <ResponseImageViewer dataUri={responseBody} altText={'response-image'} />;
 	} else if (contentType.includes('pdf')) {
@@ -30,21 +42,21 @@ const responseBodySelector = (responseBody: string, contentType: string) => {
 	}
 };
 
-const renderBody = (
+const RenderBody = (
 	activeResponseBodyTab: string,
-	responseBody: string,
-	contentType: string,
+	response: Response,
 	language: string,
 	wordWrap: boolean,
 	editorRef: React.RefObject<MonacoEditorHandle | null>
-) => {
+): JSX.Element | undefined => {
 	if (activeResponseBodyTab === 'preview') {
-		return responseBodySelector(responseBody, contentType);
+		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+		return ResponseBodySelector(response.body!, response.contentType);
 	}
-	return <ResponseStringViewer value={responseBody} language={language} wordWrap={wordWrap} formatOnMount={true} ref={editorRef} />;
+	return RenderFormatter(language, response, wordWrap, editorRef);
 };
 
-const ResponseBodyTab: React.FC<ResponseBodyTabProps> = ({ responseBody, contentType }) => {
+const ResponseBodyTab: React.FC<ResponseBodyTabProps> = ({ response }) => {
 	const dispatch = useAppDispatch();
 	const {
 		ui: { isExecuting, activeResponseBodyTab },
@@ -54,40 +66,40 @@ const ResponseBodyTab: React.FC<ResponseBodyTabProps> = ({ responseBody, content
 	const [showFilter, setShowFilter] = useState(false);
 	const [copied, setCopied] = useState(false);
 
-	const getOptionsBasedOnresponseType = (contentType: string) => {
-		if (contentType.includes('image') || contentType.includes('pdf')) {
+	const getOptionsBasedOnResponseType = (contentType: string) => {
+		if (contentType?.includes('image') || contentType?.includes('pdf')) {
 			return RESPONSE_CONTENT_TYPE_OPTIONS.filter(option => option.responseType === 'binary');
 		}
 		return RESPONSE_CONTENT_TYPE_OPTIONS;
 	};
 
 	const setVisualBasedOnContentType = (contentType: string): string => {
-		if (contentType.includes('image') || contentType.includes('pdf')) {
+		if (contentType?.includes('image') || contentType?.includes('pdf')) {
 			return 'preview';
 		}
 		return 'default';
 	};
 
-	const getDefaultLanguageForContentType = (contentType: string): string => {
-		if (contentType.includes('json')) {
+	const getDefaultFormatterForContentType = (contentType: string): string => {
+		if (contentType?.includes('json')) {
 			return 'json';
-		} else if (contentType.includes('html')) {
+		} else if (contentType?.includes('html')) {
 			return 'html';
-		} else if (contentType.includes('xml')) {
+		} else if (contentType?.includes('xml')) {
 			return 'xml';
-		} else if (contentType.includes('javascript')) {
+		} else if (contentType?.includes('javascript')) {
 			return 'javascript';
-		} else if (contentType.includes('css')) {
+		} else if (contentType?.includes('css')) {
 			return 'css';
 		}
 		return 'hex';
 	};
 
-	const [language, setLanguage] = useState(() => getDefaultLanguageForContentType(contentType));
-	const [options, setOptions] = useState(() => getOptionsBasedOnresponseType(contentType));
+	const [formatter, setFormatter] = useState(() => getDefaultFormatterForContentType(response?.contentType));
+	const [options, setOptions] = useState(() => getOptionsBasedOnResponseType(response?.contentType));
 
 	const handleValueChange = (value: string) => {
-		setLanguage(value);
+		setFormatter(value);
 		dispatch(setActiveResponseBodyTab('default'));
 	};
 
@@ -104,14 +116,14 @@ const ResponseBodyTab: React.FC<ResponseBodyTabProps> = ({ responseBody, content
 	};
 
 	useEffect(() => {
-		setOptions(getOptionsBasedOnresponseType(contentType));
-		const tab = setVisualBasedOnContentType(contentType);
+		setOptions(getOptionsBasedOnResponseType(response?.contentType));
+		const tab = setVisualBasedOnContentType(response?.contentType);
 		dispatch(setActiveResponseBodyTab(tab));
-		const defaultLanguage = getDefaultLanguageForContentType(contentType);
-		setLanguage(defaultLanguage);
-	}, [contentType, dispatch]);
+		const defaultLanguage = getDefaultFormatterForContentType(response?.contentType);
+		setFormatter(defaultLanguage);
+	}, [response?.contentType, dispatch]);
 
-	if (!responseBody) {
+	if (!response?.body) {
 		return (
 			<div className='relative'>
 				<EmptyState
@@ -124,7 +136,7 @@ const ResponseBodyTab: React.FC<ResponseBodyTabProps> = ({ responseBody, content
 		);
 	}
 
-	const currentOption = options.find(option => option.value === language);
+	const currentOption = options.find(option => option.value === formatter);
 	return (
 		<div className='relative h-full w-full rounded-none flex flex-col gap-2'>
 			{/* HEADER DIV */}
@@ -132,7 +144,11 @@ const ResponseBodyTab: React.FC<ResponseBodyTabProps> = ({ responseBody, content
 				{/* TABS */}
 				<div className='flex flex-1 gap-2 h-9'>
 					{activeResponseBodyTab !== 'default' ? (
-						<ApiClientButton variant='outline' content={language.toUpperCase()} className='w-fit' onClick={() => dispatch(setActiveResponseBodyTab('default'))}>
+						<ApiClientButton
+							variant='outline'
+							content={formatter.toUpperCase()}
+							className='w-fit'
+							onClick={() => dispatch(setActiveResponseBodyTab('default'))}>
 							{currentOption?.Icon && <currentOption.Icon />}
 						</ApiClientButton>
 					) : (
@@ -141,7 +157,7 @@ const ResponseBodyTab: React.FC<ResponseBodyTabProps> = ({ responseBody, content
 							classNameContent={`w-fit justify-start`}
 							classNameDiv='flex justify-center items-center uppercase'
 							options={options.map(option => ({ label: option.label, value: option.value, Icon: option.Icon }))}
-							value={language}
+							value={formatter}
 							onValueChange={value => handleValueChange(value)}
 						/>
 					)}
@@ -180,7 +196,7 @@ const ResponseBodyTab: React.FC<ResponseBodyTabProps> = ({ responseBody, content
 					<ApiClientInput className='w-full' />
 				</div>
 			)}
-			{renderBody(activeResponseBodyTab, responseBody, contentType, language, wordWrap, editorRef)}
+			{RenderBody(activeResponseBodyTab, response, formatter, wordWrap, editorRef)}
 		</div>
 	);
 };

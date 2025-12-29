@@ -1,21 +1,8 @@
-import type { PayloadAction} from '@reduxjs/toolkit';
+import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import type { AuthConfig } from '@/shared/types/auth';
-import type {
-	RequestBody,
-	FormDataBody,
-	BinaryBody,
-	RawBody,
-	GraphQLBody,
-	KeyValuePair} from '@/shared/types/body';
-import {
-	createDefaultRequestBody,
-	isFormDataBody,
-	isUrlEncodedBody,
-	isRawBody,
-	isBinaryBody,
-	isGraphQLBody,
-} from '@/shared/types/body';
+import type { RequestBody, FormDataBody, BinaryBody, RawBody, GraphQLBody, UrlEncodedBody } from '@/shared/types/body';
+import { createDefaultRequestBody, isFormDataBody, isUrlEncodedBody, isRawBody, isBinaryBody, isGraphQLBody } from '@/shared/types/body';
 import type { Param } from '@/shared/types/request';
 import type { BodyType } from '@/shared/types';
 
@@ -172,7 +159,7 @@ const requestSlice = createSlice({
 				state.body.formData = action.payload;
 			}
 		},
-		setUrlEncoded: (state, action: PayloadAction<KeyValuePair[]>) => {
+		setUrlEncoded: (state, action: PayloadAction<UrlEncodedBody[]>) => {
 			if (isUrlEncodedBody(state.body)) {
 				state.body.urlEncoded = action.payload;
 			}

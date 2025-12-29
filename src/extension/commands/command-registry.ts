@@ -2,6 +2,7 @@ import type { ExtensionContext, WebviewPanel } from 'vscode';
 import { commands } from 'vscode';
 import { v4 as uuidv4 } from 'uuid';
 import { broadcasterHub } from '../orchestrators/broadcaster-hub';
+import { CLIENT_COMMANDS } from '@/shared/constants/commands';
 
 type PanelKind = 'main' | 'secondary';
 
@@ -9,7 +10,7 @@ interface OpenPanelOptions {
 	kind: PanelKind;
 	title: string;
 	command?: string;
-	payload?: any;
+	payload?: unknown;
 }
 
 interface CommandRegistryDependencies {
@@ -42,7 +43,7 @@ export class CommandRegistry {
 	 */
 	private registerMainCommand(): void {
 		this.deps.context.subscriptions.push(
-			commands.registerCommand('openRequest', (...args) => {
+			commands.registerCommand(CLIENT_COMMANDS.OPEN_REQUEST, (...args) => {
 				const request = args?.[0]?.request;
 				this.openPanel({
 					kind: 'main',
@@ -50,7 +51,7 @@ export class CommandRegistry {
 					payload: args?.[0],
 				});
 			}),
-			commands.registerCommand('openCollectionView', collection => {
+			commands.registerCommand(CLIENT_COMMANDS.OPEN_COLLECTION_VIEW, collection => {
 				this.openPanel({
 					kind: 'secondary',
 					title: collection?.name,

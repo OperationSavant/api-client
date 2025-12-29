@@ -4,10 +4,17 @@ import { cn } from '@/shared/lib/utils';
 import type { TabConfig } from '@/shared/types/tabs';
 import { useContainerBreakpoint } from '@/hooks/use-container-breakpoint';
 
+/**
+ * NOTE:
+ * Tabs are a heterogeneous, runtime-composed registry.
+ * Prop types cannot be known statically at this boundary.
+ * Type safety is enforced inside individual tab components.
+ */
 interface ApiClientTabsProps<T extends string = string> {
 	tabs: TabConfig<T>[];
 	value?: T;
 	onChange?: (value: T) => void;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	context?: Record<string, any>;
 	orientation?: 'horizontal' | 'vertical';
 	className?: string;

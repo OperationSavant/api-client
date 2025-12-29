@@ -1,15 +1,14 @@
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Trash2 } from 'lucide-react';
-import type { KeyValueEntry } from '@/shared/types/request';
 import { Autocomplete } from './api-client-autocomplete';
 import { COMMON_HEADER_NAMES } from '@/shared/constants/headers';
 import { HEADER_DEFAULT_VALUES } from '@/shared/constants/header-default-values';
 import { ApiClientInput } from './api-client-input';
 import ApiClientButton from './api-client-button';
-import { cn } from '@/shared/lib/utils';
+import type { UrlEncodedBody } from '@/shared/types/body';
 
-interface ApiClientTableProps<T extends KeyValueEntry> {
+interface ApiClientTableProps<T extends UrlEncodedBody> {
 	rows: T[];
 	handleChange?: (idx: number, field: keyof T, val: string) => void;
 	handleCheck?: (idx: number, checked: boolean) => void;
@@ -38,7 +37,7 @@ const vscodeCheckboxStyles = [
 	'focus-visible:outline-focus-border',
 ].join(' ');
 
-export const ApiClientTable = ({ rows, handleChange, handleCheck, handleDelete, isHeaderTable, isReadOnly }: ApiClientTableProps<KeyValueEntry>) => {
+export const ApiClientTable = ({ rows, handleChange, handleCheck, handleDelete, isHeaderTable, isReadOnly }: ApiClientTableProps<UrlEncodedBody>) => {
 	return (
 		<div className='flex'>
 			<Table className='text-xs border border-panel-border table-fixed'>

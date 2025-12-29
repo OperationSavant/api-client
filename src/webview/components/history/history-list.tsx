@@ -10,6 +10,7 @@ import type { SidebarTabContext } from '@/shared/types/tabs';
 import { ScrollArea } from '../ui/scroll-area';
 import { formatDate, getMethodColor, getStatusColor } from '@/lib/ui-utils';
 import { Checkbox } from '../ui/checkbox';
+import { CLIENT_COMMANDS } from '@/shared/constants/commands';
 
 interface HistoryListProps {
 	onRequestSelect?: (request: HistoryItem) => void;
@@ -67,8 +68,8 @@ export const HistoryList: React.FC<HistoryListProps> = ({ onRequestSelect, onSav
 	const handleDeleteItem = (id: string) => {
 		if (window.confirm('Are you sure you want to delete this history item?')) {
 			context?.sendToExtension({
-				command: 'deleteHistoryItem',
-				historyId: id,
+				command: CLIENT_COMMANDS.DELETE_HISTORY_ITEM,
+				payload: id,
 				source: 'webviewView',
 			});
 			setSelectedItems(prev => {
@@ -85,8 +86,8 @@ export const HistoryList: React.FC<HistoryListProps> = ({ onRequestSelect, onSav
 		if (window.confirm(`Are you sure you want to delete ${selectedItems.size} selected items?`)) {
 			selectedItems.forEach(id => {
 				context?.sendToExtension({
-					command: 'deleteHistoryItem',
-					historyId: id,
+					command: CLIENT_COMMANDS.DELETE_HISTORY_ITEM,
+					payload: id,
 					source: 'webviewView',
 				});
 			});
@@ -97,7 +98,7 @@ export const HistoryList: React.FC<HistoryListProps> = ({ onRequestSelect, onSav
 	const handleClearAll = () => {
 		if (window.confirm('Are you sure you want to clear all history? This action cannot be undone.')) {
 			context?.sendToExtension({
-				command: 'clearHistory',
+				command: CLIENT_COMMANDS.CLEAR_HISTORY,
 				source: 'webviewView',
 			});
 			setSelectedItems(new Set());
