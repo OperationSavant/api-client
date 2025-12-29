@@ -5,8 +5,10 @@
  * imported into any component in the webview.
  */
 
+import type { MessageEnvelope } from '@/shared/types/webview-messages';
+
 interface VsCodeApi {
-	postMessage(message: { command: string; [key: string]: any }): void;
+	postMessage(message: MessageEnvelope): void;
 }
 
 declare const acquireVsCodeApi: () => VsCodeApi;

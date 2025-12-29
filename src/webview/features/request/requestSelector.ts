@@ -1,18 +1,6 @@
 import type { RootState } from '@/store/main-store';
-import type {
-	FormDataBody,
-	KeyValuePair,
-	RawBody,
-	BinaryBody,
-	GraphQLBody} from '@/shared/types/body';
-import {
-	isFormDataBody,
-	isRawBody,
-	isUrlEncodedBody,
-	isBinaryBody,
-	isGraphQLBody,
-	isNoneBody
-} from '@/shared/types/body';
+import type { FormDataBody, UrlEncodedBody, RawBody, BinaryBody, GraphQLBody } from '@/shared/types/body';
+import { isFormDataBody, isRawBody, isUrlEncodedBody, isBinaryBody, isGraphQLBody, isNoneBody } from '@/shared/types/body';
 
 // ============================================================================
 // BASE SELECTORS
@@ -37,7 +25,7 @@ export const selectFormDataEntries = (state: RootState): FormDataBody[] => {
 /**
  * Get URL-encoded pairs (empty array if not urlencoded body)
  */
-export const selectUrlEncodedPairs = (state: RootState): KeyValuePair[] => {
+export const selectUrlEncodedPairs = (state: RootState): UrlEncodedBody[] => {
 	const body = selectBody(state);
 	return isUrlEncodedBody(body) ? body.urlEncoded : [];
 };

@@ -1,10 +1,9 @@
-import type { WebviewPanel } from 'vscode';
-import type { RequestExecutionConfig, RequestExecutorService } from '../services/request-executor';
 import { historyService } from '@/domain/services/history-service';
 import { unitOfWork } from '@/domain/services/unit-of-work';
-import { StateManager } from '../services/state-manager';
-import type { HistoryItem } from '@/shared/types/history';
+import type { RequestExecutorService } from '../services/request-executor';
 import { broadcasterHub } from '../orchestrators/broadcaster-hub';
+import type { HistoryItem } from '@/shared/types/history';
+import type { Request } from '@/shared/types/request';
 
 interface RequestHandlerDependencies {
 	requestExecutor: RequestExecutorService;
@@ -13,18 +12,9 @@ interface RequestHandlerDependencies {
 export class RequestHandler {
 	constructor(private deps: RequestHandlerDependencies) {}
 
-	async handle(message: any, panel: WebviewPanel): Promise<void> {
+	async handle(message: Request): Promise<void> {
 		try {
-			const config: RequestExecutionConfig = {
-				url: message.url,
-				method: message.method,
-				headers: message.headers || {},
-				params: message.params,
-				bodyConfig: message.bodyConfig,
-				auth: message.auth,
-			};
-
-			const result = await this.deps.requestExecutor.execute(config);
+			const result = await this.deps.requestExecutor.execute(message);
 
 			const historyItem: HistoryItem = {
 				historyId: Date.now().toString(),
@@ -33,22 +23,10 @@ export class RequestHandler {
 					method: message.method,
 					headers: message.headers,
 					params: message.params,
-					body: message.bodyConfig,
+					body: message.body,
 					auth: message.auth,
 				},
-				response: {
-					status: result.status,
-					statusText: result.statusText,
-					headers: result.headers,
-					body: result.body,
-					size: result.size,
-					isLargeBody: result.isLargeBody,
-					bodyFilePath: result.bodyFilePath,
-					isError: result.isError,
-					error: result.error,
-					contentType: result.headers['content-type'] || '',
-					duration: result.responseTime,
-				},
+				response: { ...result },
 				timestamp: new Date(),
 				success: !result.isError,
 				error: result.error,
@@ -68,18 +46,7 @@ export class RequestHandler {
 
 			broadcasterHub.broadcast({
 				command: 'apiResponse',
-				data: {
-					status: result.status,
-					statusText: result.statusText,
-					headers: result.headers,
-					body: result.body,
-					size: result.size,
-					duration: result.responseTime,
-					isLargeBody: result.isLargeBody,
-					bodyFilePath: result.bodyFilePath,
-					method: message.method,
-					url: message.url,
-				},
+				data: { ...result },
 			});
 		} catch (error) {
 			console.error('[RequestHandler] Failed to handle request:', error);

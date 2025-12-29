@@ -1,28 +1,9 @@
-// Types for HTTP requests and cURL integration
-
 import type { HttpVerb } from '.';
 import type { AuthConfig } from './auth';
 import type { RequestBody } from './body';
 import { createDefaultRequestBody } from './body';
 
 export type Param = { key: string; value: string; checked: boolean };
-
-export interface KeyValueEntry {
-	key: string;
-	value: string;
-	checked: boolean;
-}
-
-export interface RequestOptions {
-	followRedirects?: boolean;
-	maxRedirects?: number;
-	timeout?: number;
-	compressed?: boolean;
-	insecure?: boolean;
-	includeHeaders?: boolean;
-	userAgent?: string;
-	cookies?: string;
-}
 
 export interface Request {
 	url: string;
@@ -34,16 +15,18 @@ export interface Request {
 	options?: RequestOptions;
 }
 
-export interface CurlParseResult {
-	url: string;
-	method: HttpVerb;
-	headers: Record<string, string>;
-	auth: AuthConfig;
-	body: RequestBody;
-	success: boolean;
-	errors: string[];
+interface RequestOptions {
+	followRedirects?: boolean;
+	maxRedirects?: number;
+	timeout?: number;
+	compressed?: boolean;
+	insecure?: boolean;
+	includeHeaders?: boolean;
+	userAgent?: string;
+	cookies?: string;
 }
 
+//TODO: Remove from here and move it to some utils/helpers file
 export const createDefaultRequest = (): Request => ({
 	url: '',
 	method: 'GET',

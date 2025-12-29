@@ -1,30 +1,32 @@
-import type { WebviewViewMessage } from '@/shared/types/webview-messages';
-import type { WebviewView } from 'vscode';
+import type { MessageEnvelope } from '@/shared/types/webview-messages';
 import { commands } from 'vscode';
 import { broadcasterHub } from '../orchestrators/broadcaster-hub';
+import type { Request } from '@/shared/types/request';
+import type { Collection } from '@/shared/types/collection';
+import { CLIENT_COMMANDS } from '@/shared/constants/commands';
 
 export class SidebarHandler {
 	constructor() {}
 
-	async handle(message: WebviewViewMessage, webviewView: WebviewView): Promise<void> {
+	async handle(message: MessageEnvelope): Promise<void> {
 		switch (message.command) {
-			case 'createNewRequest':
-				await commands.executeCommand(message.command, ...(message.args || []));
+			case CLIENT_COMMANDS.CREATE_NEW_REQUEST:
+				await commands.executeCommand(message.command);
 				break;
-			case 'sidebarReady':
-			case 'refreshSidebar':
-				await this.sendInitialData(webviewView);
+			case CLIENT_COMMANDS.SIDEBAR_READY:
+			case CLIENT_COMMANDS.REFRESH_SIDEBAR:
+				await this.sendInitialData();
 				break;
-			case 'openRequest':
-				await commands.executeCommand(message.command, ...(message.args || []));
+			case CLIENT_COMMANDS.OPEN_REQUEST:
+				await commands.executeCommand(message.command, ...((message.payload as Request[]) || []));
 				break;
-			case 'openCollectionView':
-				await commands.executeCommand(message.command, ...(message.args || []));
+			case CLIENT_COMMANDS.OPEN_COLLECTION_VIEW:
+				await commands.executeCommand(message.command, ...([message.payload as Collection] || []));
 				break;
 		}
 	}
 
-	private async sendInitialData(webviewView: WebviewView): Promise<void> {
+	private async sendInitialData(): Promise<void> {
 		try {
 			const collectionService = await import('@/domain/services/collectionService').then(m => m.collectionService);
 			await collectionService.loadFromPersistence();
@@ -34,6 +36,8 @@ export class SidebarHandler {
 			const historyService = await import('@/domain/services/history-service').then(m => m.historyService);
 			await historyService.loadFromPersistence();
 			const history = historyService.getAllHistory();
+
+			//TODO: load all environments once implemented
 
 			broadcasterHub.broadcast({
 				command: 'initializeDataFromExtension',

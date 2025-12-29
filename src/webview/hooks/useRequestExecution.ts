@@ -4,15 +4,18 @@ import { useCallback } from 'react';
 import type { RootState } from '@/store/main-store';
 import { arrayToRecord } from '@/shared/lib/utils';
 import { assembleBodyForExecution, mergeContentTypeHeader } from '@/shared/lib/body-assembler';
+import type { MessageEnvelope } from '@/shared/types/webview-messages';
+import { CLIENT_COMMANDS } from '@/shared/constants/commands';
+import type { Request } from '@/shared/types/request';
 
 export const useRequestExecution = ({
 	onLoadingChange,
 	onResponseClear,
-	sendToBackend,
+	sendToExtension,
 }: {
 	onLoadingChange: (loading: boolean) => void;
 	onResponseClear: () => void;
-	sendToBackend: (message: any) => void;
+	sendToExtension: (message: MessageEnvelope) => void;
 }) => {
 	const request = useSelector((state: RootState) => state.request);
 
@@ -34,17 +37,19 @@ export const useRequestExecution = ({
 		const assemblyResult = assembleBodyForExecution(request.body, request.headers);
 		const finalHeaders = mergeContentTypeHeader(request.headers, assemblyResult);
 
-		sendToBackend({
+		sendToExtension({
 			source: 'webview',
-			command: 'sendRequest',
-			url: fullUrl,
-			method: request.method,
-			bodyConfig: assemblyResult.body,
-			headers: arrayToRecord(finalHeaders),
-			params: arrayToRecord(request.params),
-			auth: request.auth,
+			command: CLIENT_COMMANDS.SEND_REQUEST,
+			payload: {
+				url: fullUrl,
+				method: request.method,
+				body: assemblyResult.body,
+				headers: arrayToRecord(finalHeaders),
+				params: arrayToRecord(request.params),
+				auth: request.auth,
+			} as Request,
 		});
-	}, [request, onLoadingChange, onResponseClear, sendToBackend]);
+	}, [request, onLoadingChange, onResponseClear, sendToExtension]);
 
 	return { executeRequest };
 };

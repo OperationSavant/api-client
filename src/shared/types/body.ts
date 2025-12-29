@@ -1,15 +1,10 @@
-// Types for different request body formats
-
-import { BodyType } from '.';
-
-export interface KeyValuePair {
+export interface UrlEncodedBody {
 	key: string;
 	value: string;
 	checked: boolean;
-	description?: string;
 }
 
-export interface FormDataBody extends KeyValuePair {
+export interface FormDataBody extends UrlEncodedBody {
 	type: 'text' | 'file';
 	file?: File;
 	fileName?: string;
@@ -37,7 +32,7 @@ export interface GraphQLBody {
 export type RequestBody =
 	| { type: 'none' }
 	| { type: 'form-data'; formData: FormDataBody[] }
-	| { type: 'x-www-form-urlencoded'; urlEncoded: KeyValuePair[] }
+	| { type: 'x-www-form-urlencoded'; urlEncoded: UrlEncodedBody[] }
 	| { type: 'raw'; raw: RawBody }
 	| { type: 'binary'; binary: BinaryBody }
 	| { type: 'graphql'; graphql: GraphQLBody };
@@ -46,26 +41,26 @@ export const createDefaultRequestBody = (): RequestBody => ({
 	type: 'none',
 });
 
-export function isFormDataBody(body: RequestBody): body is { type: 'form-data'; formData: FormDataBody[] } {
+export const isFormDataBody = (body: RequestBody): body is { type: 'form-data'; formData: FormDataBody[] } => {
 	return body.type === 'form-data';
-}
+};
 
-export function isRawBody(body: RequestBody): body is { type: 'raw'; raw: RawBody } {
+export const isRawBody = (body: RequestBody): body is { type: 'raw'; raw: RawBody } => {
 	return body.type === 'raw';
-}
+};
 
-export function isUrlEncodedBody(body: RequestBody): body is { type: 'x-www-form-urlencoded'; urlEncoded: KeyValuePair[] } {
+export const isUrlEncodedBody = (body: RequestBody): body is { type: 'x-www-form-urlencoded'; urlEncoded: UrlEncodedBody[] } => {
 	return body.type === 'x-www-form-urlencoded';
-}
+};
 
-export function isBinaryBody(body: RequestBody): body is { type: 'binary'; binary: BinaryBody } {
+export const isBinaryBody = (body: RequestBody): body is { type: 'binary'; binary: BinaryBody } => {
 	return body.type === 'binary';
-}
+};
 
-export function isGraphQLBody(body: RequestBody): body is { type: 'graphql'; graphql: GraphQLBody } {
+export const isGraphQLBody = (body: RequestBody): body is { type: 'graphql'; graphql: GraphQLBody } => {
 	return body.type === 'graphql';
-}
+};
 
-export function isNoneBody(body: RequestBody): body is { type: 'none' } {
+export const isNoneBody = (body: RequestBody): body is { type: 'none' } => {
 	return body.type === 'none';
-}
+};

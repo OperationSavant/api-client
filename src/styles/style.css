@@ -191,6 +191,11 @@
 	--editor-group-header-tabs-border: var(--vscode-editorGroupHeader-tabsBorder);
 	--editor-group-header-border: var(--vscode-editorGroupHeader-border);
 
+	/* Editor Line Numbers */
+	--editor-line-number-foreground: var(--vscode-editorLineNumber-foreground);
+	--editor-line-number-active-foreground: var(--vscode-editorLineNumber-activeForeground);
+	--editor-line-number-dimmed-foreground: var(--vscode-editorLineNumber-dimmedForeground);
+
 	/* Tabs */
 	--tab-active-background: var(--vscode-tab-activeBackground);
 	--tab-active-foreground: var(--vscode-tab-activeForeground);
@@ -458,6 +463,11 @@
 	--color-delete: #ef4444;
 	--color-head: #6b7280;
 	--color-options: #06b6d4;
+
+	/* Editor */
+	--color-line-number: var(--editor-line-number-foreground);
+	--color-line-number-active: var(--editor-line-number-active-foreground);
+	--color-line-number-dimmed: var(--editor-line-number-dimmed-foreground);
 }
 
 @layer base {

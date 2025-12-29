@@ -17,10 +17,13 @@ import { useSelector } from 'react-redux';
 import { setActiveResponseTab, setResponsePanelSize } from '@/features/editor/editorUISlice';
 import ResponseBodyTab from './response-body-tab';
 import ResponseHeaderTab from './response-header-tab';
+import type { MessageEnvelope } from '@/shared/types/webview-messages';
+import { CLIENT_COMMANDS } from '@/shared/constants/commands';
+import type { ImperativePanelGroupHandle } from 'react-resizable-panels';
 
 interface ResponseViewerProps {
-	sendToExtension: (message: any) => void;
-	panelGroupRef: React.RefObject<any>;
+	sendToExtension: (message: MessageEnvelope) => void;
+	panelGroupRef: React.RefObject<ImperativePanelGroupHandle | null>;
 	className?: string;
 }
 
@@ -33,7 +36,7 @@ export const ResponseViewer: React.FC<ResponseViewerProps> = ({ sendToExtension,
 
 	const handleOpenFileInEditor = useCallback(
 		(filePath: string) => {
-			sendToExtension({ source: 'webview', command: 'openFileInEditor', filePath });
+			sendToExtension({ source: 'webview', command: CLIENT_COMMANDS.OPEN_FILE_IN_EDITOR, payload: filePath });
 		},
 		[sendToExtension]
 	);
@@ -365,9 +368,7 @@ export const ResponseViewer: React.FC<ResponseViewerProps> = ({ sendToExtension,
 	// };
 
 	const tabContext: ResponseTabContext = {
-		responseBody: response?.body || '',
-		contentType: response?.contentType || '',
-		headers: response?.headers || {},
+		response,
 	};
 
 	const RESPONSE_TABS_CONFIG: TabConfig[] = [

@@ -13,7 +13,8 @@
 			"@/extension/*": ["src/extension/*"],
 			"@/domain/*": ["src/domain/*"],
 			"@/shared/*": ["src/shared/*"]
-		}
+		},
+		"skipLibCheck": true
 	},
 	"include": ["src/extension/**/*", "src/domain/**/*", "src/shared/**/*"],
 	"exclude": ["node_modules", ".vscode-test", "src/webview"],

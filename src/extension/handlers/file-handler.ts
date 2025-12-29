@@ -1,4 +1,4 @@
-import type { WebviewPanel, OpenDialogOptions} from 'vscode';
+import type { OpenDialogOptions } from 'vscode';
 import { window, workspace, Uri, ViewColumn } from 'vscode';
 import { contentType as mimeContentType } from 'mime-types';
 import { broadcasterHub } from '../orchestrators/broadcaster-hub';
@@ -9,7 +9,7 @@ export class FileHandler {
 	/**
 	 * Handle form-data file selection for specific field index
 	 */
-	async handleFormDataFileSelect(message: any, panel: WebviewPanel): Promise<void> {
+	async handleFormDataFileSelect(message: any): Promise<void> {
 		const index = message.index;
 
 		const options: OpenDialogOptions = {
@@ -31,7 +31,7 @@ export class FileHandler {
 	/**
 	 * Handle binary body file selection
 	 */
-	async handleBinaryFileSelect(message: any, panel: WebviewPanel): Promise<void> {
+	async handleBinaryFileSelect(): Promise<void> {
 		const options: OpenDialogOptions = {
 			canSelectFiles: true,
 			canSelectFolders: false,
@@ -53,7 +53,7 @@ export class FileHandler {
 	/**
 	 * Open large response file in editor
 	 */
-	async handleOpenFileInEditor(message: any, panel: WebviewPanel): Promise<void> {
+	async handleOpenFileInEditor(message: any): Promise<void> {
 		if (!message.filePath) {
 			return;
 		}
@@ -62,6 +62,7 @@ export class FileHandler {
 
 		const document = await workspace.openTextDocument(fileUri);
 
+		//TODO: Will be deleted in future versions
 		await window.showTextDocument(document, {
 			preview: false,
 			viewColumn: ViewColumn.Beside,

@@ -1,6 +1,6 @@
-import type { KeyValueEntry } from '@/shared/types/request';
+import type { UrlEncodedBody } from '@/shared/types/body';
 
-export const useKeyValueTable = <T extends KeyValueEntry>(rows: T[], setRows: (newRows: T[]) => void, defaultRow: T) => {
+export const useKeyValueTable = <T extends UrlEncodedBody>(rows: T[], setRows: (newRows: T[]) => void, defaultRow: T) => {
 	const keepOnlyOneEmptyRow = (arr: T[]): T[] => {
 		const nonEmpty = arr.filter(p => p.key !== '' || p.value !== '');
 		return [...nonEmpty, defaultRow];

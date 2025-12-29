@@ -1,9 +1,9 @@
-import type { ExtensionContext, ViewColumn, WebviewOptions, WebviewPanel, WebviewPanelOptions, WebviewView} from 'vscode';
+import type { ExtensionContext, ViewColumn, WebviewPanel, WebviewView } from 'vscode';
 import { Uri, window } from 'vscode';
 import { ContentBuilder } from '../services/webview-content-builder';
 import { broadcasterHub } from './broadcaster-hub';
 import type { MessageRouter } from './message-router';
-import type { WebviewMessage, WebviewViewMessage } from '@/shared/types/webview-messages';
+import type { MessageEnvelope } from '@/shared/types/webview-messages';
 
 export class OrchestratorHelper {
 	static createPanel(
@@ -15,8 +15,7 @@ export class OrchestratorHelper {
 			| {
 					readonly viewColumn: ViewColumn;
 					readonly preserveFocus?: boolean;
-			  },
-		options?: WebviewPanelOptions & WebviewOptions
+			  }
 	): WebviewPanel {
 		const panel = window.createWebviewPanel(viewType, title, showOptions, {
 			enableScripts: true,
@@ -33,7 +32,7 @@ export class OrchestratorHelper {
 		const isWebviewPanel = 'reveal' in panel;
 		const isWebviewView = 'show' in panel;
 		panel.webview.onDidReceiveMessage(
-			async (message: WebviewMessage | WebviewViewMessage) => {
+			async (message: MessageEnvelope) => {
 				try {
 					if (isWebviewPanel && message.source === 'webview') await messageRouter.route(message, panel);
 					else if (isWebviewView && message.source === 'webviewView') await messageRouter.route(message, panel);

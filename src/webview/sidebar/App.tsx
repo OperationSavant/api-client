@@ -13,6 +13,8 @@ import { CollectionTab } from '@/components/collections/collection-tab';
 import { FolderTree, Layers, History } from 'lucide-react';
 import HistoryTab from '@/components/history/history-tab';
 import { useWebviewInitialization } from '@/hooks/useStateRestoration';
+import type { MessageEnvelope } from '@/shared/types/webview-messages';
+import { CLIENT_COMMANDS } from '@/shared/constants/commands';
 
 export const SIDEBAR_TABS_CONFIG: TabConfig[] = [
 	{ id: 'collections', label: 'Collections', component: CollectionTab, icon: FolderTree },
@@ -27,7 +29,7 @@ const App = () => {
 
 	const [currentTab, setCurrentTab] = useState('collections');
 
-	const sendToExtension = useCallback((message: any) => {
+	const sendToExtension = useCallback((message: MessageEnvelope) => {
 		vscode.postMessage(message);
 	}, []);
 
@@ -37,7 +39,7 @@ const App = () => {
 
 	useEffect(() => {
 		if (isReady) {
-			sendToExtension({ source: 'webviewView', command: 'sidebarReady' });
+			sendToExtension({ source: 'webviewView', command: CLIENT_COMMANDS.SIDEBAR_READY });
 		}
 	}, [isReady, sendToExtension]);
 
@@ -66,8 +68,7 @@ const App = () => {
 
 	const handleOpenRequest = useCallback(() => {
 		sendToExtension({
-			command: 'openRequest',
-			args: [],
+			command: CLIENT_COMMANDS.OPEN_REQUEST,
 			source: 'webviewView',
 		});
 	}, [sendToExtension]);

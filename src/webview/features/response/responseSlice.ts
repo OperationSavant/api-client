@@ -1,27 +1,14 @@
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
+import type { Response } from '@/shared/types/response';
 
-export interface ResponseState {
-	status: number;
-	statusText: string;
-	headers: Record<string, string>;
-	body: string | null;
-	isLargeBody?: boolean;
-	bodyFilePath?: string;
-	contentType: string;
-	size: number;
-	duration: number;
-	isError: boolean;
-	error?: string;
-}
-
-const initialState: ResponseState | null = null;
+const initialState: Response | null = null;
 
 export const responseSlice = createSlice({
 	name: 'response',
-	initialState: initialState as ResponseState | null,
+	initialState: initialState as Response | null,
 	reducers: {
-		setResponse: (_state, action: PayloadAction<ResponseState | null>) => {
+		setResponse: (_state, action: PayloadAction<Response | null>) => {
 			return action.payload;
 		},
 		clearResponse: () => {

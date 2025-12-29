@@ -28,12 +28,18 @@ const ResponsePDFViewer: React.FC<ResponsePDFViewerProps> = ({ pdfData }) => {
 	}
 
 	if (!fileObject) {
-		return <LoadingFallback />;
+		return <LoadingFallback message='Loading document...' description='Preparing PDF document for viewing...' />;
 	}
 
 	return (
 		<ScrollArea className='flex-1 w-full min-h-0 overflow-y-auto'>
-			<Document options={options} onLoadSuccess={onDocumentLoadSuccess} file={fileObject?.data} className='mx-auto flex flex-col items-center'>
+			<Document
+				options={options}
+				loading={<LoadingFallback message='Loading document...' description='Preparing PDF document for viewing...' />}
+				noData={<LoadingFallback message='No document to display' description='The PDF document is empty or could not be loaded.' />}
+				onLoadSuccess={onDocumentLoadSuccess}
+				file={fileObject?.data}
+				className='mx-auto flex flex-col items-center'>
 				{Array.from(new Array(numPages), (_el, index) => (
 					<Page key={`page_${index + 1}`} pageNumber={index + 1} renderAnnotationLayer={false} renderForms={false} renderTextLayer={false} scale={2} />
 				))}

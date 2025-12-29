@@ -4,7 +4,7 @@ import { REQUEST_TABS_CONFIG } from '@/config/tabs/tabs-config';
 import type { RequestTabContext } from '@/shared/types/tabs';
 import type { AuthConfig, OAuth2Auth } from '@/shared/types/auth';
 import ApiClientTabs from '../custom/api-client-tabs';
-import type { RootState} from '@/store/main-store';
+import type { RootState } from '@/store/main-store';
 import { useAppDispatch } from '@/store/main-store';
 import { useSelector } from 'react-redux';
 import { setAuth, setMethod, setUrl } from '@/features/request/requestSlice';
@@ -13,9 +13,11 @@ import { useRequestExecution } from '@/hooks/useRequestExecution';
 import { clearResponse } from '@/features/response/responseSlice';
 import { ApiClientSaveRequestDialog } from '../custom/app/api-client-save-request-dialog';
 import type { SaveRequestPayload } from '@/shared/types/collection';
+import type { MessageEnvelope } from '@/shared/types/webview-messages';
+import { CLIENT_COMMANDS } from '@/shared/constants/commands';
 
 interface RequestViewProps {
-	sendToExtension: (message: any) => void;
+	sendToExtension: (message: MessageEnvelope) => void;
 }
 
 export const RequestViewer = ({ sendToExtension }: RequestViewProps) => {
@@ -23,7 +25,7 @@ export const RequestViewer = ({ sendToExtension }: RequestViewProps) => {
 	const { executeRequest } = useRequestExecution({
 		onLoadingChange: (isLoading: boolean) => dispatch(setIsExecuting(isLoading)),
 		onResponseClear: () => dispatch(clearResponse()),
-		sendToBackend: sendToExtension,
+		sendToExtension,
 	});
 
 	const {
@@ -35,8 +37,8 @@ export const RequestViewer = ({ sendToExtension }: RequestViewProps) => {
 		async (oauth2Config: OAuth2Auth) => {
 			sendToExtension({
 				source: 'webview',
-				command: 'generateOAuth2Token',
-				oauth2Config,
+				command: CLIENT_COMMANDS.GENERATE_OAUTH2_TOKEN,
+				payload: oauth2Config,
 			});
 		},
 		[sendToExtension]
@@ -44,18 +46,18 @@ export const RequestViewer = ({ sendToExtension }: RequestViewProps) => {
 
 	const handleSelectFile = useCallback(
 		(index: number) => {
-			sendToExtension({ source: 'webview', command: 'formDataFileRequest', index });
+			sendToExtension({ source: 'webview', command: CLIENT_COMMANDS.FORM_DATA_FILE_REQUEST, payload: index });
 		},
 		[sendToExtension]
 	);
 
 	const handleSelectBinaryFile = useCallback(() => {
-		sendToExtension({ source: 'webview', command: 'binaryFileRequest' });
+		sendToExtension({ source: 'webview', command: CLIENT_COMMANDS.BINARY_FILE_REQUEST });
 	}, [sendToExtension]);
 
 	const handleSaveRequest = useCallback(
 		(payload: SaveRequestPayload) => {
-			sendToExtension({ source: 'webview', command: 'saveRequest', payload });
+			sendToExtension({ source: 'webview', command: CLIENT_COMMANDS.SAVE_REQUEST, payload });
 			dispatch(setIsSaveDialogOpen(false));
 		},
 		[sendToExtension, dispatch]
@@ -63,7 +65,7 @@ export const RequestViewer = ({ sendToExtension }: RequestViewProps) => {
 
 	const handleCreateCollection = useCallback(
 		(name: string) => {
-			sendToExtension({ source: 'webview', command: 'createCollection', name });
+			sendToExtension({ source: 'webview', command: CLIENT_COMMANDS.CREATE_COLLECTION, payload: name });
 		},
 		[sendToExtension]
 	);
