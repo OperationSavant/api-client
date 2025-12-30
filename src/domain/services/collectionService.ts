@@ -1,4 +1,19 @@
-import type { Collection, CollectionFolder, CollectionRequest, CollectionMetadata, CollectionTreeNode } from '@/shared/types/collection';
+import type {
+	Collection,
+	CollectionFolder,
+	CollectionRequest,
+	CollectionMetadata,
+	CollectionTreeNode,
+	CreateCollection,
+	UpdateCollection,
+	DeleteCollection,
+	CreateFolder,
+	UpdateFolder,
+	DeleteFolder,
+	CreateOrSaveRequest,
+	UpdateRequest,
+	DeleteRequest,
+} from '@/shared/types/collection';
 import type { ICollectionPersistence } from '@/domain/types/collection-persistence';
 import { unitOfWork } from './unit-of-work';
 
@@ -34,7 +49,7 @@ export class CollectionService {
 	}
 
 	// Collection CRUD Operations
-	createCollection(name: string, description?: string): Collection {
+	createCollection({ name, description }: CreateCollection): Collection {
 		const collection: Collection = {
 			id: this.generateId(),
 			name,
@@ -61,7 +76,7 @@ export class CollectionService {
 		return Array.from(this.collections.values());
 	}
 
-	updateCollection(id: string, updates: Partial<Omit<Collection, 'id' | 'createdAt'>>): Collection | undefined {
+	updateCollection({ id, updates }: UpdateCollection): Collection | undefined {
 		const collection = this.collections.get(id);
 		if (!collection) return undefined;
 
@@ -82,7 +97,7 @@ export class CollectionService {
 		return updatedCollection;
 	}
 
-	deleteCollection(id: string): boolean {
+	deleteCollection({ id }: DeleteCollection): boolean {
 		const collection = this.collections.get(id);
 		if (!collection) return false;
 
@@ -97,7 +112,7 @@ export class CollectionService {
 	}
 
 	// Folder CRUD Operations
-	createFolder(collectionId: string, name: string, parentId?: string, description?: string): CollectionFolder | undefined {
+	createFolder({ collectionId, name, parentId, description }: CreateFolder): CollectionFolder | undefined {
 		const collection = this.collections.get(collectionId);
 		if (!collection) return undefined;
 
@@ -136,7 +151,7 @@ export class CollectionService {
 		return this.findFolder(collection, folderId);
 	}
 
-	updateFolder(collectionId: string, folderId: string, updates: Partial<Omit<CollectionFolder, 'id'>>): CollectionFolder | undefined {
+	updateFolder({ collectionId, folderId, updates }: UpdateFolder): CollectionFolder | undefined {
 		const collection = this.collections.get(collectionId);
 		if (!collection) return undefined;
 
@@ -155,7 +170,7 @@ export class CollectionService {
 		return folder;
 	}
 
-	deleteFolder(collectionId: string, folderId: string): boolean {
+	deleteFolder({ collectionId, folderId }: DeleteFolder): boolean {
 		const collection = this.collections.get(collectionId);
 		if (!collection) return false;
 
@@ -181,7 +196,7 @@ export class CollectionService {
 	}
 
 	// Request CRUD Operations
-	createRequest(collectionId: string, request: Omit<CollectionRequest, 'id'>, folderId?: string): CollectionRequest | undefined {
+	createRequest({ collectionId, request, folderId }: CreateOrSaveRequest): CollectionRequest | undefined {
 		const collection = this.collections.get(collectionId);
 		if (!collection) return undefined;
 
@@ -216,7 +231,7 @@ export class CollectionService {
 		return this.findRequest(collection, requestId);
 	}
 
-	updateRequest(collectionId: string, requestId: string, updates: Partial<Omit<CollectionRequest, 'id'>>): CollectionRequest | undefined {
+	updateRequest({ collectionId, requestId, updates }: UpdateRequest): CollectionRequest | undefined {
 		const collection = this.collections.get(collectionId);
 		if (!collection) return undefined;
 
@@ -235,7 +250,7 @@ export class CollectionService {
 		return request;
 	}
 
-	deleteRequest(collectionId: string, requestId: string): boolean {
+	deleteRequest({ collectionId, requestId }: DeleteRequest): boolean {
 		const collection = this.collections.get(collectionId);
 		if (!collection) return false;
 
@@ -272,10 +287,10 @@ export class CollectionService {
 		};
 
 		// Add root folders
-		rootNode.children!.push(...collection.folders.map(folder => this.buildFolderTree(folder)));
+		rootNode.children?.push(...collection.folders.map(folder => this.buildFolderTree(folder)));
 
 		// Add root requests
-		rootNode.children!.push(
+		rootNode.children?.push(
 			...collection.requests.map(request => ({
 				id: request.id,
 				name: request.name,
@@ -319,7 +334,7 @@ export class CollectionService {
 		if (!request) return false;
 
 		// Remove from current location
-		this.deleteRequest(collectionId, requestId);
+		this.deleteRequest({ collectionId, requestId });
 
 		// Add to new location
 		request.folderId = targetFolderId;
@@ -357,7 +372,7 @@ export class CollectionService {
 		}
 
 		// Remove from current location
-		this.deleteFolder(collectionId, folderId);
+		this.deleteFolder({ collectionId, folderId });
 
 		// Add to new location
 		folder.parentId = targetParentId;
@@ -425,10 +440,10 @@ export class CollectionService {
 		};
 
 		// Add subfolders
-		node.children!.push(...folder.subfolders.map(subfolder => this.buildFolderTree(subfolder)));
+		node.children?.push(...folder.subfolders.map(subfolder => this.buildFolderTree(subfolder)));
 
 		// Add requests
-		node.children!.push(
+		node.children?.push(
 			...folder.requests.map(request => ({
 				id: request.id,
 				name: request.name,

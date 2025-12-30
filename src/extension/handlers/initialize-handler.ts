@@ -1,8 +1,8 @@
 import type { WebviewPanel } from 'vscode';
 import { collectionService } from '@/domain/services/collectionService';
 import { environmentService } from '@/domain/services/environment-service';
-import { historyService } from '@/domain/services/history-service';
 import { broadcasterHub } from '../orchestrators/broadcaster-hub';
+import { SERVER_COMMANDS } from '@/shared/constants/commands';
 
 export class InitializeHandler {
 	constructor() {}
@@ -10,19 +10,10 @@ export class InitializeHandler {
 	async handle(panel: WebviewPanel): Promise<void> {
 		const collections = collectionService.getAllCollections();
 		const environments = environmentService.getScopes();
-		const history = historyService.getAllHistory();
-
 		const context = broadcasterHub.getPanelContext(panel);
-
-		// ThemeService.sendThemeToWebview(panel);
-
 		broadcasterHub.broadcast({
-			command: 'initialize',
-			collections: collections,
-			environments: environments,
-			history: history,
-			request: context?.request,
-			collectionId: context?.collectionId,
+			command: SERVER_COMMANDS.WEBVIEW_INITIALIZE,
+			data: { collections: collections, environments: environments, metadata: context },
 		});
 	}
 }

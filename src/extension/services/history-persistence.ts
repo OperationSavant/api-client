@@ -183,6 +183,7 @@ export class SQLiteHistoryPersistence implements IHistoryPersistence {
 	/**
 	 * Convert database row to HistoryItem
 	 */
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	private rowToHistoryItem(row: any): HistoryItem {
 		return {
 			historyId: row.id,

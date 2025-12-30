@@ -43,12 +43,18 @@ export class CommandRegistry {
 	 */
 	private registerMainCommand(): void {
 		this.deps.context.subscriptions.push(
-			commands.registerCommand(CLIENT_COMMANDS.OPEN_REQUEST, (...args) => {
-				const request = args?.[0]?.request;
+			commands.registerCommand(CLIENT_COMMANDS.CREATE_REQUEST, _ => {
 				this.openPanel({
 					kind: 'main',
-					title: request?.name ?? 'API Client',
-					payload: args?.[0],
+					title: 'API Client',
+				});
+			}),
+			commands.registerCommand(CLIENT_COMMANDS.OPEN_REQUEST, (...args) => {
+				const request = args[0].request;
+				this.openPanel({
+					kind: 'main',
+					title: request.name,
+					payload: args[0],
 				});
 			}),
 			commands.registerCommand(CLIENT_COMMANDS.OPEN_COLLECTION_VIEW, collection => {

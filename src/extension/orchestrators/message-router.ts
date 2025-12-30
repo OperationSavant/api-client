@@ -43,7 +43,7 @@ export class MessageRouter {
 		this.webviewHandlers = {
 			[CLIENT_COMMANDS.WEBVIEW_READY]: ({ target }) => this.initializeHandler.handle(target as WebviewPanel),
 
-			[CLIENT_COMMANDS.SEND_REQUEST]: ({ message }) => this.requestHandler.handle(message.payload as Request),
+			[CLIENT_COMMANDS.SEND_REQUEST]: ({ message: { payload } }) => this.requestHandler.handle(payload as Request),
 
 			// [CLIENT_COMMANDS.START_OAUTH2_AUTHORIZATION]: ({ message }) => this.oauth2Handler.handle(message),
 
@@ -61,13 +61,11 @@ export class MessageRouter {
 
 			[CLIENT_COMMANDS.CREATE_COLLECTION]: ({ message }) => this.collectionHandler.handleCreateCollection(message),
 
-			[CLIENT_COMMANDS.SAVE_REQUEST]: ({ message }) => this.collectionHandler.handleSaveRequest(message),
-
 			[CLIENT_COMMANDS.UPDATE_COLLECTION]: ({ message }) => this.collectionHandler.handleUpdateCollection(message),
 
 			[CLIENT_COMMANDS.DELETE_COLLECTION]: ({ message }) => this.collectionHandler.handleDeleteCollection(message),
 
-			[CLIENT_COMMANDS.DELETE_REQUEST]: ({ message }) => this.collectionHandler.handleDeleteRequest(message),
+			[CLIENT_COMMANDS.SAVE_REQUEST]: ({ message }) => this.collectionHandler.handleSaveRequest(message),
 
 			[CLIENT_COMMANDS.UPDATE_REQUEST]: ({ message }) => this.collectionHandler.handleUpdateRequest(message),
 
@@ -78,10 +76,6 @@ export class MessageRouter {
 			[CLIENT_COMMANDS.DELETE_ENVIRONMENT]: ({ message }) => this.environmentHandler.handleDeleteEnvironment(message),
 
 			[CLIENT_COMMANDS.SET_ACTIVE_ENVIRONMENT]: ({ message }) => this.environmentHandler.handleSetActiveEnvironment(message),
-
-			[CLIENT_COMMANDS.CLEAR_HISTORY]: () => this.historyHandler.handleClearHistory(),
-
-			[CLIENT_COMMANDS.DELETE_HISTORY_ITEM]: ({ message }) => this.historyHandler.handleDeleteHistoryItem(message),
 		};
 
 		// ---------- SIDEBAR (RESTRICTED CAPABILITY) ----------
@@ -94,17 +88,25 @@ export class MessageRouter {
 
 			[CLIENT_COMMANDS.OPEN_REQUEST]: ({ message }) => this.sidebarHandler.handle(message),
 
-			[CLIENT_COMMANDS.CREATE_NEW_REQUEST]: ({ message }) => this.sidebarHandler.handle(message),
+			[CLIENT_COMMANDS.CREATE_REQUEST]: ({ message }) => this.sidebarHandler.handle(message),
+
+			[CLIENT_COMMANDS.DELETE_REQUEST]: ({ message }) => this.collectionHandler.handleDeleteRequest(message),
+
+			[CLIENT_COMMANDS.UPDATE_REQUEST]: ({ message }) => this.collectionHandler.handleUpdateRequest(message),
 
 			[CLIENT_COMMANDS.CREATE_COLLECTION]: ({ message }) => this.collectionHandler.handleCreateCollection(message),
 
 			[CLIENT_COMMANDS.CREATE_FOLDER]: ({ message }) => this.collectionHandler.handleCreateFolder(message),
 
+			[CLIENT_COMMANDS.UPDATE_FOLDER]: ({ message }) => this.collectionHandler.handleUpdateFolder(message),
+
+			[CLIENT_COMMANDS.DELETE_FOLDER]: ({ message }) => this.collectionHandler.handleDeleteFolder(message),
+
 			[CLIENT_COMMANDS.SAVE_REQUEST]: ({ message }) => this.collectionHandler.handleSaveRequest(message),
 
-			[CLIENT_COMMANDS.SEARCH_COLLECTIONS]: ({ message }) => this.sidebarHandler.handle(message),
+			[CLIENT_COMMANDS.CLEAR_HISTORY]: () => this.historyHandler.handleClearHistory(),
 
-			[CLIENT_COMMANDS.SEARCH_HISTORY]: ({ message }) => this.sidebarHandler.handle(message),
+			[CLIENT_COMMANDS.DELETE_HISTORY_ITEM]: ({ message }) => this.historyHandler.handleDeleteHistoryItem(message),
 		};
 	}
 

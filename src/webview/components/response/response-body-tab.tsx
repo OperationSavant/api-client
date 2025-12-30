@@ -23,7 +23,7 @@ interface ResponseBodyTabProps {
 	response: Response;
 }
 
-const RenderFormatter = (language: string, response: Response, wordWrap: boolean, editorRef: React.RefObject<MonacoEditorHandle | null>) => {
+const renderFormatter = (language: string, response: Response, wordWrap: boolean, editorRef: React.RefObject<MonacoEditorHandle | null>) => {
 	switch (language) {
 		case 'hex':
 			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -34,7 +34,7 @@ const RenderFormatter = (language: string, response: Response, wordWrap: boolean
 	}
 };
 
-const ResponseBodySelector = (responseBody: string, contentType: string): JSX.Element | undefined => {
+const responseBodySelector = (responseBody: string, contentType: string): JSX.Element | undefined => {
 	if (contentType.includes('image')) {
 		return <ResponseImageViewer dataUri={responseBody} altText={'response-image'} />;
 	} else if (contentType.includes('pdf')) {
@@ -42,7 +42,7 @@ const ResponseBodySelector = (responseBody: string, contentType: string): JSX.El
 	}
 };
 
-const RenderBody = (
+const renderBody = (
 	activeResponseBodyTab: string,
 	response: Response,
 	language: string,
@@ -51,9 +51,9 @@ const RenderBody = (
 ): JSX.Element | undefined => {
 	if (activeResponseBodyTab === 'preview') {
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-		return ResponseBodySelector(response.body!, response.contentType);
+		return responseBodySelector(response.body!, response.contentType);
 	}
-	return RenderFormatter(language, response, wordWrap, editorRef);
+	return renderFormatter(language, response, wordWrap, editorRef);
 };
 
 const ResponseBodyTab: React.FC<ResponseBodyTabProps> = ({ response }) => {
@@ -196,7 +196,7 @@ const ResponseBodyTab: React.FC<ResponseBodyTabProps> = ({ response }) => {
 					<ApiClientInput className='w-full' />
 				</div>
 			)}
-			{RenderBody(activeResponseBodyTab, response, formatter, wordWrap, editorRef)}
+			{renderBody(activeResponseBodyTab, response, formatter, wordWrap, editorRef)}
 		</div>
 	);
 };

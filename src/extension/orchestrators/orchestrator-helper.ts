@@ -38,11 +38,7 @@ export class OrchestratorHelper {
 					else if (isWebviewView && message.source === 'webviewView') await messageRouter.route(message, panel);
 				} catch (error) {
 					console.error(`[OrchestratorHelper - ${isWebviewPanel ? 'WebviewPanel' : isWebviewView ? 'WebviewView' : 'Unknown'}] Message handling error:`, error);
-					// Send error to webview for user feedback
-					broadcasterHub.broadcast({
-						command: 'error',
-						message: error instanceof Error ? error.message : 'An unexpected error occurred',
-					});
+					broadcasterHub.broadcast({ command: 'error' });
 					broadcasterHub.broadcastException(error instanceof Error ? error.message : 'An unexpected error occurred');
 				}
 			},

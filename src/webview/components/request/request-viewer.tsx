@@ -12,7 +12,7 @@ import { setActiveRequestTab, setIsExecuting, setIsSaveDialogOpen } from '@/feat
 import { useRequestExecution } from '@/hooks/useRequestExecution';
 import { clearResponse } from '@/features/response/responseSlice';
 import { ApiClientSaveRequestDialog } from '../custom/app/api-client-save-request-dialog';
-import type { SaveRequestPayload } from '@/shared/types/collection';
+import type { CreateOrSaveRequest } from '@/shared/types/collection';
 import type { MessageEnvelope } from '@/shared/types/webview-messages';
 import { CLIENT_COMMANDS } from '@/shared/constants/commands';
 
@@ -56,7 +56,7 @@ export const RequestViewer = ({ sendToExtension }: RequestViewProps) => {
 	}, [sendToExtension]);
 
 	const handleSaveRequest = useCallback(
-		(payload: SaveRequestPayload) => {
+		(payload: CreateOrSaveRequest) => {
 			sendToExtension({ source: 'webview', command: CLIENT_COMMANDS.SAVE_REQUEST, payload });
 			dispatch(setIsSaveDialogOpen(false));
 		},

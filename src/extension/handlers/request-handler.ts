@@ -4,6 +4,7 @@ import type { RequestExecutorService } from '../services/request-executor';
 import { broadcasterHub } from '../orchestrators/broadcaster-hub';
 import type { HistoryItem } from '@/shared/types/history';
 import type { Request } from '@/shared/types/request';
+import { SERVER_COMMANDS } from '@/shared/constants/commands';
 
 interface RequestHandlerDependencies {
 	requestExecutor: RequestExecutorService;
@@ -41,11 +42,11 @@ export class RequestHandler {
 			// Broadcast new history item to all panels
 			broadcasterHub.broadcast({
 				command: 'historyItemAdded',
-				historyItem: savedHistoryItem,
+				data: { historyItem: savedHistoryItem },
 			});
 
 			broadcasterHub.broadcast({
-				command: 'apiResponse',
+				command: SERVER_COMMANDS.API_RESPONSE,
 				data: { ...result },
 			});
 		} catch (error) {

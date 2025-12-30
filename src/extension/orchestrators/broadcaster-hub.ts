@@ -1,4 +1,4 @@
-import type { WebviewPanel, WebviewView} from 'vscode';
+import type { WebviewPanel, WebviewView } from 'vscode';
 import { window } from 'vscode';
 
 export class BroadcasterHub {
@@ -26,22 +26,26 @@ export class BroadcasterHub {
 		this.webviewView = view;
 	}
 
-	getPanelContext(panel: WebviewPanel): any | undefined {
-		for (const {panel: registeredPanel, initPayload} of this.webviewPanels.values()) {
+	getPanelContext(panel: WebviewPanel): unknown | undefined {
+		for (const { panel: registeredPanel, initPayload } of this.webviewPanels.values()) {
 			if (registeredPanel === panel) {
 				return initPayload;
 			}
 		}
 	}
 
-	broadcast(message: any) {
+	broadcast({ command, data }: { command: string; data?: unknown }) {
 		for (const { panel } of this.webviewPanels.values()) {
-			panel.webview.postMessage({ ...message });
+			panel.webview.postMessage({ command, data });
 		}
-		this.webviewView?.webview.postMessage({ ...message });
+		this.webviewView?.webview.postMessage({ command, data });
 	}
 
-	broadcastException(message: any) {
+	broadcastInformation(message: string) {
+		window.showInformationMessage(message);
+	}
+
+	broadcastException(message: string | undefined) {
 		window.showErrorMessage(message || 'An unexpected error occurred');
 	}
 }
