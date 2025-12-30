@@ -4,6 +4,7 @@ import { ContentBuilder } from '../services/webview-content-builder';
 import { broadcasterHub } from './broadcaster-hub';
 import type { MessageRouter } from './message-router';
 import type { MessageEnvelope } from '@/shared/types/webview-messages';
+import { SERVER_COMMANDS } from '@/shared/constants/commands';
 
 export class OrchestratorHelper {
 	static createPanel(
@@ -38,7 +39,7 @@ export class OrchestratorHelper {
 					else if (isWebviewView && message.source === 'webviewView') await messageRouter.route(message, panel);
 				} catch (error) {
 					console.error(`[OrchestratorHelper - ${isWebviewPanel ? 'WebviewPanel' : isWebviewView ? 'WebviewView' : 'Unknown'}] Message handling error:`, error);
-					broadcasterHub.broadcast({ command: 'error' });
+					broadcasterHub.broadcast({ command: SERVER_COMMANDS.SERVER_ERROR });
 					broadcasterHub.broadcastException(error instanceof Error ? error.message : 'An unexpected error occurred');
 				}
 			},

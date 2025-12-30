@@ -10,7 +10,7 @@ export class HistoryHandler {
 
 	private broadcastHistoryUpdate(): void {
 		const allHistory = historyService.getAllHistory();
-		broadcasterHub.broadcast({ command: SERVER_COMMANDS.SET_HISTORY, data: { allHistory } });
+		broadcasterHub.broadcast({ command: SERVER_COMMANDS.SET_HISTORY, data: allHistory });
 	} /**
 	 * Clear all history
 	 */

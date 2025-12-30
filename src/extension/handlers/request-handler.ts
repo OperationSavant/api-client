@@ -41,8 +41,8 @@ export class RequestHandler {
 
 			// Broadcast new history item to all panels
 			broadcasterHub.broadcast({
-				command: 'historyItemAdded',
-				data: { historyItem: savedHistoryItem },
+				command: SERVER_COMMANDS.ADD_HISTORY,
+				data: savedHistoryItem,
 			});
 
 			broadcasterHub.broadcast({
