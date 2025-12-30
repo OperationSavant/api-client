@@ -1,20 +1,21 @@
 import { addCollection, setCollections } from '@/features/collections/sidebar-collectionSlice';
+import type { Collection } from '@/shared/types/collection';
 import type { AppDispatch } from '@/store/sidebar-store';
 
 interface SidebarCollectionHandlerDependencies {
 	dispatch: AppDispatch;
 }
 
-export function createSidebarCollectionHandlers(deps: SidebarCollectionHandlerDependencies) {
-	const handleAddCollection = (data: any) => {
+export function createSidebarCollectionHandlers({ dispatch }: SidebarCollectionHandlerDependencies) {
+	const handleAddCollection = (data: Collection) => {
 		if (data) {
-			deps.dispatch(addCollection(data));
+			dispatch(addCollection(data));
 		}
 	};
 
-	const handleSetCollections = (data: any) => {
-		if (data && data.collections && Array.isArray(data.collections)) {
-			deps.dispatch(setCollections(data.collections));
+	const handleSetCollections = (data: Collection[]) => {
+		if (data && Array.isArray(data)) {
+			dispatch(setCollections(data));
 		}
 	};
 

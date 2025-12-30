@@ -1,21 +1,18 @@
-import type { WebviewPanel } from 'vscode';
 import { window } from 'vscode';
 import { historyService } from '@/domain/services/history-service';
 import { unitOfWork } from '@/domain/services/unit-of-work';
 import { broadcasterHub } from '../orchestrators/broadcaster-hub';
+import type { MessageEnvelope } from '@/shared/types/webview-messages';
+import { SERVER_COMMANDS } from '@/shared/constants/commands';
 
 export class HistoryHandler {
 	constructor() {}
 
 	private broadcastHistoryUpdate(): void {
 		const allHistory = historyService.getAllHistory();
-		broadcasterHub.broadcast({
-			command: 'setHistory',
-			history: allHistory,
-		});
+		broadcasterHub.broadcast({ command: SERVER_COMMANDS.SET_HISTORY, data: allHistory });
 	} /**
 	 * Clear all history
-	 * ACTUAL CODE: extension.ts lines 156-164
 	 */
 	async handleClearHistory(): Promise<void> {
 		//TODO: Use BroadcastrHub to support multiple panels
@@ -23,24 +20,14 @@ export class HistoryHandler {
 
 		if (confirmation === 'Clear') {
 			try {
-				// Domain operation (synchronous)
 				historyService.clearHistory();
-
-				// Commit to database (async)
 				await unitOfWork.commit();
-
-				// Broadcast update to all panels
 				this.broadcastHistoryUpdate();
-				//TODO: Use BroadcastrHub to support multiple panels
-				// window.showInformationMessage('History cleared.');
+				broadcasterHub.broadcastInformation('History cleared.');
 			} catch (error) {
 				console.error('Failed to clear history:', error);
-
-				// Rollback in-memory changes
 				unitOfWork.rollback();
-				//TODO: Use BroadcastrHub to support multiple panels
-				// window.showErrorMessage(`Failed to clear history: ${error instanceof Error ? error.message : 'Unknown error'}`);
-				throw error;
+				broadcasterHub.broadcastException(`Failed to clear history: ${error instanceof Error ? error.message : 'Unknown error'}`);
 			}
 		}
 	}
@@ -49,28 +36,16 @@ export class HistoryHandler {
 	 * Delete single history item
 	 * NOTE: No webview message handler in commented code, but method exists in service
 	 */
-	async handleDeleteHistoryItem(message: any): Promise<void> {
+	async handleDeleteHistoryItem(message: MessageEnvelope): Promise<void> {
 		try {
-			const { historyId } = message;
-
-			// Domain operation (synchronous)
-			historyService.deleteHistoryItem(historyId);
-
-			// Commit to database (async)
+			historyService.deleteHistoryItem(message.payload as string);
 			await unitOfWork.commit();
-
-			// Broadcast update to all panels
 			this.broadcastHistoryUpdate();
-			//TODO: Use BroadcastrHub to support multiple panels
-			// window.showInformationMessage('History item deleted.');
+			broadcasterHub.broadcastInformation('History item deleted.');
 		} catch (error) {
 			console.error('Failed to delete history item:', error);
-
-			// Rollback in-memory changes
 			unitOfWork.rollback();
-			//TODO: Use BroadcastrHub to support multiple panels
-			// window.showErrorMessage(`Failed to delete history item: ${error instanceof Error ? error.message : 'Unknown error'}`);
-			throw error;
+			broadcasterHub.broadcastException(`Failed to delete history item: ${error instanceof Error ? error.message : 'Unknown error'}`);
 		}
 	}
 }

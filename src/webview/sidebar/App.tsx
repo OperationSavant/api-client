@@ -14,7 +14,7 @@ import { FolderTree, Layers, History } from 'lucide-react';
 import HistoryTab from '@/components/history/history-tab';
 import { useWebviewInitialization } from '@/hooks/useStateRestoration';
 import type { MessageEnvelope } from '@/shared/types/webview-messages';
-import { CLIENT_COMMANDS } from '@/shared/constants/commands';
+import { CLIENT_COMMANDS, SERVER_COMMANDS } from '@/shared/constants/commands';
 
 export const SIDEBAR_TABS_CONFIG: TabConfig[] = [
 	{ id: 'collections', label: 'Collections', component: CollectionTab, icon: FolderTree },
@@ -44,21 +44,21 @@ const App = () => {
 	}, [isReady, sendToExtension]);
 
 	useEffect(() => {
-		messaging.registerHandler('initializeDataFromExtension', initializeHandlers.handleInitialize);
-		messaging.registerHandler('setCollections', collectionHandlers.handleSetCollections);
-		messaging.registerHandler('setHistory', historyHandlers.handleSetHistory);
-		messaging.registerHandler('historyItemAdded', historyHandlers.handleAddHistoryItem);
-		messaging.registerHandler('historyItemRemoved', historyHandlers.handleRemoveHistoryItem);
-		messaging.registerHandler('historyCleared', historyHandlers.handleClearHistory);
+		messaging.registerHandler(SERVER_COMMANDS.SIDEBAR_INITIALIZE, initializeHandlers.handleInitialize);
+		messaging.registerHandler(SERVER_COMMANDS.SET_COLLECTIONS, collectionHandlers.handleSetCollections);
+		messaging.registerHandler(SERVER_COMMANDS.SET_HISTORY, historyHandlers.handleSetHistory);
+		messaging.registerHandler(SERVER_COMMANDS.ADD_HISTORY, historyHandlers.handleAddHistoryItem);
+		messaging.registerHandler(SERVER_COMMANDS.DELETE_HISTORY_ITEM, historyHandlers.handleRemoveHistoryItem);
+		messaging.registerHandler(SERVER_COMMANDS.CLEAR_HISTORY, historyHandlers.handleClearHistory);
 		markReady();
 
 		return () => {
-			messaging.unregisterHandler('initializeDataFromExtension');
-			messaging.unregisterHandler('setCollections');
-			messaging.unregisterHandler('setHistory');
-			messaging.unregisterHandler('historyItemAdded');
-			messaging.unregisterHandler('historyItemRemoved');
-			messaging.unregisterHandler('historyCleared');
+			messaging.unregisterHandler(SERVER_COMMANDS.SIDEBAR_INITIALIZE);
+			messaging.unregisterHandler(SERVER_COMMANDS.SET_COLLECTIONS);
+			messaging.unregisterHandler(SERVER_COMMANDS.SET_HISTORY);
+			messaging.unregisterHandler(SERVER_COMMANDS.ADD_HISTORY);
+			messaging.unregisterHandler(SERVER_COMMANDS.DELETE_HISTORY_ITEM);
+			messaging.unregisterHandler(SERVER_COMMANDS.CLEAR_HISTORY);
 		};
 	}, [messaging, initializeHandlers, collectionHandlers, historyHandlers, markReady]);
 
@@ -68,7 +68,7 @@ const App = () => {
 
 	const handleOpenRequest = useCallback(() => {
 		sendToExtension({
-			command: CLIENT_COMMANDS.OPEN_REQUEST,
+			command: CLIENT_COMMANDS.CREATE_REQUEST,
 			source: 'webviewView',
 		});
 	}, [sendToExtension]);

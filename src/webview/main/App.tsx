@@ -4,14 +4,7 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/componen
 import type { ImperativePanelGroupHandle } from 'react-resizable-panels';
 import { ResponseViewer } from '@/components/response/response-viewer';
 import { useAppDispatch } from '@/store/main-store';
-import {
-	createInitializeHandlers,
-	createResponseHandlers,
-	createCollectionHandlers,
-	createRequestHandlers,
-	createFileHandlers,
-	createOAuth2Handlers,
-} from '@/handlers';
+import { createInitializeHandlers, createResponseHandlers, createCollectionHandlers, createRequestHandlers, createFileHandlers } from '@/handlers';
 import { useWebviewMessaging } from '@/hooks/useWebviewMessaging';
 import { useWebviewInitialization } from '@/hooks/useStateRestoration';
 import { LoadingFallback } from '@/components/custom/states/loading-fallback';
@@ -19,7 +12,7 @@ import { RequestViewer } from '@/components/request/request-viewer';
 import { createThemeHandlers } from '@/handlers/theme-handlers';
 import { setIsExecuting } from '@/features/editor/editorUISlice';
 import type { MessageEnvelope } from '@/shared/types/webview-messages';
-import { CLIENT_COMMANDS } from '@/shared/constants/commands';
+import { CLIENT_COMMANDS, SERVER_COMMANDS } from '@/shared/constants/commands';
 
 const App = () => {
 	const dispatch = useAppDispatch();
@@ -37,7 +30,7 @@ const App = () => {
 	const requestHandlers = useMemo(() => createRequestHandlers({ dispatch }), [dispatch]);
 	const fileHandlers = useMemo(() => createFileHandlers({ dispatch }), [dispatch]);
 	const themeHandlers = useMemo(() => createThemeHandlers(), []);
-	const oauth2Handlers = useMemo(() => createOAuth2Handlers({ dispatch }), [dispatch]);
+	// const oauth2Handlers = useMemo(() => createOAuth2Handlers({ dispatch }), [dispatch]);
 
 	useEffect(() => {
 		if (isReady) {
@@ -49,31 +42,31 @@ const App = () => {
 		const handleError = () => {
 			dispatch(setIsExecuting(false));
 		};
-		messaging.registerHandler('initialize', initializeHandlers.handleInitialize);
-		messaging.registerHandler('apiResponse', responseHandlers.handleApiResponse);
-		messaging.registerHandler('addCollection', collectionHandlers.handleAddCollection);
-		messaging.registerHandler('setCollections', collectionHandlers.handleSetCollections);
+		messaging.registerHandler(SERVER_COMMANDS.WEBVIEW_INITIALIZE, initializeHandlers.handleInitialize);
+		messaging.registerHandler(SERVER_COMMANDS.API_RESPONSE, responseHandlers.handleApiResponse);
+		messaging.registerHandler(SERVER_COMMANDS.ADD_COLLECTION, collectionHandlers.handleAddCollection);
+		messaging.registerHandler(SERVER_COMMANDS.SET_COLLECTIONS, collectionHandlers.handleSetCollections);
 		messaging.registerHandler('resetState', requestHandlers.handleResetState);
-		messaging.registerHandler('formDataFileResponse', fileHandlers.handleFormDataFileResponse);
-		messaging.registerHandler('binaryFileResponse', fileHandlers.handleBinaryFileResponse);
-		messaging.registerHandler('themeData', themeHandlers.handleThemeData);
-		messaging.registerHandler('oauth2TokenResponse', oauth2Handlers.handleOAuth2TokenResponse);
-		messaging.registerHandler('error', handleError);
+		messaging.registerHandler(SERVER_COMMANDS.FORM_DATA_FILE_RESPONSE, fileHandlers.handleFormDataFileResponse);
+		messaging.registerHandler(SERVER_COMMANDS.BINARY_FILE_RESPONSE, fileHandlers.handleBinaryFileResponse);
+		messaging.registerHandler(SERVER_COMMANDS.THEME_DATA, themeHandlers.handleThemeData);
+		// messaging.registerHandler('oauth2TokenResponse', oauth2Handlers.handleOAuth2TokenResponse);
+		messaging.registerHandler(SERVER_COMMANDS.SERVER_ERROR, handleError);
 		markReady();
 
 		return () => {
-			messaging.unregisterHandler('initialize');
-			messaging.unregisterHandler('apiResponse');
-			messaging.unregisterHandler('addCollection');
-			messaging.unregisterHandler('setCollections');
+			messaging.unregisterHandler(SERVER_COMMANDS.WEBVIEW_INITIALIZE);
+			messaging.unregisterHandler(SERVER_COMMANDS.API_RESPONSE);
+			messaging.unregisterHandler(SERVER_COMMANDS.ADD_COLLECTION);
+			messaging.unregisterHandler(SERVER_COMMANDS.SET_COLLECTIONS);
 			messaging.unregisterHandler('resetState');
-			messaging.unregisterHandler('formDataFileResponse');
-			messaging.unregisterHandler('binaryFileResponse');
-			messaging.unregisterHandler('themeData');
-			messaging.unregisterHandler('oauth2TokenResponse');
-			messaging.unregisterHandler('error');
+			messaging.unregisterHandler(SERVER_COMMANDS.FORM_DATA_FILE_RESPONSE);
+			messaging.unregisterHandler(SERVER_COMMANDS.BINARY_FILE_RESPONSE);
+			messaging.unregisterHandler(SERVER_COMMANDS.THEME_DATA);
+			// messaging.unregisterHandler('oauth2TokenResponse');
+			messaging.unregisterHandler(SERVER_COMMANDS.SERVER_ERROR);
 		};
-	}, [messaging, initializeHandlers, responseHandlers, collectionHandlers, requestHandlers, fileHandlers, themeHandlers, oauth2Handlers, markReady, dispatch]);
+	}, [messaging, initializeHandlers, responseHandlers, collectionHandlers, requestHandlers, fileHandlers, themeHandlers, markReady, dispatch]);
 
 	if (!isInitialized) {
 		return <LoadingFallback message={'Restoring session...'} description={'Please wait while we restore your previous workspace state'} />;

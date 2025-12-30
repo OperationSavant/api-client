@@ -1,5 +1,4 @@
 import type { HistoryItem, HistoryFilter, HistoryExport, HistoryConfiguration } from '@/shared/types/history';
-import { HistorySort, HistoryStatistics } from '@/shared/types/history';
 import type { IHistoryPersistence } from '@/domain/types/history-persistence';
 import { unitOfWork } from './unit-of-work';
 

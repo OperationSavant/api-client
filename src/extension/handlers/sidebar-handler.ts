@@ -3,14 +3,14 @@ import { commands } from 'vscode';
 import { broadcasterHub } from '../orchestrators/broadcaster-hub';
 import type { Request } from '@/shared/types/request';
 import type { Collection } from '@/shared/types/collection';
-import { CLIENT_COMMANDS } from '@/shared/constants/commands';
+import { CLIENT_COMMANDS, SERVER_COMMANDS } from '@/shared/constants/commands';
 
 export class SidebarHandler {
 	constructor() {}
 
 	async handle(message: MessageEnvelope): Promise<void> {
 		switch (message.command) {
-			case CLIENT_COMMANDS.CREATE_NEW_REQUEST:
+			case CLIENT_COMMANDS.CREATE_REQUEST:
 				await commands.executeCommand(message.command);
 				break;
 			case CLIENT_COMMANDS.SIDEBAR_READY:
@@ -40,20 +40,18 @@ export class SidebarHandler {
 			//TODO: load all environments once implemented
 
 			broadcasterHub.broadcast({
-				command: 'initializeDataFromExtension',
-				collections,
-				environments: [],
-				history,
+				command: SERVER_COMMANDS.SIDEBAR_INITIALIZE,
+				data: { collections, environments: [], history },
 			});
 		} catch (error) {
 			console.error('Error sending initial data to sidebar:', error);
 
 			broadcasterHub.broadcast({
-				command: 'initializeDataFromExtension',
-				collections: [],
-				environments: [],
-				history: [],
+				command: SERVER_COMMANDS.SIDEBAR_INITIALIZE,
+				data: { collections: [], environments: [], history: [] },
 			});
+
+			broadcasterHub.broadcastException(`Error sending initial data to sidebar: ${error instanceof Error ? error.message : 'An unexpected error occurred'}`);
 		}
 	}
 }

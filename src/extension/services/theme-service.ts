@@ -1,9 +1,10 @@
-import type { WebviewPanel} from 'vscode';
+import type { WebviewPanel } from 'vscode';
 import { workspace, extensions } from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as jsonc from 'jsonc-parser';
 import { broadcasterHub } from '../orchestrators/broadcaster-hub';
+import { SERVER_COMMANDS } from '@/shared/constants/commands';
 
 interface IVSCodeTheme {
 	$schema: 'vscode://schemas/color-theme';
@@ -37,22 +38,21 @@ export class ThemeService {
 				return;
 			}
 
-			if (this.themeCache.has(themeName!)) {
-				broadcasterHub.broadcast({
-					command: 'themeData',
-					themeContent: this.themeCache.get(themeName!),
-				});
+			if (this.themeCache.has(themeName)) {
+				broadcasterHub.broadcast({ command: SERVER_COMMANDS.THEME_DATA, data: { themeContent: this.themeCache.get(themeName) } });
 				return;
 			}
 
-			const themeExtension = extensions.all.find(ext => ext.packageJSON?.contributes?.themes?.some((t: any) => t.label === themeName || t.id === themeName));
+			const themeExtension = extensions.all.find(ext =>
+				ext.packageJSON?.contributes?.themes?.some((t: { label: string; id: string }) => t.label === themeName || t.id === themeName)
+			);
 
 			if (!themeExtension) {
 				console.warn('ThemeService: No theme extension found for', themeName);
 				return;
 			}
 
-			const themeInfo = themeExtension.packageJSON.contributes.themes.find((t: any) => t.label === themeName || t.id === themeName);
+			const themeInfo = themeExtension.packageJSON.contributes.themes.find((t: { label: string; id: string }) => t.label === themeName || t.id === themeName);
 
 			if (!themeInfo) {
 				console.error('ThemeService: Could not find theme info in extension package.json.');
@@ -64,11 +64,8 @@ export class ThemeService {
 			const fileContent = fs.readFileSync(themePath, 'utf-8');
 			const themeContent = jsonc.parse(fileContent) as IVSCodeTheme;
 
-			this.themeCache.set(themeName!, { ...themeContent, type: themeInfo.uiTheme });
-			broadcasterHub.broadcast({
-				command: 'themeData',
-				themeContent: { ...themeContent, type: themeInfo.uiTheme },
-			});
+			this.themeCache.set(themeName, { ...themeContent, type: themeInfo.uiTheme });
+			broadcasterHub.broadcast({ command: SERVER_COMMANDS.THEME_DATA, data: { themeContent: { ...themeContent, type: themeInfo.uiTheme } } });
 		} catch (e) {
 			console.error('ThemeService: Error reading theme file:', e);
 		}
@@ -81,6 +78,7 @@ export class ThemeService {
 	static watchThemeChanges(panel: WebviewPanel): { dispose: () => void } {
 		const disposable = workspace.onDidChangeConfiguration(e => {
 			if (e.affectsConfiguration('workbench.colorTheme')) {
+				//TODO: Need to re-add this functionality with better theme service implementation
 				// this.sendThemeToWebview(panel);
 			}
 		});

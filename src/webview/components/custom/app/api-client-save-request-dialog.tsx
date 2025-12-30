@@ -6,7 +6,7 @@ import { ApiClientInput } from '../api-client-input';
 import ApiClientButton from '../api-client-button';
 import { ApiClientSelect } from '../api-client-select';
 import ApiClientFieldRow from '../api-client-field-row';
-import type { CollectionRequest, CollectionFolder, SaveRequestPayload } from '@/shared/types/collection';
+import type { CollectionRequest, CollectionFolder, CreateOrSaveRequest } from '@/shared/types/collection';
 import { arrayToRecord } from '@/shared/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { FileText, Folder, ListFilter } from 'lucide-react';
@@ -14,7 +14,7 @@ import { FileText, Folder, ListFilter } from 'lucide-react';
 interface SaveRequestDialogProps {
 	isOpen: boolean;
 	onClose: () => void;
-	onSave: (payload: SaveRequestPayload) => void;
+	onSave: (payload: CreateOrSaveRequest) => void;
 	onCreateCollection: (name: string) => void;
 }
 
@@ -84,7 +84,6 @@ export const ApiClientSaveRequestDialog: React.FC<SaveRequestDialogProps> = ({ i
 		if (!selectedCollectionId) return;
 		onSave({
 			collectionId: selectedCollectionId,
-			requestId: request.id,
 			request: {
 				collectionId: selectedCollectionId,
 				name: requestName,
@@ -97,6 +96,7 @@ export const ApiClientSaveRequestDialog: React.FC<SaveRequestDialogProps> = ({ i
 				params: arrayToRecord(request.params),
 				...(request.body.type === 'graphql' && { operationName: request.body.graphql.operationName }),
 			},
+			folderId: undefined,
 		});
 	};
 

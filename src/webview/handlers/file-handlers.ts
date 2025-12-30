@@ -6,14 +6,14 @@ interface FileHandlerDependencies {
 }
 
 export function createFileHandlers(deps: FileHandlerDependencies) {
-	const handleFormDataFileResponse = (message: any) => {
+	const handleFormDataFileResponse = (message: { paths: string[]; index: number }) => {
 		const { paths, index } = message;
-		if (paths || paths.length > 0) {
+		if (paths && paths.length > 0) {
 			deps.dispatch(updateFormDataWithFiles({ paths, index }));
 		}
 	};
 
-	const handleBinaryFileResponse = (message: any) => {
+	const handleBinaryFileResponse = (message: { path: string; size: number; contentType: string }) => {
 		const { path, size, contentType } = message;
 		if (path) {
 			const fileName = path.split('\\').pop()?.split('/').pop();

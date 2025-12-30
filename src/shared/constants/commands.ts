@@ -3,13 +3,19 @@ export const CLIENT_COMMANDS = {
 	SEND_REQUEST: 'wizard.apiClient.sendRequest',
 
 	CREATE_COLLECTION: 'wizard.apiClient.createCollection',
-	SAVE_REQUEST: 'wizard.apiClient.saveRequest',
 	UPDATE_COLLECTION: 'wizard.apiClient.updateCollection',
 	DELETE_COLLECTION: 'wizard.apiClient.deleteCollection',
 
-	DELETE_REQUEST: 'wizard.apiClient.deleteRequest',
+	CREATE_REQUEST: 'wizard.apiClient.createRequest',
+	OPEN_REQUEST: 'wizard.apiClient.openRequest',
+	SAVE_REQUEST: 'wizard.apiClient.saveRequest',
 	UPDATE_REQUEST: 'wizard.apiClient.updateRequest',
+	DELETE_REQUEST: 'wizard.apiClient.deleteRequest',
 	REORDER_REQUESTS: 'wizard.apiClient.reorderRequests',
+
+	CREATE_FOLDER: 'wizard.apiClient.createFolder',
+	UPDATE_FOLDER: 'wizard.apiClient.updateFolder',
+	DELETE_FOLDER: 'wizard.apiClient.deleteFolder',
 
 	CREATE_ENVIRONMENT: 'wizard.apiClient.createEnvironment',
 	DELETE_ENVIRONMENT: 'wizard.apiClient.deleteEnvironment',
@@ -30,14 +36,22 @@ export const CLIENT_COMMANDS = {
 
 	OPEN_COLLECTION_VIEW: 'wizard.apiClient.openCollectionView',
 
-	CREATE_NEW_REQUEST: 'wizard.apiClient.createNewRequest',
-	CREATE_FOLDER: 'wizard.apiClient.createFolder',
-
-	OPEN_REQUEST: 'wizard.apiClient.openRequest',
-
 	SIDEBAR_READY: 'wizard.apiClient.sidebarReady',
 	REFRESH_SIDEBAR: 'wizard.apiClient.refreshSidebar',
+} as const;
 
-	SEARCH_COLLECTIONS: 'wizard.apiClient.searchCollections',
-	SEARCH_HISTORY: 'wizard.apiClient.searchHistory',
+export const SERVER_COMMANDS = {
+	WEBVIEW_INITIALIZE: 'wizard.apiClient.initialize',
+	SIDEBAR_INITIALIZE: 'wizard.apiClient.sidebarInitialize',
+	API_RESPONSE: 'wizard.apiClient.apiResponse',
+	ADD_COLLECTION: 'wizard.apiClient.addCollection',
+	SET_COLLECTIONS: 'wizard.apiClient.setCollections',
+	ADD_HISTORY: 'wizard.apiClient.historyAdded',
+	SET_HISTORY: 'wizard.apiClient.setHistory',
+	DELETE_HISTORY_ITEM: 'wizard.apiClient.historyItemDeleted',
+	CLEAR_HISTORY: 'wizard.apiClient.historyClear',
+	FORM_DATA_FILE_RESPONSE: 'wizard.apiClient.formDataFileResponse',
+	BINARY_FILE_RESPONSE: 'wizard.apiClient.binaryFileResponse',
+	THEME_DATA: 'wizard.apiClient.themeData',
+	SERVER_ERROR: 'wizard.apiClient.serverError',
 } as const;

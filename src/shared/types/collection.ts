@@ -2,11 +2,55 @@ import type { AuthConfig } from './auth';
 import type { RequestBody } from './body';
 import type { TestSuite } from './testing';
 
-export interface SaveRequestPayload {
+export interface CreateOrSaveRequest {
 	collectionId: string;
 	request: Omit<CollectionRequest, 'id'>;
-	requestId?: string;
+	folderId?: string;
 }
+
+export interface UpdateRequest {
+	collectionId: string;
+	requestId: string;
+	updates: Partial<Omit<CollectionRequest, 'id'>>;
+}
+
+export interface DeleteRequest {
+	collectionId: string;
+	requestId: string;
+}
+
+export interface CreateCollection {
+	name: string;
+	description?: string;
+}
+
+export interface UpdateCollection {
+	id: string;
+	updates: Partial<Omit<Collection, 'id' | 'createdAt'>>;
+}
+
+export interface DeleteCollection {
+	id: string;
+}
+
+export interface CreateFolder {
+	collectionId: string;
+	name: string;
+	parentId?: string;
+	description?: string;
+}
+
+export interface UpdateFolder {
+	collectionId: string;
+	folderId: string;
+	updates: Partial<Omit<CollectionFolder, 'id'>>;
+}
+
+export interface DeleteFolder {
+	collectionId: string;
+	folderId: string;
+}
+
 export interface Collection {
 	id: string;
 	name: string;
@@ -24,12 +68,12 @@ export interface CollectionFolder {
 	id: string;
 	name: string;
 	description?: string;
-	parentId?: string; // null for root folders
+	parentId?: string;
 	collapsed?: boolean;
 	requests: CollectionRequest[];
 	subfolders: CollectionFolder[];
-	auth?: AuthConfig; // Inheritable auth
-	variables?: Record<string, string>; // Inheritable variables
+	auth?: AuthConfig;
+	variables?: Record<string, string>;
 }
 
 export interface CollectionRequest {
@@ -47,12 +91,6 @@ export interface CollectionRequest {
 	folderId?: string;
 	operationName?: string;
 }
-
-// export interface RequestBody {
-// 	type: 'none' | 'form-data' | 'url-encoded' | 'raw' | 'binary' | 'graphql';
-// 	data: any;
-// 	contentType?: string;
-// }
 
 export interface CollectionMetadata {
 	id: string;
