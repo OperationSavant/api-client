@@ -1,6 +1,7 @@
 import type { AuthConfig, OAuth2Auth } from '@/shared/types/auth';
 import type { Response } from '@/shared/types/response';
 import type { MessageEnvelope } from './webview-messages';
+import type { ImperativePanelGroupHandle } from 'react-resizable-panels';
 /**
  * NOTE:
  * Tabs are a heterogeneous, runtime-composed registry.
@@ -33,7 +34,14 @@ export interface RequestTabContext {
 }
 
 export interface ResponseTabContext {
-	response: Response | null;
+	sendToExtension: (message: MessageEnvelope) => void;
+
+	response: Partial<Omit<Response, 'isError' | 'error'>>;
+	responsePanelSize?: 'default' | 'maximized' | 'minimized';
+	panelGroupRef: React.RefObject<ImperativePanelGroupHandle | null>;
+	onToggleResponsePanel?: () => void;
+
+	headers: Record<string, string>;
 }
 
 export interface SidebarTabContext {

@@ -390,7 +390,7 @@ export const TreeView: React.FC<TreeViewProps> = ({
 								<ApiClientButton size='icon' onClick={onCreateCollection}>
 									<UserRoundPlus className='h-4 w-4' />
 								</ApiClientButton>
-								<TooltipContent>Add New Collection</TooltipContent>
+								<TooltipContent className='bg-primary text-foreground'>Add New Collection</TooltipContent>
 							</TooltipTrigger>
 						</Tooltip>
 						<div className='relative w-full'>

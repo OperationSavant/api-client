@@ -14,7 +14,9 @@ pdfjs.GlobalWorkerOptions.workerSrc = './build/pdf.worker.min.mjs';
 const root = ReactDOM.createRoot(document.getElementById('main-root') as HTMLElement);
 root.render(
 	<React.StrictMode>
-		<ErrorBoundary FallbackComponent={ErrorFallback}>
+		<ErrorBoundary
+			fallbackRender={({ error, resetErrorBoundary }) => <ErrorFallback error={error} resetErrorBoundary={resetErrorBoundary} />}
+			onReset={() => {}}>
 			<Provider store={mainStore}>
 				<Suspense fallback={<LoadingFallback message='Loading API Client...' description='Please wait while we prepare your workspace' />}>
 					<App />

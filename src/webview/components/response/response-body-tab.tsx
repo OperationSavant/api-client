@@ -18,6 +18,7 @@ import { ApiClientInput } from '../custom/api-client-input';
 import type { MonacoEditorHandle } from '@/shared/types/monaco';
 import type { Response } from '@/shared/types/response';
 import { ResponseHexViewer } from './response-hex-viewer';
+import { ResponseHtmlViewer } from './response-html-viewer';
 
 interface ResponseBodyTabProps {
 	response: Response;
@@ -25,6 +26,8 @@ interface ResponseBodyTabProps {
 
 const renderFormatter = (language: string, response: Response, wordWrap: boolean, editorRef: React.RefObject<MonacoEditorHandle | null>) => {
 	switch (language) {
+		case 'html':
+			return <ResponseHtmlViewer html={response.body || ''} />;
 		case 'hex':
 			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 			return <ResponseHexViewer model={response.representations?.hex!} />;
@@ -122,19 +125,6 @@ const ResponseBodyTab: React.FC<ResponseBodyTabProps> = ({ response }) => {
 		const defaultLanguage = getDefaultFormatterForContentType(response?.contentType);
 		setFormatter(defaultLanguage);
 	}, [response?.contentType, dispatch]);
-
-	if (!response?.body) {
-		return (
-			<div className='relative'>
-				<EmptyState
-					icon={Send}
-					title='No response yet'
-					description='Send a request to see the response here'
-					className={cn(isExecuting ? 'opacity-50' : 'opacity-100')}
-				/>
-			</div>
-		);
-	}
 
 	const currentOption = options.find(option => option.value === formatter);
 	return (

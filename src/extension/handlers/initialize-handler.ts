@@ -13,7 +13,7 @@ export class InitializeHandler {
 		const context = broadcasterHub.getPanelContext(panel);
 		broadcasterHub.broadcast({
 			command: SERVER_COMMANDS.WEBVIEW_INITIALIZE,
-			data: { collections: collections, environments: environments, metadata: context },
+			data: { collections: collections, environments: environments, metadata: context?.initPayload, previewContainerUri: context?.previewContainerUri || null },
 		});
 	}
 }

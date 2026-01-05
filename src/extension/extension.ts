@@ -1,5 +1,4 @@
-import type { ExtensionContext} from 'vscode';
-import { WebviewPanel } from 'vscode';
+import type { ExtensionContext } from 'vscode';
 import { MessageRouter } from '@/extension/orchestrators/message-router';
 import { WebviewOrchestrator } from '@/extension/orchestrators/webview-orchestrator';
 import { ViewOrchestrator } from '@/extension/orchestrators/view-orchestrator';
@@ -20,8 +19,8 @@ export async function activate(context: ExtensionContext) {
 		createWebview: (name: string, kind: string) => {
 			const scriptName = kind === 'main' ? 'main.js' : 'secondary.js';
 			const rootId = kind === 'main' ? 'main-root' : 'secondary-root';
-			const panel = webviewOrchestrator.createPanel(name, scriptName, rootId);
-			return panel;
+			const { newPanel, previewUri } = webviewOrchestrator.createPanel(name, scriptName, rootId);
+			return { newPanel, previewUri };
 		},
 	});
 	commandRegistry.registerAll();
@@ -31,4 +30,3 @@ export function deactivate() {
 	// Unit of Work handles persistence, just close DB connection
 	closeDatabase();
 }
-

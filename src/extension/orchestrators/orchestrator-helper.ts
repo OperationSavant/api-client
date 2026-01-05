@@ -1,5 +1,5 @@
-import type { ExtensionContext, ViewColumn, WebviewPanel, WebviewView } from 'vscode';
-import { Uri, window } from 'vscode';
+import type { ExtensionContext, ViewColumn, WebviewPanel, WebviewView, Uri } from 'vscode';
+import { window } from 'vscode';
 import { ContentBuilder } from '../services/webview-content-builder';
 import { broadcasterHub } from './broadcaster-hub';
 import type { MessageRouter } from './message-router';
@@ -20,13 +20,15 @@ export class OrchestratorHelper {
 	): WebviewPanel {
 		const panel = window.createWebviewPanel(viewType, title, showOptions, {
 			enableScripts: true,
-			localResourceRoots: [Uri.joinPath(extensionUri, 'dist')],
+			localResourceRoots: [extensionUri],
 		});
 		return panel;
 	}
 
-	static configurePanel(webviewUri: Uri, panel: WebviewPanel | WebviewView, context: ExtensionContext, rootId: string): void {
-		panel.webview.html = ContentBuilder.buildHtml(panel.webview, webviewUri, rootId);
+	static configurePanel(webviewUri: Uri, panel: WebviewPanel | WebviewView, context: ExtensionContext, rootId: string): string {
+		const { html, previewUri } = ContentBuilder.buildHtml(panel.webview, webviewUri, context, rootId);
+		panel.webview.html = html;
+		return previewUri;
 	}
 
 	static watchWebViewMessages(panel: WebviewPanel | WebviewView, messageRouter: MessageRouter, context?: ExtensionContext) {

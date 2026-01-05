@@ -1,4 +1,16 @@
 //@ts-check
+/**
+ * WEBVIEW BOUNDARY
+ *
+ * This bundle runs in a browser sandbox.
+ * - NO Node.js APIs
+ * - Buffer usage is transitional
+ * - Shared lib split is planned
+ *
+ * If you need fs/path/crypto → STOP.
+ */
+
+// TODO(arch): Split shared lib into shared-core / shared-extension / shared-webview
 
 'use strict';
 
@@ -86,6 +98,10 @@ const config = {
 				],
 			},
 			{
+				test: /\.css$/,
+				use: [MiniCssExtractPlugin.loader, 'css-loader'],
+			},
+			{
 				test: /\.node$/,
 				use: 'node-loader',
 			},
@@ -96,6 +112,9 @@ const config = {
 		level: 'log', // enables logging required for problem matchers
 	},
 	plugins: [
+		new MiniCssExtractPlugin({
+			filename: '[name].css',
+		}),
 		new CopyPlugin({
 			patterns: [{ from: 'node_modules/@vscode/sqlite/build/Release', to: 'dist' }],
 		}),
@@ -103,6 +122,15 @@ const config = {
 };
 
 /**@type {import('webpack').Configuration}*/
+/**
+ * ⚠️ Shared transitional library
+ * This package is consumed by BOTH:
+ * - VS Code extension host (Node)
+ * - VS Code webviews (Browser)
+ *
+ * Node-only APIs MUST NOT be added here.
+ * Buffer usage is TEMPORARY and will be removed.
+ */
 const mainWebviewConfig = {
 	target: 'web',
 	mode: 'none',
@@ -122,7 +150,6 @@ const mainWebviewConfig = {
 			{ name: '@', alias: path.resolve(__dirname, 'src/webview') },
 		],
 		fallback: {
-			process: false,
 			buffer: require.resolve('buffer/'),
 		},
 	},
@@ -195,7 +222,8 @@ const mainWebviewConfig = {
 			'process.env.NODE_ENV': JSON.stringify('production'),
 		}),
 		new (require('webpack').ProvidePlugin)({
-			process: 'process/browser',
+			// ⚠️ Transitional: required only because shared lib is cross-runtime.
+			// Must be removed once shared-core is extracted.
 			Buffer: ['buffer', 'Buffer'],
 		}),
 		new MiniCssExtractPlugin({
@@ -220,12 +248,25 @@ const mainWebviewConfig = {
 					from: path.join(path.dirname(require.resolve('pdfjs-dist/package.json')), 'standard_fonts'),
 					to: 'standard_fonts/',
 				},
+				{
+					from: 'src/webview/iframe',
+					to: 'preview',
+				},
 			],
 		}),
 	],
 };
 
 /**@type {import('webpack').Configuration}*/
+/**
+ * ⚠️ Shared transitional library
+ * This package is consumed by BOTH:
+ * - VS Code extension host (Node)
+ * - VS Code webviews (Browser)
+ *
+ * Node-only APIs MUST NOT be added here.
+ * Buffer usage is TEMPORARY and will be removed.
+ */
 const sidebarWebviewConfig = {
 	target: 'web',
 	mode: 'none',
@@ -245,7 +286,6 @@ const sidebarWebviewConfig = {
 			{ name: '@', alias: path.resolve(__dirname, 'src/webview') },
 		],
 		fallback: {
-			process: false,
 			buffer: require.resolve('buffer/'),
 		},
 	},
@@ -294,13 +334,23 @@ const sidebarWebviewConfig = {
 			'process.env.NODE_ENV': JSON.stringify('production'),
 		}),
 		new (require('webpack').ProvidePlugin)({
-			process: 'process/browser',
+			// ⚠️ Transitional: required only because shared lib is cross-runtime.
+			// Must be removed once shared-core is extracted.
 			Buffer: ['buffer', 'Buffer'],
 		}),
 	],
 };
 
 /**@type {import('webpack').Configuration}*/
+/**
+ * ⚠️ Shared transitional library
+ * This package is consumed by BOTH:
+ * - VS Code extension host (Node)
+ * - VS Code webviews (Browser)
+ *
+ * Node-only APIs MUST NOT be added here.
+ * Buffer usage is TEMPORARY and will be removed.
+ */
 const secondaryWebviewConfig = {
 	target: 'web',
 	mode: 'none',
@@ -320,7 +370,8 @@ const secondaryWebviewConfig = {
 			{ name: '@', alias: path.resolve(__dirname, 'src/webview') },
 		],
 		fallback: {
-			process: false,
+			// ⚠️ Transitional: required only because shared lib is cross-runtime.
+			// Must be removed once shared-core is extracted.
 			buffer: require.resolve('buffer/'),
 		},
 	},
@@ -369,7 +420,8 @@ const secondaryWebviewConfig = {
 			'process.env.NODE_ENV': JSON.stringify('production'),
 		}),
 		new (require('webpack').ProvidePlugin)({
-			process: 'process/browser',
+			// ⚠️ Transitional: required only because shared lib is cross-runtime.
+			// Must be removed once shared-core is extracted.
 			Buffer: ['buffer', 'Buffer'],
 		}),
 	],

@@ -213,7 +213,7 @@ const requestSlice = createSlice({
 					auth?: AuthConfig;
 					params?: Record<string, string>;
 					headers?: Record<string, string>;
-					body?: any;
+					body?: RequestBody;
 				};
 				collectionId: string;
 			}>
@@ -259,7 +259,7 @@ const requestSlice = createSlice({
 			if (request.body) {
 				if (typeof request.body === 'object' && 'type' in request.body) {
 					// Already a discriminated union - use as is
-					state.body = request.body as RequestBody;
+					state.body = request.body;
 				} else {
 					state.body = createDefaultRequestBody();
 				}
@@ -297,7 +297,7 @@ export const updateFormDataWithFiles = createAsyncThunk(
 		const key = originalField.key || '';
 
 		const newFields = paths.map((p: string) => {
-			const fileName = p.split('\\').pop()!.split('/').pop()!;
+			const fileName = p.split('\\')?.pop()?.split('/')?.pop();
 			return {
 				key: key,
 				value: p,

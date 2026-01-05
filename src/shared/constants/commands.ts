@@ -41,6 +41,7 @@ export const CLIENT_COMMANDS = {
 } as const;
 
 export const SERVER_COMMANDS = {
+	SET_PANEL_TABID: 'wizard.apiClient.setPanelTabId',
 	WEBVIEW_INITIALIZE: 'wizard.apiClient.initialize',
 	SIDEBAR_INITIALIZE: 'wizard.apiClient.sidebarInitialize',
 	API_RESPONSE: 'wizard.apiClient.apiResponse',
