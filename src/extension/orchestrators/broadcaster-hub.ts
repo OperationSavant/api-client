@@ -1,9 +1,14 @@
 import type { WebviewPanel, WebviewView } from 'vscode';
 import { window } from 'vscode';
 
+interface RegisterPanelProps {
+	initPayload: unknown;
+	previewContainerUri?: string;
+}
+
 export class BroadcasterHub {
 	private static instance: BroadcasterHub;
-	private webviewPanels = new Map<string, { panel: WebviewPanel; initPayload: unknown }>();
+	private webviewPanels = new Map<WebviewPanel, RegisterPanelProps>();
 	private webviewView: WebviewView | null = null;
 
 	private constructor() {}
@@ -15,10 +20,10 @@ export class BroadcasterHub {
 		return BroadcasterHub.instance;
 	}
 
-	registerPanel(id: string, panel: WebviewPanel, args: unknown) {
-		this.webviewPanels.set(id, { panel, initPayload: args });
+	registerPanel({ panel, initPayload, previewContainerUri }: { panel: WebviewPanel } & RegisterPanelProps) {
+		this.webviewPanels.set(panel, { initPayload, previewContainerUri });
 		panel.onDidDispose(() => {
-			this.webviewPanels.delete(id);
+			this.webviewPanels.delete(panel);
 		});
 	}
 
@@ -26,19 +31,24 @@ export class BroadcasterHub {
 		this.webviewView = view;
 	}
 
-	getPanelContext(panel: WebviewPanel): unknown | undefined {
-		for (const { panel: registeredPanel, initPayload } of this.webviewPanels.values()) {
-			if (registeredPanel === panel) {
-				return initPayload;
-			}
-		}
+	getPanelContext(panel: WebviewPanel): { initPayload?: unknown; previewContainerUri?: string } | undefined {
+		const { initPayload, previewContainerUri } = this.webviewPanels.get(panel) || {};
+		return { initPayload, previewContainerUri };
 	}
 
 	broadcast({ command, data }: { command: string; data?: unknown }) {
-		for (const { panel } of this.webviewPanels.values()) {
+		for (const panel of this.webviewPanels.keys()) {
 			panel.webview.postMessage({ command, data });
 		}
 		this.webviewView?.webview.postMessage({ command, data });
+	}
+
+	broadcastToSpecificPanel(panel: WebviewPanel, message: { command: string; data?: unknown }) {
+		const panelContext = this.webviewPanels.get(panel);
+		if (panelContext) {
+			console.log(`Broadcasting message to panel ${panel.title}:`, message, new Date().toLocaleString());
+			panel.webview.postMessage(message);
+		}
 	}
 
 	broadcastInformation(message: string) {

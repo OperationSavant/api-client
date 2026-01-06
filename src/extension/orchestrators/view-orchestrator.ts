@@ -11,7 +11,7 @@ interface ViewOrchestratorDependencies {
 export class ViewOrchestrator {
 	public readonly sidebarProvider: SidebarProvider;
 	constructor(private dependencies: ViewOrchestratorDependencies) {
-		this.sidebarProvider = new SidebarProvider(this.dependencies.context.extensionUri, this.dependencies.messageRouter);
+		this.sidebarProvider = new SidebarProvider(this.dependencies.context, this.dependencies.messageRouter);
 		this.registerTreeViews();
 	}
 

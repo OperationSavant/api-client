@@ -11,16 +11,18 @@ interface LoadingFallbackProps {
 
 export const LoadingFallback: React.FC<LoadingFallbackProps> = ({ message, description, className }) => {
 	return (
-		<div className={cn(`flex items-center justify-center h-screen bg-background text-foreground`, className)}>
-			<Empty className='border-none'>
-				<EmptyHeader>
-					<EmptyMedia variant='icon'>
-						<Loader2 className='size-6 animate-spin text-primary' />
-					</EmptyMedia>
-					<EmptyTitle>{message}</EmptyTitle>
-					{description && <EmptyDescription>{description}</EmptyDescription>}
-				</EmptyHeader>
-			</Empty>
+		<div className={cn(`flex items-center justify-center h-screen bg-transparent text-foreground`, className)}>
+			{message && (
+				<Empty className='border-none'>
+					<EmptyHeader>
+						<EmptyMedia variant='icon'>
+							<Loader2 className='size-6 animate-spin text-primary' />
+						</EmptyMedia>
+						<EmptyTitle>{message}</EmptyTitle>
+						{description && <EmptyDescription>{description}</EmptyDescription>}
+					</EmptyHeader>
+				</Empty>
+			)}
 		</div>
 	);
 };

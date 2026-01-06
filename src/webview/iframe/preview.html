@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta
+			http-equiv="Content-Security-Policy"
+			content="
+			default-src 'none';
+			script-src 'self' https:;
+			style-src 'self'  'unsafe-inline' https:;
+			img-src 'self' data: https:;
+			font-src 'self' https:;
+			frame-src 'self' https:;
+		" />
+		<style>
+			html,
+			body {
+				margin: 0;
+				padding: 0;
+				height: 100%;
+				background: white;
+			}
+			#container {
+				height: 100%;
+				width: 100%;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div id="container"></div>
+
+		<script src="./preview-container.js"></script>
+	</body>
+</html>

@@ -19,14 +19,7 @@ export class RequestHandler {
 
 			const historyItem: HistoryItem = {
 				historyId: Date.now().toString(),
-				request: {
-					url: message.url,
-					method: message.method,
-					headers: message.headers,
-					params: message.params,
-					body: message.body,
-					auth: message.auth,
-				},
+				request: { ...message },
 				response: { ...result },
 				timestamp: new Date(),
 				success: !result.isError,

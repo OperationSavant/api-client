@@ -17,6 +17,9 @@ import { createSlice } from '@reduxjs/toolkit';
  * - Validation states
  */
 export interface EditorUIState {
+	// Preview URL for HTML response viewer iframe
+	previewUrl: string;
+
 	// Tab Navigation
 	activeRequestTab: string;
 	activeResponseTab: string;
@@ -51,6 +54,8 @@ export interface EditorUIState {
 }
 
 const initialState: EditorUIState = {
+	// Preview URL for HTML response viewer iframe
+	previewUrl: '',
 	// Tab Navigation
 	activeRequestTab: 'params',
 	activeResponseTab: 'body',
@@ -89,6 +94,12 @@ const editorUISlice = createSlice({
 		// ============================================================================
 		setEditorUIState: (state, action: PayloadAction<EditorUIState>) => {
 			return action.payload;
+		},
+		// ============================================================================
+		// Preview URL
+		// ============================================================================
+		setPreviewUrl: (state, action: PayloadAction<string>) => {
+			state.previewUrl = action.payload;
 		},
 		// ============================================================================
 		// TAB NAVIGATION
@@ -214,6 +225,8 @@ const editorUISlice = createSlice({
 export const {
 	// Default State
 	setEditorUIState,
+	// Preview URL
+	setPreviewUrl,
 	// Tab Navigation
 	setActiveRequestTab,
 	setActiveResponseTab,

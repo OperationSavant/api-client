@@ -3,6 +3,7 @@ import { vscode } from '@/vscode';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import type { ImperativePanelGroupHandle } from 'react-resizable-panels';
 import { ResponseViewer } from '@/components/response/response-viewer';
+import type { RootState } from '@/store/main-store';
 import { useAppDispatch } from '@/store/main-store';
 import { createInitializeHandlers, createResponseHandlers, createCollectionHandlers, createRequestHandlers, createFileHandlers } from '@/handlers';
 import { useWebviewMessaging } from '@/hooks/useWebviewMessaging';
@@ -10,9 +11,10 @@ import { useWebviewInitialization } from '@/hooks/useStateRestoration';
 import { LoadingFallback } from '@/components/custom/states/loading-fallback';
 import { RequestViewer } from '@/components/request/request-viewer';
 import { createThemeHandlers } from '@/handlers/theme-handlers';
-import { setIsExecuting } from '@/features/editor/editorUISlice';
+import { setIsExecuting, setResponsePanelSize } from '@/features/editor/editorUISlice';
 import type { MessageEnvelope } from '@/shared/types/webview-messages';
 import { CLIENT_COMMANDS, SERVER_COMMANDS } from '@/shared/constants/commands';
+import { useSelector } from 'react-redux';
 
 const App = () => {
 	const dispatch = useAppDispatch();
@@ -20,9 +22,33 @@ const App = () => {
 	const panelGroupRef = useRef<ImperativePanelGroupHandle>(null);
 	const { isReady, isInitialized, markReady, markInitialized } = useWebviewInitialization();
 
+	const {
+		ui: { responsePanelSize },
+	} = useSelector((state: RootState) => state);
+
 	const sendToExtension = useCallback((message: MessageEnvelope) => {
 		vscode.postMessage(message);
 	}, []);
+
+	const handleToggleResponsePanel = useCallback(() => {
+		const panelGroup = panelGroupRef.current;
+		if (!panelGroup) return;
+
+		switch (responsePanelSize) {
+			case 'default':
+				panelGroup.setLayout([10, 90]);
+				dispatch(setResponsePanelSize('maximized'));
+				break;
+			case 'maximized':
+				panelGroup.setLayout([95, 5]);
+				dispatch(setResponsePanelSize('minimized'));
+				break;
+			case 'minimized':
+				panelGroup.setLayout([60, 40]);
+				dispatch(setResponsePanelSize('default'));
+				break;
+		}
+	}, [dispatch, responsePanelSize, panelGroupRef]);
 
 	const initializeHandlers = useMemo(() => createInitializeHandlers({ dispatch, onInitialized: markInitialized }), [dispatch, markInitialized]);
 	const responseHandlers = useMemo(() => createResponseHandlers({ dispatch }), [dispatch]);
@@ -83,7 +109,7 @@ const App = () => {
 				<ResizableHandle withHandle className='bg-primary h-0.5 hover:bg-primary hover:h-1' />
 				<ResizablePanel defaultSize={40} minSize={5}>
 					<div className='h-full w-full py-2 px-2'>
-						<ResponseViewer sendToExtension={sendToExtension} panelGroupRef={panelGroupRef} />
+						<ResponseViewer sendToExtension={sendToExtension} panelGroupRef={panelGroupRef} onToggleResponsePanel={handleToggleResponsePanel} />
 					</div>
 				</ResizablePanel>
 			</ResizablePanelGroup>

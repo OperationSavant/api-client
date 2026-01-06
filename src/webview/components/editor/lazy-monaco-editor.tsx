@@ -7,9 +7,14 @@ import { LoadingFallback } from '../custom/states/loading-fallback';
 // Lazy load the actual Monaco editor
 const MonacoEditorImpl = lazy(() => import('./monaco-editor'));
 
-export const MonacoEditor = forwardRef<MonacoEditorHandle, MonacoEditorProps>((props, ref) => {
+interface LazyMonacoEditorProps extends MonacoEditorProps {
+	loadingMessage?: string;
+	loadingDescription?: string;
+}
+
+export const MonacoEditor = forwardRef<MonacoEditorHandle, LazyMonacoEditorProps>((props, ref) => {
 	return (
-		<Suspense fallback={<LoadingFallback message='Loading Request Body Editor' />}>
+		<Suspense fallback={<LoadingFallback message={props.loadingMessage} description={props.loadingDescription} />}>
 			<MonacoEditorImpl {...props} ref={ref} />
 		</Suspense>
 	);

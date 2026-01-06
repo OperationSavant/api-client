@@ -111,6 +111,29 @@ export class MessageRouter {
 	}
 
 	// ---------- ROUTER ----------
+	/**
+	 * Routes a validated webview message to the appropriate command handler set.
+	 *
+	 * IMPORTANT:
+	 * - `message.source` is NOT a security or transport authority.
+	 * - Webview isolation and panel-type validation are already enforced upstream
+	 *   (VS Code guarantees + OrchestratorHelper checks).
+	 *
+	 * This routing logic intentionally maintains TWO separate handler maps
+	 * (`webviewHandlers` and `webviewViewHandlers`) as a **program-level boundary**:
+	 * - To make command capabilities explicit by webview type
+	 * - To prevent accidental cross-scope command exposure during maintenance
+	 * - To encode architectural intent in code, even if the platform already
+	 *   prevents cross-webview message delivery
+	 *
+	 * In other words:
+	 * - The platform enforces isolation
+	 * - The orchestrator enforces correctness
+	 * - This router enforces **domain intent and capability segregation**
+	 *
+	 * Do NOT collapse these handler maps into a single registry.
+	 * Do NOT treat `message.source` as a security boundary.
+	 */
 	async route(message: MessageEnvelope, target: WebviewPanel | WebviewView): Promise<void> {
 		const handlers = message.source === 'webview' ? this.webviewHandlers : this.webviewViewHandlers;
 

@@ -1,6 +1,5 @@
 import type { ExtensionContext, WebviewPanel } from 'vscode';
 import { commands } from 'vscode';
-import { v4 as uuidv4 } from 'uuid';
 import { broadcasterHub } from '../orchestrators/broadcaster-hub';
 import { CLIENT_COMMANDS } from '@/shared/constants/commands';
 
@@ -15,7 +14,7 @@ interface OpenPanelOptions {
 
 interface CommandRegistryDependencies {
 	context: ExtensionContext;
-	createWebview: (name: string, kind: PanelKind) => WebviewPanel;
+	createWebview: (name: string, kind: PanelKind) => { newPanel: WebviewPanel; previewUri: string };
 }
 
 export class CommandRegistry {
@@ -29,13 +28,10 @@ export class CommandRegistry {
 		this.registerMainCommand();
 	}
 
-	private openPanel(options: OpenPanelOptions) {
-		const tabId = uuidv4();
-		const panel = this.deps.createWebview(options.title, options.kind);
-
-		broadcasterHub.registerPanel(tabId, panel, options.payload ? options.payload : undefined);
-
-		return panel;
+	private openPanel(options: OpenPanelOptions): WebviewPanel {
+		const { newPanel, previewUri } = this.deps.createWebview(options.title, options.kind);
+		broadcasterHub.registerPanel({ panel: newPanel, initPayload: options.payload ? options.payload : undefined, previewContainerUri: previewUri });
+		return newPanel;
 	}
 
 	/**
