@@ -11,8 +11,8 @@ interface ErrorStateProps {
 }
 
 /**
- * Reusable empty state component
- * Use this for "no data" scenarios throughout the application
+ * Reusable error state component
+ * Use this for "error" scenarios throughout the application
  */
 export const ErrorState: React.FC<ErrorStateProps> = ({ title, errorDescription, errorContent, className }) => {
 	return (

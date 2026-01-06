@@ -46,7 +46,6 @@ export class BroadcasterHub {
 	broadcastToSpecificPanel(panel: WebviewPanel, message: { command: string; data?: unknown }) {
 		const panelContext = this.webviewPanels.get(panel);
 		if (panelContext) {
-			console.log(`Broadcasting message to panel ${panel.title}:`, message, new Date().toLocaleString());
 			panel.webview.postMessage(message);
 		}
 	}

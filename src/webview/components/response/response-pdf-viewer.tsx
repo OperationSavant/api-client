@@ -19,13 +19,11 @@ const options = {
 };
 
 const ResponsePDFViewer: React.FC<ResponsePDFViewerProps> = ({ pdfData }) => {
-	const viewportRef = useRef<HTMLDivElement>(null);
 	const [numPages, setNumPages] = useState<number>(1);
 	const [pageNumber, setPageNumber] = useState(1);
 	const [scale, setScale] = useState(1);
 
 	const fileObject = useMemo(() => {
-		console.log('PDF data received:');
 		if (!pdfData) return null;
 		return { data: pdfData };
 	}, [pdfData]);
@@ -47,21 +45,8 @@ const ResponsePDFViewer: React.FC<ResponsePDFViewerProps> = ({ pdfData }) => {
 		changePage(1);
 	};
 
-	useEffect(() => {
-		const el = viewportRef.current;
-		if (!el) return;
-
-		const onScroll = () => {
-			const { scrollTop, scrollHeight, clientHeight } = el;
-			console.log(`Scroll position: ${scrollTop}, Scroll height: ${scrollHeight}, Client height: ${clientHeight}`);
-		};
-
-		el.addEventListener('scroll', onScroll);
-		return () => el.removeEventListener('scroll', onScroll);
-	}, []);
-
 	return (
-		<ScrollArea className='relative flex-1 w-full min-h-0 overflow-y-auto group' ref={viewportRef}>
+		<ScrollArea className='relative flex-1 w-full min-h-0 overflow-y-auto group'>
 			<Document
 				options={options}
 				loading={<LoadingFallback message='Loading document...' description='Preparing PDF document for viewing...' />}
