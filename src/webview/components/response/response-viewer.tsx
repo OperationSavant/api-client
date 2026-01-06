@@ -70,8 +70,8 @@ export const ResponseViewer: React.FC<ResponseViewerProps> = ({ sendToExtension,
 
 	return (
 		<div className={cn(`flex flex-col h-full`, className)} data-testid='response-viewer-container'>
-			{response && response.isError && <ErrorState title='Error' errorDescription={response.error} className='m-auto' />}
-			{response && response.body && (
+			{response.isError && <ErrorState title='Error' errorDescription={response.error} errorContent={response.body} className='m-auto' />}
+			{!response.isError && response.body && (
 				<ApiClientTabs
 					tabs={RESPONSE_TABS_CONFIG}
 					context={tabContext}

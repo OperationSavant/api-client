@@ -1,4 +1,5 @@
-import type { ExtensionContext, ViewColumn, WebviewPanel, WebviewView, Uri } from 'vscode';
+import type { ExtensionContext, ViewColumn, WebviewPanel, WebviewView } from 'vscode';
+import { Uri } from 'vscode';
 import { window } from 'vscode';
 import { ContentBuilder } from '../services/webview-content-builder';
 import { broadcasterHub } from './broadcaster-hub';
@@ -20,7 +21,7 @@ export class OrchestratorHelper {
 	): WebviewPanel {
 		const panel = window.createWebviewPanel(viewType, title, showOptions, {
 			enableScripts: true,
-			localResourceRoots: [extensionUri],
+			localResourceRoots: [Uri.joinPath(extensionUri, 'dist')],
 		});
 		return panel;
 	}

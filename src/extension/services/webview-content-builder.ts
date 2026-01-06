@@ -34,7 +34,7 @@ export class ContentBuilder {
 		const hash = crypto.createHash('sha256').update(js, 'utf8').digest('base64');
 
 		html = html.replace('<script src="./preview-container.js"></script>', `<script>${js}</script>`);
-		html = html.replace("script-src 'self' https:", `script-src 'self' 'sha256-${hash}' https:`);
+		html = html.replace("script-src 'self'", `script-src 'self' 'sha256-${hash}'`);
 
 		const previewUri = rootId === 'main-root' ? `data:text/html;charset=utf-8,${encodeURIComponent(html)}` : '';
 

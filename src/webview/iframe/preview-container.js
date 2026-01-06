@@ -1,4 +1,8 @@
 const container = document.getElementById('container');
+if (!container) {
+	console.error('Container element not found');
+	throw new Error('Container element not found');
+}
 
 window.addEventListener('message', event => {
 	if (event.data?.type !== 'DATA') return;
@@ -23,7 +27,7 @@ function buildIframeHtml(html) {
         default-src 'none';
         script-src 'self';
         style-src 'self' 'unsafe-inline';
-        img-src 'self' data: https:;
+        img-src 'self' data:;
         font-src 'self' data:;
         connect-src 'self';
         frame-src 'none';
